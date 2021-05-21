@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "lint": "eslint -c .eslintrc --ext .ts ./src",
-    "start": "electron-forge start",
+    "lint": "eslint -c .eslintrc.json --ext .ts ./src",
+    "start": "npm run build && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
