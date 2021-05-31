@@ -33,7 +33,12 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('runConvert')?.addEventListener('click', function(){
-        ipcRenderer.send('startConvert');
+        
+        
+        const command = <HTMLInputElement>document.getElementById('command');
+            
+        
+        ipcRenderer.send('startConvert', {'aa': command.value});
 
 
         // ipcRenderer.on('selectFile-reply', (event, args) => {

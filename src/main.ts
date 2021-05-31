@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import * as path from "path";
-import * as exec from "child_process";
+
 
 let mainWindow: BrowserWindow;
 
@@ -63,27 +63,84 @@ function createWindow () {
   });
 
 
+  import * as spawn from "child_process";
+  // import * as exec from "child_process";
+  import EventEmitter from 'events';
+  import rCommand from './r-connection';
+
+  const command = new rCommand(spawn.spawn, new EventEmitter());
+  // let R: any;
+  // let exit = true;
+  
+  // function startProces(){
+  //   R = child.spawn('R', ['--quiet --no-save']);
+  //   R.stdout.on('data', (data:string) => {
+  //     console.log(`stdout: ${data}`);
+  //   });
+  
+  
+  //   R.stderr.on('data', (data:string) => {
+  //     console.error(`stderr: ${data}`);
+  //   });
+    
+  //   R.on('close', (code:string) => {
+  //     exit = true;
+  //     console.log(`child process exited with code ${code}`);
+  //   });
+  //   R.on('exit', (code:string) => {
+  //     exit = true;
+  //     console.log(`child process exiteeeed with code ${code}`);
+  //   });
+
+  //   exit = false;
+  //   console.log('restarted');
+    
+  // } 
+ 
+  
+
   ipcMain.on('startConvert', (event, args) => {
 
-      // run R command
-      exec.exec('Rscript -e "DDIwR::convert(\''+fileToConvert+'\', to = \''+convertedFile+'\')"', (error, stdout, stderr) => {
+      // // run R command
+      // exec.exec('Rscript -e "DDIwR::convert(\''+fileToConvert+'\', to = \''+convertedFile+'\')"', (error, stdout, stderr) => {
         
-        if (error) {
-          console.error(`exec error: ${error}`);
-          return;
-        }
-        console.log(`stdout: ${stdout}`);
-        console.error(`stderr: ${stderr}`);
+      //   if (error) {
+      //     console.error(`exec error: ${error}`);
+      //     return;
+      //   }
+      //   console.log(`stdout: ${stdout}`);
+      //   console.error(`stderr: ${stderr}`);
 
 
-        dialog.showMessageBox(mainWindow, {
-          title: 'Merge',
-          message: 'S-a terminat conversia!'
-        })
+      //   dialog.showMessageBox(mainWindow, {
+      //     title: 'Merge',
+      //     message: 'S-a terminat conversia!'
+      //   })
 
 
+      // });
+
+      console.log(args);
+      
+      
+
+      // TODO -- pass a stream and on data log??
+      // WIP -- return a stream????
+      command.executeCommand(args.aa).then((response) => {
+        console.log(response);
       });
 
       
+      
 
+      // if(exit){
+      //   startProces();        
+      // }
+
+      // R.stdin.write(args.aa+'\n');
+    
+      // console.log('after');
+      
   });
+
+
