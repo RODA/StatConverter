@@ -1,200 +1,160 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
-import * as path from "path";
-import * as pty from "node-pty";
+process.env.NODE_ENV = 'development';
+// process.env.NODE_ENV = 'production';
 
+import {
+    app,
+    BrowserWindow,
+    ipcMain,
+    dialog
+} from 'electron';
+import * as path from "path";
+import * as commandExec from 'child_process';
 
 let mainWindow: BrowserWindow;
 
-function createWindow () {
-  mainWindow = new BrowserWindow({
-      width: 800,
-      height: 600,
-      webPreferences: {
-        preload: path.join(__dirname, 'preload.js')
-      }
+function createWindow() {
+    mainWindow = new BrowserWindow({
+        width: 1024,
+        height: 768,
+        backgroundColor: '#fff',
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js')
+        }
     })
-  
+
     mainWindow.loadFile(path.join(__dirname, "../index.html"))
-  }
-  
-  app.whenReady().then(() => {
-    createWindow()
-  
-    app.on('activate', () => {
-      if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow()
-      }
-    })
-  })
-  
-  app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-      app.quit()
+
+    if (process.env.NODE_ENV !== 'development') {
+        mainWindow.removeMenu();
     }
-  })
 
+    if (process.env.NODE_ENV === 'development') {
+        // Open the DevTools.
+        mainWindow.webContents.openDevTools();
+    }
+}
+app.whenReady().then(() => {
+    createWindow()
 
-  let fileToConvert: string;
-  let convertedFile: string;
-
-  ipcMain.on('selectFile', (event, args) => {
-   
-    dialog.showOpenDialog(mainWindow, {
-      
-      title: 'Alege fisier',
-      properties: ['openFile']
-    
-    }).then(result => {
-
-
-      if(!result.canceled){
-
-        fileToConvert = result.filePaths[0];
-        
-        const file = path.basename(fileToConvert, 'sav');
-        const dir = path.dirname(fileToConvert);
-        convertedFile = dir + '/' + file + 'dta';
-
-        event.reply('selectFile-reply', { file1: fileToConvert, file2: convertedFile});
-      }
-    
-    }).catch(err => {
-      console.log(err)
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow()
+        }
     })
-  });
+
+    // check if R is installed
+    let shell = '';
+    let findR;
+
+    try {
+        if (process.platform === 'win32') {
+            findR = commandExec.execSync('where.exe RScript.exe', {
+                shell: 'cmd.exe',
+                cwd: process.cwd(),
+                env: process.env,
+                encoding: 'utf-8' as BufferEncoding
+            });
+        } else {
+            findR = commandExec.execSync('which Rscript', {
+                shell: '/bin/bash',
+                cwd: process.cwd(),
+                env: process.env,
+                encoding: 'utf-8' as BufferEncoding
+            });
+        }
+
+        // The R Shell
+        shell = findR.replace(/(\r\n|\n|\r)/gm, "");
+
+    } catch (error) {
+
+        dialog.showMessageBox(mainWindow, {
+            type: 'question',
+            title: 'Select r path',
+            message: 'Could not find R. Would you like to select the path?'
+
+        }).then((response) => {
+
+          if(response){
+              dialog.showOpenDialog(mainWindow, {
+                  title: 'R path',
+                  properties:[ 'openFile'],
+              }).then((result) => {
+
+                  console.log(result.filePaths);
+                  shell = result.filePaths[0];
+
+                  if(shell != ''){
+                    startRServer(shell);
+                  }
+              
+              });
+            }
+        });
+
+    }
+
+    console.log(shell);
+
+    if(shell != ''){
+      startRServer(shell);
+    } 
 
 
-  import * as spawn from "child_process";
-  // import * as exec from "child_process";
-  import EventEmitter from 'events';
-  import rCommand from './r-connection';
+    let fileToConvert: string;
+    let convertedFile: string;
+
+    ipcMain.on('selectFile', (event, args) => {
+
+        dialog.showOpenDialog(mainWindow, {
+
+            title: 'Alege fisier',
+            filters: [{
+                name: 'SPSS files',
+                extensions: ['sav', 'por']
+            }],
+            properties: ['openFile'],
+
+        }).then(result => {
 
 
-  const command = new rCommand(spawn.spawn, new EventEmitter());
-  // let R: any;
-  // let exit = true;
-  
-// console.log(process.env);
+            if (!result.canceled) {
+
+                fileToConvert = result.filePaths[0];
+
+                const file = path.basename(fileToConvert, 'sav');
+                const dir = path.dirname(fileToConvert);
+                convertedFile = dir + '/' + file + 'dta';
+
+                event.reply('selectFile-reply', {
+                    file1: fileToConvert,
+                    file2: convertedFile
+                });
+            }
+
+        }).catch(err => {
+            console.log(err)
+        })
+    });
+})
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        app.quit()
+    }
+})
 
 
-  // function startProces(){
-  //   R = child.spawn('R', ['--quiet --no-save']);
-  //   R.stdout.on('data', (data:string) => {
-  //     console.log(`stdout: ${data}`);
-  //   });
-  
-  
-  //   R.stderr.on('data', (data:string) => {
-  //     console.error(`stderr: ${data}`);
-  //   });
-    
-  //   R.on('close', (code:string) => {
-  //     exit = true;
-  //     console.log(`child process exited with code ${code}`);
-  //   });
-  //   R.on('exit', (code:string) => {
-  //     exit = true;
-  //     console.log(`child process exiteeeed with code ${code}`);
-  //   });
+function startRServer(path: string): void{
 
-  //   exit = false;
-  //   console.log('restarted');
-    
-  // } 
- 
-  const ptyProcess = pty.spawn('R', ['--no-save', '--slave'], {
-    name: 'xterm-color',
-    cols: 80,
-    rows: 30,
-    
-  });
-  
-  // ptyProcess.on('data', function(data) {
-  //   console.log(typeof data);
-  //   console.log(data);
-  // });
 
-  ptyProcess.onData( (aa) => {
-    console.log(aa);
-    
+  commandExec.exec(path + ' -e "2+2"', (error, stdout, stderr) => {
+
+
+    console.log(error);
+    console.log(stdout);
+    console.log(stderr);
+
   })
 
-  ptyProcess.
-
-  // import * as fs from 'fs';
-
-  // const out = fs.openSync('./out.log', 'a');
-  // const err = fs.openSync('./out.log', 'a');
-  
-  // const subprocess = spawn.spawn('R', ['--no-save', '--slave'], {
-  //   detached: true,
-  //   stdio: [ 'pipe', out, err ]
-  // });
-  
-  // subprocess.unref();
-
-
-  ipcMain.on('startConvert', (event, args) => {
-
-      // // run R command
-      // exec.exec('Rscript -e "DDIwR::convert(\''+fileToConvert+'\', to = \''+convertedFile+'\')"', (error, stdout, stderr) => {
-        
-      //   if (error) {
-      //     console.error(`exec error: ${error}`);
-      //     return;
-      //   }
-      //   console.log(`stdout: ${stdout}`);
-      //   console.error(`stderr: ${stderr}`);
-
-
-      //   dialog.showMessageBox(mainWindow, {
-      //     title: 'Merge',
-      //     message: 'S-a terminat conversia!'
-      //   })
-
-
-      // });
-
-      // console.log(args.aa);
-    
-      
-      ptyProcess.write(args.aa+'\n');
-
-      // subprocess.stdin?.write(args.aa+'\n');
-
-      // TODO -- pass a stream and on data log??
-      // WIP -- return a stream????
-      // command.executeCommand(args.aa).then((response) => {
-      //   console.log(response);
-      // });
-
-      
-      // // const childProcess = require('child_process');
-
-      // const result = (() => {
-      //   const { stderr, stdout, status } = spawn.spawnSync('R', ['--no-save']);
-
-      //   if (status !== 0) {
-      //     const errorText = stderr.toString();
-      //     console.log('Fatal error from <code>npm install</code>.');
-
-      //     throw new Error(errorText);
-      //   }
-      //   return stdout.toString();
-
-
-
-
-      // })();
-
-      // if(exit){
-      //   startProces();        
-      // }
-
-      // R.stdin.write(args.aa+'\n');
-    
-      // console.log('after');
-      
-  });
-
-
+}
