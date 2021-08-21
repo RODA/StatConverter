@@ -90,7 +90,7 @@ export default class rCommand {
       // console.log(this.response);
 
     } else if(type == 'closed' || type == 'exit'){
-      console.log('prosses exit ' + type);
+      console.log('process exit ' + type);
     }
 
     this.EventEmitter.emit('dataProcessed');
