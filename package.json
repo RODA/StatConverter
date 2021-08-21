@@ -1,7 +1,7 @@
 {
   "name": "statconverter",
   "version": "1.0.0",
-  "description": "Convert from spss to stata using R",
+  "description": "Convert from SPSS to Stata using R",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
@@ -27,8 +27,10 @@
   },
   "homepage": "https://github.com/RODA/StatConverter#readme",
   "dependencies": {
+    "@types/ws": "^7.4.7",
     "electron-squirrel-startup": "^1.0.0",
-    "node-pty": "^0.10.1"
+    "node-pty": "^0.10.1",
+    "ws": "^8.2.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",

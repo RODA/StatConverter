@@ -7,8 +7,13 @@ import {
     ipcMain,
     dialog
 } from 'electron';
+
 import * as path from "path";
 import * as commandExec from 'child_process';
+import * as pty from 'node-pty';
+
+import WebSocket from 'ws';
+
 
 let mainWindow: BrowserWindow;
 
@@ -43,19 +48,19 @@ app.whenReady().then(() => {
     })
 
     // check if R is installed
-    let shell = '';
+    let R_path = '';
     let findR;
 
     try {
         if (process.platform === 'win32') {
-            findR = commandExec.execSync('where.exe RScript.exe', {
+            findR = commandExec.execSync('where.exe R.exe', {
                 shell: 'cmd.exe',
                 cwd: process.cwd(),
                 env: process.env,
                 encoding: 'utf-8' as BufferEncoding
             });
         } else {
-            findR = commandExec.execSync('which Rscript', {
+            findR = commandExec.execSync('which R', {
                 shell: '/bin/bash',
                 cwd: process.cwd(),
                 env: process.env,
@@ -63,15 +68,14 @@ app.whenReady().then(() => {
             });
         }
 
-        // The R Shell
-        shell = findR.replace(/(\r\n|\n|\r)/gm, "");
+        R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
 
     } catch (error) {
 
         dialog.showMessageBox(mainWindow, {
             type: 'question',
-            title: 'Select r path',
-            message: 'Could not find R. Would you like to select the path?'
+            title: 'Select R path',
+            message: 'Could not find R. Select the path to the binary?'
 
         }).then((response) => {
 
@@ -81,11 +85,11 @@ app.whenReady().then(() => {
                   properties:[ 'openFile'],
               }).then((result) => {
 
-                  console.log(result.filePaths);
-                  shell = result.filePaths[0];
+                  // console.log(result.filePaths);
+                  R_path = result.filePaths[0];
 
-                  if(shell != ''){
-                    startRServer(shell);
+                  if (R_path != ''){
+                    start_R_server(R_path);
                   }
               
               });
@@ -94,18 +98,17 @@ app.whenReady().then(() => {
 
     }
 
-    console.log(shell);
+    // console.log(shell);
 
-    if(shell != ''){
-      startRServer(shell);
+    if (R_path != ''){
+      start_R_server(R_path);
     } 
 
 
     let fileToConvert: string;
     let convertedFile: string;
 
-    ipcMain.on('selectFile', (event, args) => {
-
+    ipcMain.on('selectFile', (event) => {
         dialog.showOpenDialog(mainWindow, {
 
             title: 'Alege fisier',
@@ -116,7 +119,6 @@ app.whenReady().then(() => {
             properties: ['openFile'],
 
         }).then(result => {
-
 
             if (!result.canceled) {
 
@@ -144,17 +146,46 @@ app.on('window-all-closed', () => {
     }
 })
 
+// let Rprocess: commandExec.ChildProcessWithoutNullStreams;
 
-function startRServer(path: string): void{
+// const pause = async function(x: number): Promise<boolean> {
+//   const sleepNow = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
+//   await sleepNow(x);
+//   return(true)
+// }
 
+const start_R_server = function(R_path: string): void {
+    
+  const app_path = path.join(__dirname, "../src/");
+  const RptyProcess = pty.spawn(R_path, ['-q', '--no-save'], {});
+  
+  
+  RptyProcess.write('source("' + app_path + 'startServer.R' + '")\n');
+  
+  RptyProcess.onData((data) => {
+    // console.log(data);
 
-  commandExec.exec(path + ' -e "2+2"', (error, stdout, stderr) => {
+    if (data.includes("_server_started_")) {
+      // console.log("server started");
+      const Rws = new WebSocket('ws://127.0.0.1:12345');
+      
+      Rws.on('open', function open() {
+        // Rws.send('source("' + app_path + 'RGUI_call.R' + '")');
+        Rws.send('aa <- 2 + 2');
+        Rws.send('ls()');
+      });
 
+      Rws.addEventListener('message', function (event) {
+        console.log(event.data);
+      });
 
-    console.log(error);
-    console.log(stdout);
-    console.log(stderr);
-
+    } else if (data.includes("Package(s) not installed")) {
+      // server_started = false;
+      dialog.showMessageBox(mainWindow, {
+        type: 'error',
+        title: 'Missing packages',
+        message: data
+      })
+    }
   })
-
 }
