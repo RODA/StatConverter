@@ -156,11 +156,11 @@ app.on('window-all-closed', () => {
 
 const start_R_server = function(R_path: string): void {
     
-  const app_path = path.join(__dirname, "../src/");
   const RptyProcess = pty.spawn(R_path, ['-q', '--no-save'], {});
   
-  
-  RptyProcess.write('source("' + app_path + 'startServer.R' + '")\n');
+  RptyProcess.write(
+    'source("' +  path.join(__dirname, "../src/") + 'startServer.R")\n'
+  );
   
   RptyProcess.onData((data) => {
     // console.log(data);
@@ -170,7 +170,6 @@ const start_R_server = function(R_path: string): void {
       const Rws = new WebSocket('ws://127.0.0.1:12345');
       
       Rws.on('open', function open() {
-        // Rws.send('source("' + app_path + 'RGUI_call.R' + '")');
         Rws.send('aa <- 2 + 2');
         Rws.send('ls()');
       });
