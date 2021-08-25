@@ -2,7 +2,7 @@
 attach(NULL, name = "RGUI") 
 env <- as.environment("RGUI")
 
-packages <- c("httpuv", "jsonlite")
+packages <- c("httpuv", "jsonlite", "DDIwR")
 installed <- logical(length(packages))
 
 for (i in seq(length(packages))) {
