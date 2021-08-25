@@ -1,27 +1,152 @@
-
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>StatConverter</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .btn:focus {
+            outline: none;
+            box-shadow: none !important;
+        }
+    </style>
 </head>
+
 <body style="background: white;">
 
+    <div class="d-flex align-items-start">
+
+        <div class="tab-content" id="v-pills-tabContent" style="width: 858px;">
+            <div class="tab-pane fade show active p-4" id="v-pills-convert" role="tabpanel" aria-labelledby="v-pills-convert-tab">
+
+                <div class="row align-items-center mt-5 mb-3">
+                    <div class="col-2 text-end">
+                        <label for="inputType" class="col-form-label">Input type</label>
+                    </div>
+                    <div class="col-8">
+                        <select class="form-select" id="inputType">
+                            <option selected>Select file type</option>
+                            <option value="ddi">DDI</option>
+                            <option value="excel">Excel</option>
+                            <option value="sas">SAS</option>
+                            <option value="spss">SPSS</option>
+                            <option value="stata">Stata</option>
+                            <option value="r">R</option>
+                        </select>
+                    </div>
+                    <div class="col-2"></div>
+                </div>
+                <div class="row align-items-center mb-5">
+                    <div class="col-2 text-end">
+                        <label for="fileFrom" class="col-form-label">Convert from</label>
+                    </div>
+                    <div class="col-8">
+                        <input type="input" readonly class="rounded-0 form-control" id="fileFrom">
+                        <!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
+                    </div>
+                    <div class="col-2">
+                        <button class="btn btn-secondary rounded-0" id="selectFileFrom">Browse</button>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row align-items-center mt-5 mb-3">
+                    <div class="col-2 text-end">
+                        <label for="outputType" class="col-form-label">Output type</label>
+                    </div>
+                    <div class="col-8">
+                        <select class="form-select" id="outputType">
+                            <option selected>Select file type</option>
+                            <option value="ddi">DDI</option>
+                            <option value="excel">Excel</option>
+                            <option value="sas">SAS</option>
+                            <option value="spss">SPSS</option>
+                            <option value="stata">Stata</option>
+                            <option value="r">R</option>
+                        </select>
+                    </div>
+                    <div class="col-2"></div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-2 text-end">
+                        <label for="fileTo" class="col-form-label">Convert to</label>
+                    </div>
+                    <div class="col-8">
+                        <input type="input" readonly class="rounded-0 form-control" id="fileTo">
+                        <!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
+                    </div>
+                    <div class="col-2">
+                        <span class="d-inline-block" tabindex="0" title="Select output type first" id="selectFileToTooltip">
+
+                        <button class="btn btn-secondary rounded-0" id="selectFileTo" disabled>Browse</button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row align-items-center mt-5">
+                    <div class="col-2 text-end">
+                   
+                    </div>
+                    <div class="col-8 text-center">
+                        <button class="btn btn-dark rounded-0" disabled id="runConvert">Convert</button>
+                    </div>
+                    <div class="col-2">
+                    </div>
+                </div>
+               
 
 
-    <input type="input" readonly style="width: 450px;" id="fileToConvert">
-    <button id="selectFile">Browse</button>
-    <br><br>
-    <input type="input" readonly style="width: 450px;" id="convertedFile">
-    <br><br>
-    <input type="text" style="width: 450px;" id="command">
-    <br><br>
-    <button id="runConvert">Convert</button>
+            </div>
+            <div class="tab-pane fade" id="v-pills-variables" role="tabpanel" aria-labelledby="v-pills-variables-tab">...</div>
+            <div class="tab-pane fade" id="v-pills-cases" role="tabpanel" aria-labelledby="v-pills-cases-tab">...</div>
+            <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">...</div>
+        </div>
+        <div class="nav bg-secondary flex-column nav-pills ms-3 border-start pt-4" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="height: 100vh; width: 150px;">
+            <button class="rounded-0 btn btn-secondary active" id="v-pills-convert-tab" data-bs-toggle="pill" data-bs-target="#v-pills-convert" type="button" role="tab" aria-controls="v-pills-convert" aria-selected="true">Convert</button>
+            <button class="rounded-0 btn btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
+            <button class="rounded-0 btn btn-secondary" id="v-pills-cases-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cases" type="button" role="tab" aria-controls="v-pills-cases" aria-selected="false">Cases</button>
+            <button class="rounded-0  btn btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto;" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
+            <div class="text-white text-center flex" style="font-size: 0.8rem;">
+                <div class="align-self-end pb-3">
+                    <a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br>
+                    version 1.0
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
 
 
 
     <!-- You can also require other files to run in this process -->
+    <!-- <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script> -->
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./dist/renderer.js"></script>
+    <script>
+        var exampleEl = document.getElementById('selectFileToTooltip')
+        var tooltip = new bootstrap.Tooltip(exampleEl, {
+        boundary: document.body // or document.querySelector('#boundary')
+        })
+
+        document.getElementById('outputType').addEventListener('change', () => {
+        const out = document.getElementById('selectFileTo');
+        const outputType = document.getElementById('outputType');
+        const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+        if(outputTypeValue != 'Select file type'){
+            out.disabled = false;
+            tooltip.disable()
+        } else {
+            out.disabled = true;
+            tooltip.enable()
+        }     
+    })
+    </script>
 </body>
+
 </html>

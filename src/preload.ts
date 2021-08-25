@@ -11,36 +11,63 @@ window.addEventListener('DOMContentLoaded', () => {
     // }
     
 
-    document.getElementById('selectFile')?.addEventListener('click', function(){
+    ( <HTMLInputElement>document.getElementById('selectFileFrom')).addEventListener('click', function(){
 
-        ipcRenderer.send('selectFile');
+        const inputType = <HTMLSelectElement>document.getElementById('inputType');
+        const inputTypeValue = inputType.options[inputType.selectedIndex].value;
 
-        ipcRenderer.on('selectFile-reply', (event, args) => {
+        ipcRenderer.send('selectFileFrom', { inputType: inputTypeValue });
+
+        ipcRenderer.on('selectFileFrom-reply', (event, args) => {
             
             
             // const fileName = args.fileName;
 
-            console.log(args.file);
+            console.log(args);
             
-            const fileToConvert = <HTMLInputElement>document.getElementById('fileToConvert');
-            const convertedFile = <HTMLInputElement>document.getElementById('convertedFile');
+
+            const fileFrom = <HTMLInputElement>document.getElementById('fileFrom');
+
+            // const outputType = <HTMLSelectElement>document.getElementById('outputType');
+            // const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+            const fileTo = <HTMLInputElement>document.getElementById('fileTo');
             
-            fileToConvert.value = args.file1;
-            convertedFile.value = args.file2;
+            fileFrom.value = args.file1;
+            fileTo.value = args.file2;
 
         });
 
     });
 
-    document.getElementById('runConvert')?.addEventListener('click', function(){
-        
-        
-        const command = <HTMLInputElement>document.getElementById('command');
+    (<HTMLInputElement>document.getElementById('selectFileTo')).addEventListener('click', function(){
+
+        const outputType = <HTMLSelectElement>document.getElementById('outputType');
+        const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+
+        ipcRenderer.send('selectFileTo', { outputType: outputTypeValue });
+
+        ipcRenderer.on('selectFileTo-reply', (event, args) => {
             
+            console.log(args);
+              
+            const fileTo = <HTMLInputElement>document.getElementById('fileTo');
+            fileTo.value = args.file;
+
+            (<HTMLInputElement>document.getElementById('runConvert')).disabled = false;
+
+        });
+
+    });
+
+
+
+    (<HTMLInputElement>document.getElementById('runConvert')).addEventListener('click', function(){
         
-        ipcRenderer.send('startConvert', {'aa': command.value});
+        const outputType = <HTMLSelectElement>document.getElementById('outputType');
+        const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+        const fileTo = <HTMLInputElement>document.getElementById('fileTo');
 
-
+        ipcRenderer.send('startConvert', {'to': outputTypeValue, 'file': fileTo.value});
         // ipcRenderer.on('selectFile-reply', (event, args) => {
             
         // })
