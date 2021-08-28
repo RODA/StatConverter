@@ -40,72 +40,66 @@ window.addEventListener('DOMContentLoaded', () => {
         const inputTypeValue = inputType.options[inputType.selectedIndex].value;
 
         ipcRenderer.send('selectFileFrom', { inputType: inputTypeValue });
-
-        ipcRenderer.on('selectFileFrom-reply', (event, io) => {
-            inputOutput.inputType = io.inputType;
-            inputOutput.fileFrom = io.fileFrom;
-            inputOutput.fileFromDir = io.fileFromDir;
-            inputOutput.fileFromName = io.fileFromName;
-            
-            
-            fileFrom.value = io.fileFrom;
-
-            const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-            
-            if (outputTypeValue != "Select file type") {
-                const ext = helpers.getExtensionFromType(outputTypeValue);
-                const fileTo = <HTMLInputElement>document.getElementById('fileTo');
-                if (inputOutput.fileToDir == '') {
-                    inputOutput.fileToDir = io.fileFromDir;
-                }
-                
-                fileTo.value = path.join(inputOutput.fileToDir, io.fileFromName + ext);
-                inputOutput.outputType = outputTypeValue;
-                inputOutput.fileTo = fileTo.value;
-                inputOutput.fileToName = io.fileFromName;
-            }
-
-            const message = helpers.validate(inputOutput);
-            
-            if (message == "Unsupported input type.") {
-                inputType.selectedIndex = 0;
-                ipcRenderer.send('showError', { message: message });
-            }
-
-        });
-
     });
 
+    ipcRenderer.on('selectFileFrom-reply', (event, io) => {
+        inputOutput.inputType = io.inputType;
+        inputOutput.fileFrom = io.fileFrom;
+        inputOutput.fileFromDir = io.fileFromDir;
+        inputOutput.fileFromName = io.fileFromName;
+        
+        
+        fileFrom.value = io.fileFrom;
+
+        const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+        
+        if (outputTypeValue != "Select file type") {
+            const ext = helpers.getExtensionFromType(outputTypeValue);
+            const fileTo = <HTMLInputElement>document.getElementById('fileTo');
+            if (inputOutput.fileToDir == '') {
+                inputOutput.fileToDir = io.fileFromDir;
+            }
+            
+            fileTo.value = path.join(inputOutput.fileToDir, io.fileFromName + ext);
+            inputOutput.outputType = outputTypeValue;
+            inputOutput.fileTo = fileTo.value;
+            inputOutput.fileToName = io.fileFromName;
+        }
+
+        const message = helpers.validate(inputOutput);
+        
+        if (message == "Unsupported input type.") {
+            inputType.selectedIndex = 0;
+            ipcRenderer.send('showError', { message: message });
+        }
+
+    });
     
 
     selectFileTo.addEventListener('click', function() {
-
-        
         const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-
         ipcRenderer.send('selectFileTo', { outputType: outputTypeValue });
-
-        ipcRenderer.on('selectFileTo-reply', (event, io) => {
-            contor++;
-            console.log('contor: ' + contor);
-            inputOutput.outputType = io.outputType;
-            inputOutput.fileTo = io.fileTo;
-            inputOutput.fileToDir = io.fileToDir;
-            inputOutput.fileToName = io.fileToName;
-
-            
-            fileTo.value = io.fileTo;
-
-            const message = helpers.validate(inputOutput);
-            if (message == "Unsupported output type.") {
-                outputType.selectedIndex = 0;
-                inputOutput.outputType = "";
-                outputType.dispatchEvent(new Event("change"));
-                ipcRenderer.send('showError', { message: message });
-            }
-        });
     });
 
+    ipcRenderer.on('selectFileTo-reply', (event, io) => {
+        contor++;
+        console.log('contor: ' + contor);
+        inputOutput.outputType = io.outputType;
+        inputOutput.fileTo = io.fileTo;
+        inputOutput.fileToDir = io.fileToDir;
+        inputOutput.fileToName = io.fileToName;
+
+        fileTo.value = io.fileTo;
+
+        const message = helpers.validate(inputOutput);  
+
+        if (message == "Unsupported output type.") {
+            outputType.selectedIndex = 0;
+            inputOutput.outputType = "";
+            outputType.dispatchEvent(new Event("change"));
+            ipcRenderer.send('showError', { message: message });            
+        }
+    });
 
 
     startConvert.addEventListener('click', function() {
@@ -146,7 +140,6 @@ window.addEventListener('DOMContentLoaded', () => {
         //     ftTooltip.enable();
         // }
         
-        
         inputOutput.outputType = outputTypeValue;
         if (inputOutput.fileToDir != "" && inputOutput.fileToName != "") {
             const ext = helpers.getExtensionFromType(outputTypeValue);
@@ -155,7 +148,4 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
     });
-
-    
-
 }) 
