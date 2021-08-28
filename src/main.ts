@@ -11,10 +11,30 @@ import {
 import * as path from "path";
 import * as commandExec from 'child_process';
 import * as pty from 'node-pty';
-
 import WebSocket from 'ws';
 
+import {
+    InputOutputType
+} from './interfaces';
+
+import {
+    helpers
+} from "./helpers";
+
+
 let mainWindow: BrowserWindow;
+
+const inputOutput: InputOutputType = {
+    inputType: '',
+    fileFrom: '',
+    fileFromDir: '',
+    fileFromName: '',
+
+    outputType: '',
+    fileTo: '',
+    fileToDir: '',
+    fileToName: '',
+};
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -41,6 +61,7 @@ function createWindow() {
         mainWindow.webContents.openDevTools();
     }
 }
+
 app.whenReady().then(() => {
     createWindow()
 
@@ -102,137 +123,88 @@ app.whenReady().then(() => {
     }
 
     // console.log(shell);
-
+    
     if (R_path != '') {
         start_R_server(R_path);
     }
 
 
-    const inputOutput: {
-        inputType: string;
-        fileFrom: string;
-        fileFromName: string;
-        fileFromDir: string;
-        outputType: string;
-        fileTo: string;
-    } = {
-        inputType: '',
-        fileFrom: '',
-        fileFromName: '',
-        fileFromDir: '',
-        outputType: '',
-        fileTo: '',
-    }
-
     ipcMain.on('selectFileFrom', (event, args) => {
+        if (args.inputType === 'Select file type'){
+            dialog.showErrorBox(
+                'Error',
+                'Select input type'
+            )
+        } else {
+            const info = helpers.fileFromInfo(args.inputType);
 
-        const ext: string[] = [];
-        let fileTypeName = '';
-        switch (args.inputType) {
-            case 'ddi':
-                ext.push('xml');
-                fileTypeName = 'DDI Files (xml)';
-                break
-            case 'excel':
-                ext.push('xlsx');
-                fileTypeName = 'Excel Files (only xlsx)';
-                break
-            case 'sas':
-                ext.push('sas7bdat');
-                fileTypeName = 'SAS Files (sas7bdat)';
-                break
-            case 'spss':
-                ext.push('sav');
-                ext.push('por');
-                fileTypeName = 'SPSS Files (sav, por)';
-                break
-            case 'stata':
-                ext.push('dta');
-                fileTypeName = 'Stata Files (dta)';
-                break
-            case 'r':
-                ext.push('rds');
-                fileTypeName = 'R Files (rds, rda)';
-                break
-            default:
-                ext.push('*');
+            dialog.showOpenDialog(mainWindow, {
+
+                title: 'Select source file',
+                filters: [{
+                    name: info.fileTypeName,
+                    extensions: info.ext
+                }],
+                properties: ['openFile'],
+
+            }).then(result => {
+                
+                if (!result.canceled) {
+                    
+                    inputOutput.fileFrom = result.filePaths[0];
+
+                    const file = path.basename(inputOutput.fileFrom);
+                    const ext = path.extname(file);
+
+                    inputOutput.inputType = helpers.getTypeFromExtension(ext);
+                    inputOutput.fileFromName = path.basename(inputOutput.fileFrom, ext);
+                    inputOutput.fileFromDir = path.dirname(inputOutput.fileFrom);
+                    
+                    event.reply('selectFileFrom-reply', inputOutput);
+                }
+
+            }).catch(err => {
+                console.log(err)
+            })
         }
-
-        dialog.showOpenDialog(mainWindow, {
-
-            title: 'Choose file',
-            filters: [{
-                name: fileTypeName,
-                extensions: ext
-            }],
-            properties: ['openFile'],
-
-        }).then(result => {
-
-            if (!result.canceled) {
-
-                inputOutput.fileFrom = result.filePaths[0];
-
-                const file = path.basename(inputOutput.fileFrom);
-
-                inputOutput.inputType = path.extname(file);
-                inputOutput.fileFromName = path.basename(inputOutput.fileFrom, inputOutput.inputType);
-                inputOutput.fileFromDir = path.dirname(inputOutput.fileFrom);
-
-                event.reply('selectFileFrom-reply', {
-                    file1: inputOutput.fileFrom,
-                    file2: inputOutput.fileFromDir
-                });
-            }
-
-        }).catch(err => {
-            console.log(err)
-        })
     });
 
 
     ipcMain.on('selectFileTo', (event, args) => {
 
-        if(args.outputType === 'Select file type'){
+        if (args.outputType === 'Select file type'){
             dialog.showErrorBox(
                 'Error',
-                'Please select the file output type'
+                'Select output type'
             )
-        } else {                   
+        } else {
 
-            let ext = '';
-            switch (args.outputType) {
-                case 'ddi':
-                    ext = 'xml';
-                    break
-                case 'excel':
-                    ext = 'xlsx';
-                    break
-                case 'sas':
-                    ext = 'sas7bdat';
-                    break
-                case 'spss':
-                    ext = 'sav';
-                    break
-                case 'stata':
-                    ext = 'dta';
-                    break
-                case 'r':
-                    ext = 'rds';
-                    break
-            }
+            const ext = helpers.getExtensionFromType(args.outputType);
 
             dialog.showSaveDialog(mainWindow, {
-                title: 'Select file to save',
-                defaultPath: inputOutput.fileFromDir + '/' + inputOutput.fileFromName + '.' + ext
+                title: 'Select destination file',
+                // TODO:
+                // if this button is clicked before the input one,
+                // fileFromDir is empty
+                defaultPath: path.join(inputOutput.fileFromDir, inputOutput.fileFromName + ext)
             }).then( result => {
-        
-                if(!result.canceled){
-                    event.reply('selectFileTo-reply', {
-                        file: result.filePath,
-                    });
+
+                if (!result.canceled) {
+                    
+                    inputOutput.fileTo = "" + result.filePath;
+
+                    const file = path.basename(inputOutput.fileTo);
+                    const ext = path.extname(file);
+
+                    inputOutput.outputType = helpers.getTypeFromExtension(ext);
+                    inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
+                    inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
+
+                    event.reply('selectFileTo-reply', inputOutput);
                 }
                 
+            }).catch(err => {
+                console.log(err)
             })
         }
     });
@@ -240,11 +212,21 @@ app.whenReady().then(() => {
 
     ipcMain.on('startConvert', (event, args) => {
         
-        console.log(inputOutput);
-        
-        console.log(args);
-        
+        console.log("-----")
+        console.log(args.inputOutput);
+        console.log("-----")
     })
+
+    ipcMain.on('showError', (event, args) => {
+        dialog.showMessageBox(mainWindow, {
+            type: 'error',
+            message: args.message
+
+        })
+    })
+
+
+
 
 
 })
@@ -265,8 +247,10 @@ app.on('window-all-closed', () => {
 //   return(true)
 // }
 
-const start_R_server = function(R_path: string): void {
 
+
+const start_R_server = function(R_path: string): void {
+    /*
     const RptyProcess = pty.spawn(R_path, ['-q', '--no-save'], {});
 
     RptyProcess.write(
@@ -298,4 +282,6 @@ const start_R_server = function(R_path: string): void {
             })
         }
     })
+
+    */
 }
