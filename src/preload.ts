@@ -3,7 +3,7 @@ import * as path from "path";
 import {helpers} from "./helpers";
 import { InputOutputType } from './interfaces';
 
-
+let contor = 0;
 const inputOutput: InputOutputType = {
     inputType: '',
     fileFrom: '',
@@ -86,7 +86,8 @@ window.addEventListener('DOMContentLoaded', () => {
         ipcRenderer.send('selectFileTo', { outputType: outputTypeValue });
 
         ipcRenderer.on('selectFileTo-reply', (event, io) => {
-
+            contor++;
+            console.log('contor: ' + contor);
             inputOutput.outputType = io.outputType;
             inputOutput.fileTo = io.fileTo;
             inputOutput.fileToDir = io.fileToDir;

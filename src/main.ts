@@ -169,7 +169,7 @@ app.whenReady().then(() => {
         }
     });
 
-
+    let contor = 0;
     ipcMain.on('selectFileTo', (event, args) => {
 
         if (args.outputType === 'Select file type'){
@@ -199,7 +199,8 @@ app.whenReady().then(() => {
                     inputOutput.outputType = helpers.getTypeFromExtension(ext);
                     inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
                     inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
-
+                    contor++;
+                    console.log('contor: ' + contor);
                     event.reply('selectFileTo-reply', inputOutput);
                 }
                 
