@@ -276,10 +276,15 @@ env$RGUI_infobjs <- function(objtype) {
                     return(c(numv, calv, binv, chav, facv, datv, decv))
                 })
 
+                rnms <- rownames(.GlobalEnv[[n]])
+                if (all(is.element(rnms, as.character(seq(length(rnms)))))) {
+                    rnms <- c()
+                }
+
                 return(list(
                     nrows = nrowd,
                     ncols = ncold,
-                    rownames = rownames(.GlobalEnv[[n]]),
+                    rownames = rnms,
                     colnames = colnames(.GlobalEnv[[n]]),
                     numeric = as.vector(type[1, ]),
                     calibrated = as.vector(type[2, ]),
