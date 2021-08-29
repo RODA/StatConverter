@@ -2,7 +2,7 @@
 attach(NULL, name = "RGUI") 
 env <- as.environment("RGUI")
 
-packages <- c("httpuv", "jsonlite", "DDIwR")
+packages <- c("DDIwR", "digest", "httpuv", "jsonlite")
 installed <- logical(length(packages))
 
 for (i in seq(length(packages))) {
@@ -12,6 +12,7 @@ for (i in seq(length(packages))) {
 if (sum(installed) < length(packages)) {
     cat(paste("Package(s) not installed:", paste(packages[!installed], collapse = ", "), "\n"))
 } else {
+    cat("everything ok so far\n")
     env$RGUI_server <- httpuv::startServer("127.0.0.1", 12345,
         list(
             onHeaders = function(req) {
@@ -25,28 +26,29 @@ if (sum(installed) < length(packages)) {
                     # if (grepl("RGUI_call\\.R", message)) {
                     #     eval(parse(text = message), envir = .GlobalEnv)
                     # } else {
-                        result <- RGUI_tryCatchWEM(
+                        console <- RGUI_tryCatchWEM(
+                            # I have my own function RGUI_evalparse()
+                            # but don't remember why I need that function
                             eval(
                                 parse(text = message),
                                 envir = .GlobalEnv
                             )
                         )
 
-                        if (length(result) == 0) {
-                            ws$send(
-                                jsonlite::toJSON(
-                                    "nothing visible",
-                                    pretty = TRUE
-                                )
-                            )
-                        } else {
-                            ws$send(
-                                jsonlite::toJSON(
-                                    result,
-                                    pretty = TRUE
-                                )
-                            )
+                        if (length(console) == 0) {
+                            console <- list(visible = c())
                         }
+
+                        toreturn <- RGUI_call()
+                        toreturn$console <- console
+
+                        ws$send(
+                            jsonlite::toJSON(
+                                toreturn,
+                                pretty = TRUE
+                            )
+                        )
+                        
                     # }
                 })
                 ws$onClose(function() {
@@ -73,11 +75,6 @@ env$RGUI_continue <- lapply(c("a(", "'a"), function(x) {
     x <- unlist(strsplit(unlist(strsplit(tryCatch(eval(parse(text = x)), error = identity)$message, "\n"))[1], ":"))
     return(gsub("^[[:space:]]+|[[:space:]]+$", "", x[length(x)]))
 })
-
-env$RGUI_numhash <- function(x) {
-    strobj <- paste(capture.output(.Internal(inspect(x))), collapse = "\n")
-    return(mean(as.integer(charToRaw(strobj))))
-}
 
 env$RGUI_trimstr <- function(x) {
     gsub("^[[:space:]]+|[[:space:]]+$", "", x)
@@ -275,8 +272,8 @@ env$RGUI_infobjs <- function(objtype) {
                     if (numv) x <- env$RGUI_asNumeric(x)
                     calv <- ifelse(numv, all(na.omit(x) >= 0 & na.omit(x) <= 1), FALSE)
                     binv <- ifelse(numv, all(is.element(x, 0:1)), FALSE)
-                    
-                    return(c(numv, calv, binv, chav, facv, datv))
+                    decv <- declared::is_declared(x)
+                    return(c(numv, calv, binv, chav, facv, datv, decv))
                 })
 
                 return(list(
@@ -290,6 +287,7 @@ env$RGUI_infobjs <- function(objtype) {
                     character = as.vector(type[4, ]),
                     factor = as.vector(type[5, ]),
                     date = as.vector(type[6, ]),
+                    declared = as.vector(type[7, ]),
                     scrollvh = c(srow, scol) - 1, # for Javascript
                     vdata = unname(as.list(.GlobalEnv[[n]][seq(srow, erow), seq(scol, ecol), drop = FALSE])),
                     vcoords = paste(srow, scol, erow, ecol, ncol(.GlobalEnv[[n]]), sep = "_")
@@ -312,11 +310,13 @@ env$RGUI_infobjs <- function(objtype) {
             toreturn$vector <- names(objtype[objtype == 4])
         }
 
-        toreturn <- list(toreturn)
-        names(toreturn) <- funargs$objtype
+        # toreturn <- list(toreturn)
+        # names(toreturn) <- funargs$objtype
 
-        env$RGUI_result <- c(env$RGUI_result, RGUI_jsonify(toreturn))
+        # env$RGUI_result <- c(env$RGUI_result, RGUI_jsonify(toreturn))
     }
+
+    return(toreturn)
 }
 
 env$RGUI_ChangeLog <- function(x) {
@@ -370,9 +370,16 @@ env$RGUI_editorsize <- function(visiblerows, visiblecols) {
 }
 
 env$RGUI_import <- function(objlist) {
+
+    #---------------------------------
+    # cut seems to be a unix command, not available on winows
+    # however there is a windows port to many such utilities:
+    # http://gnuwin32.sourceforge.net/packages/coreutils.htm
+    #---------------------------------
+
     env <- as.environment("RGUI")
     # callist <- list(file = pipe(paste("cut -f1-8 -d','", objlist$file)))
-    callist <- list(file = pipe(paste("cut -f1-8 -d','", paste("'", objlist$file, "'", sep=""))))
+    callist <- list(file = pipe(paste("cut -f1-8 -d','", paste0("'", objlist$file, "'"))))
     command <- objlist$command
     objlist$file <- NULL
     objlist$command <- NULL
@@ -392,8 +399,10 @@ env$RGUI_import <- function(objlist) {
 
 env$RGUI_call <- function() {
     env <- as.environment("RGUI")
+
+    toreturn <- list()
     
-    objtype <- lapply(.GlobalEnv, function(x) {
+    objtype <- unlist(lapply(.GlobalEnv, function(x) {
         if (is.data.frame(x)) { # dataframes
             return(1)
         }
@@ -407,22 +416,32 @@ env$RGUI_call <- function() {
             return(4)
         }
         return(0)
-    })
+    }))
 
-    hashes <- lapply(.GlobalEnv, env$RGUI_numhash) # current objects
+    objtype <- objtype[order(names(objtype))]
+
+    hashes <- unlist(lapply(.GlobalEnv, digest::digest)) # current objects
+    hashes <- hashes[order(names(hashes))]
+
     if (length(objtype) > 0) {
         hashes <- hashes[objtype > 0]
         objtype <- objtype[objtype > 0]
     }
+
     deleted <- FALSE
     changed <- FALSE
 
     if (length(hashes) > 0) {
-
+        # cat(paste0("hashes: ", length(env$RGUI_hashes), "\n"))
+        # print(env$RGUI_hashes)
+        # print(hashes)
         if (length(env$RGUI_hashes) > 0) {
             # deleted <- setdiff(names(env$RGUI_hashes), names(hashes))
             deleted <- !is.element(names(env$RGUI_hashes), names(hashes))
             common <- is.element(names(hashes), names(env$RGUI_hashes))
+
+            # cat(paste("common:", paste(names(hashes)[common], collapse = ","), "\n"))
+            
             changed <- common & !is.element(hashes[common], env$RGUI_hashes[common])
             added <- !is.element(names(hashes), names(env$RGUI_hashes))
             changed <- changed | added
@@ -437,11 +456,8 @@ env$RGUI_call <- function() {
     }
 
     if (any(changed)) {
-        # it is important to overwrite "changed" because RGUI_infobjs()
-        # uses the name of the input object to create the JSON component
-        changed <- objtype[changed]
-        # this will add directly in the RGUI_result
-        env$RGUI_infobjs(changed)
+        # cat(paste("changed:", paste(names(hashes)[changed], collapse = ","), "\n"))
+        toreturn$changed <- env$RGUI_infobjs(objtype[changed])
     }
 
     if (any(deleted)) {
@@ -460,65 +476,38 @@ env$RGUI_call <- function() {
             deleted$vector <- names(objdel)[objdel == 4]
         }
 
-        env$RGUI_result <- c(env$RGUI_result, RGUI_jsonify(list(deleted = deleted)))
+        toreturn$deleted <- deleted
+        # env$RGUI_result <- c(env$RGUI_result, RGUI_jsonify(list(deleted = deleted)))
     }
 
     env$RGUI_hashes <- hashes # overwrite the hash information
     env$RGUI_objtype <- objtype
-    
-    # delete the call to RGUI_call() from the R history
-    temp <- "bla.Rhistory"
-    utils::savehistory(file = temp) # only in Terminal, not working on MacOS
-    history <- readLines(temp)
-    lhistory <- length(history)
-    
-    if (lhistory == 1) {
-        writeLines("\n", con = temp)
-    }
-    else {
-        writeLines(history[seq(lhistory - 1)], con = temp)
-    }
-    
-    loadhistory(file = temp)
 
-    if (length(env$RGUI_result) > 0) {
-        env$RGUI_result <- paste("{", paste(env$RGUI_result, collapse = ",\n"), "}", sep = "")
-
-        if (!env$RGUI_formatted) {
-            env$RGUI_result <- gsub("[[:space:]]", "", env$RGUI_result)
-        }
-        
-        cat("startR", env$RGUI_result, "endR")
-        # return an enter to detect the prompter
-        # cat('\r\n')
-    } else {
-        cat('#nodata#')
-    }
-
-    env$RGUI_result <- c() 
+    return(toreturn)
 }
 
-env$RGUI_tryCatchWEM <- function(expr) {
+env$RGUI_tryCatchWEM <- function(evalparsed) {
     # modified version of http://stackoverflow.com/questions/4948361/how-do-i-save-warnings-and-errors-as-output-from-a-function
     toreturn <- list()
+    
     output <- withVisible(withCallingHandlers(
-        tryCatch(expr, error = function(e) {
+        tryCatch(evalparsed, error = function(e) {
             toreturn$error <<- e$message
             NULL
         }), warning = function(w) {
             toreturn$warning <<- c(toreturn$warning, w$message)
             invokeRestart("muffleWarning")
         }, message = function(m) {
-            toreturn$message <<- paste(toreturn$message, m$message, sep = "")
+            toreturn$message <<- c(toreturn$message, m$message)
             invokeRestart("muffleMessage")
         }
     ))
-    
-    if (output$visible) {
-        if (!is.null(output$value)) {
-            toreturn$output <- capture.output(output$value)
-        }
-    }
+
+    if (output$visible && !is.null(output$value)) {
+        toreturn$visible <- output$value
+    } else {
+        toreturn$visible <- c()
+    }   
     
     return(toreturn)
 }

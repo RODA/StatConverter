@@ -3,7 +3,6 @@ import * as path from "path";
 import {helpers} from "./helpers";
 import { InputOutputType } from './interfaces';
 
-let contor = 0;
 const inputOutput: InputOutputType = {
     inputType: '',
     fileFrom: '',
@@ -25,6 +24,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // for (const type of ["chrome", "node", "electron"]) {
     //     replaceText(`${type}-version`, <any> process.versions[type as keyof NodeJS.ProcessVersions]);
     // }
+
+    // TODO: change <const> to <let> when it will be used to subset data
+    const subset = 'xyz';
     
     const inputType = <HTMLSelectElement>document.getElementById('inputType');
     const outputType = <HTMLSelectElement>document.getElementById('outputType');
@@ -47,7 +49,8 @@ window.addEventListener('DOMContentLoaded', () => {
         inputOutput.fileFrom = io.fileFrom;
         inputOutput.fileFromDir = io.fileFromDir;
         inputOutput.fileFromName = io.fileFromName;
-        
+
+        ipcRenderer.send('sendCommand', 'xyz <- DDIwR::convert("' + io.fileFrom + '")')
         
         fileFrom.value = io.fileFrom;
 
@@ -82,8 +85,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     ipcRenderer.on('selectFileTo-reply', (event, io) => {
-        contor++;
-        console.log('contor: ' + contor);
         inputOutput.outputType = io.outputType;
         inputOutput.fileTo = io.fileTo;
         inputOutput.fileToDir = io.fileToDir;
@@ -91,7 +92,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         fileTo.value = io.fileTo;
 
-        const message = helpers.validate(inputOutput);  
+        const message = helpers.validate(inputOutput);
 
         if (message == "Unsupported output type.") {
             outputType.selectedIndex = 0;
@@ -99,20 +100,23 @@ window.addEventListener('DOMContentLoaded', () => {
             outputType.dispatchEvent(new Event("change"));
             ipcRenderer.send('showError', { message: message });            
         }
+
+        fileTo.dispatchEvent(new Event("change"));
     });
 
 
-    startConvert.addEventListener('click', function() {
-        const message = helpers.validate(inputOutput);
-        if (message != "ok") {
-            ipcRenderer.send('startConvert', {
-                'inputOutput': inputOutput
-            });
-        }
-        else {
-            // 
-        }
+    ipcRenderer.on('sendCommand-reply', (event, data) => {
+        console.log(data);
+    })
 
+
+
+    startConvert.addEventListener('click', function() {
+
+        ipcRenderer.send(
+            'sendCommand',
+            'DDIwR::convert(' + subset + ', to = "' + inputOutput.fileTo + '")'
+        );
     });
 
     inputType.addEventListener('change', function() {
@@ -128,23 +132,13 @@ window.addEventListener('DOMContentLoaded', () => {
     outputType.addEventListener('change', function() {
         
         const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-        // const selectFileToTooltip = document.getElementById('selectFileToTooltip')
-        // const ftTooltip = new bootstrap.Tooltip(selectFileToTooltip, {
-        //     boundary: document.body // or document.querySelector('#boundary')
-        // })
-        // if (outputTypeValue != 'Select file type') {
-        //     selectFileTo.disabled = false;
-        //     ftTooltip.disable();
-        // } else {
-        //     selectFileTo.disabled = true;
-        //     ftTooltip.enable();
-        // }
         
         inputOutput.outputType = outputTypeValue;
         if (inputOutput.fileToDir != "" && inputOutput.fileToName != "") {
             const ext = helpers.getExtensionFromType(outputTypeValue);
             inputOutput.fileTo = path.join(inputOutput.fileToDir, inputOutput.fileToName + ext);
             fileTo.value = inputOutput.fileTo;
+            fileTo.dispatchEvent(new Event("change"));
         }
 
     });

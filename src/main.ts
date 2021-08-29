@@ -23,6 +23,7 @@ import {
 
 
 let mainWindow: BrowserWindow;
+let Rws: WebSocket;
 
 const inputOutput: InputOutputType = {
     inputType: '',
@@ -39,11 +40,11 @@ const inputOutput: InputOutputType = {
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1024,
-        height: 768,
+        height: 700,
         maxWidth: 1024,
-        maxHeight: 768,
+        maxHeight: 700,
         minWidth: 1024,
-        minHeight: 768,
+        minHeight: 700,
         backgroundColor: '#fff',
         webPreferences: {
             preload: path.join(__dirname, 'preload.js')
@@ -63,7 +64,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    createWindow()
+    createWindow();
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
@@ -169,7 +170,6 @@ app.whenReady().then(() => {
         }
     });
 
-    let contor = 0;
     ipcMain.on('selectFileTo', (event, args) => {
 
         if (args.outputType === 'Select file type'){
@@ -199,8 +199,6 @@ app.whenReady().then(() => {
                     inputOutput.outputType = helpers.getTypeFromExtension(ext);
                     inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
                     inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
-                    contor++;
-                    console.log('contor: ' + contor);
                     event.reply('selectFileTo-reply', inputOutput);
                 }
                 
@@ -226,12 +224,15 @@ app.whenReady().then(() => {
         })
     })
 
+    ipcMain.on('sendCommand', (event, command) => {
+        Rws.send(command);
+    })
+
 
 
 
 
 })
-
 
 
 app.on('window-all-closed', () => {
@@ -251,7 +252,7 @@ app.on('window-all-closed', () => {
 
 
 const start_R_server = function(R_path: string): void {
-    /*
+    
     const RptyProcess = pty.spawn(R_path, ['-q', '--no-save'], {});
 
     RptyProcess.write(
@@ -263,15 +264,17 @@ const start_R_server = function(R_path: string): void {
 
         if (data.includes("_server_started_")) {
             // console.log("server started");
-            const Rws = new WebSocket('ws://127.0.0.1:12345');
+            Rws = new WebSocket('ws://127.0.0.1:12345');
 
-            Rws.on('open', function open() {
-                Rws.send('aa <- 2 + 2');
-                Rws.send('ls()');
-            });
+            // Rws.on('open', function open() {
+            //     Rws.send('(aa <- 2 + 2)');
+            //     Rws.send('bb <- aa + 4');
+            //     Rws.send('ls()');
+            // });
 
-            Rws.addEventListener('message', function(event) {
-                console.log(event.data);
+            Rws.addEventListener('message', function(e) {
+                mainWindow.webContents.send('sendCommand-reply', e.data);
+                // event.reply('sendCommand-reply', e.data);
             });
 
         } else if (data.includes("Package(s) not installed")) {
@@ -284,5 +287,5 @@ const start_R_server = function(R_path: string): void {
         }
     })
 
-    */
+    
 }

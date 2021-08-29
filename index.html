@@ -92,7 +92,7 @@
                    
                     </div>
                     <div class="col-8 text-center">
-                        <span class="d-inline-block" tabindex="0" title="Check everything before converting" id="startConvertTooltip">
+                        <span class="d-inline-block" tabindex="0" title="Complete information before conversion" id="startConvertTooltip">
 
                         <button class="btn btn-secondary rounded-0" disabled id="startConvert">Convert</button>
                     </div>
@@ -151,48 +151,67 @@
         //         document.activeElement.blur();
 		// 	}
 		// });
+        
+        const inputType = document.getElementById('inputType');
+        const fileFrom = document.getElementById('fileFrom');
+        const selectFileFrom = document.getElementById('selectFileFrom');
+        const outputType = document.getElementById('outputType');
+        const fileTo = document.getElementById('fileTo');
+        const selectFileTo = document.getElementById('selectFileTo');
+        const startConvert = document.getElementById('startConvert');
+
+        inputType.addEventListener('change', () => {
+            fileFrom.value = "";
+            const inputTypeValue = inputType.options[inputType.selectedIndex].value;
+            if (inputTypeValue != 'Select file type') {
+                selectFileFrom.disabled = false;
+                fromTooltip.disable();
+            } else {
+                selectFileFrom.disabled = true;
+                fromTooltip.enable();
+            }
+        })
+
+        outputType.addEventListener('change', () => {
+            const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+            if (outputTypeValue != 'Select file type') {
+                selectFileTo.disabled = false;
+                toTooltip.disable();
+            } else {
+                selectFileTo.disabled = true;
+                toTooltip.enable();
+            }
+        })
+
+        fileTo.addEventListener('change', () => {
+            const inputTypeValue = inputType.options[inputType.selectedIndex].value;
+            const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+            if (
+                inputTypeValue != 'Select file type' &&
+                outputTypeValue != 'Select file type' &&
+                fileFrom.value != "" && fileTo.value != ""
+            ) {
+                startConvert.disabled = false;
+                scTooltip.disable();
+            }
+            else {
+                startConvert.disabled = true;
+                scTooltip.enable();
+            }
+        })
 
         var fromTooltip = new bootstrap.Tooltip(document.getElementById('fromTooltip'), {
             boundary: document.body // or document.querySelector('#boundary')
-        })
-
-        document.getElementById('inputType').addEventListener('change', () => {
-            const button = document.getElementById('selectFileFrom');
-            const inputType = document.getElementById('inputType');
-            const inputTypeValue = inputType.options[inputType.selectedIndex].value;
-            if (inputTypeValue != 'Select file type') {
-                button.disabled = false;
-                fromTooltip.disable();
-            } else {
-                button.disabled = true;
-                fromTooltip.enable();
-            }
         })
 
         var toTooltip = new bootstrap.Tooltip(document.getElementById('toTooltip'), {
             boundary: document.body // or document.querySelector('#boundary')
         })
 
-        document.getElementById('outputType').addEventListener('change', () => {
-            const button = document.getElementById('selectFileTo');
-            const outputType = document.getElementById('outputType');
-            const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-            if (outputTypeValue != 'Select file type') {
-                button.disabled = false;
-                toTooltip.disable();
-            } else {
-                button.disabled = true;
-                toTooltip.enable();
-            }
-        })
-        
-
         var scTooltip = new bootstrap.Tooltip(document.getElementById('startConvertTooltip'), {
             boundary: document.body // or document.querySelector('#boundary')
         })
 
-        const startConvert = document.getElementById('startConvert');
-        
     </script>
 </body>
 
