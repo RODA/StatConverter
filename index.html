@@ -27,7 +27,7 @@
                     </div>
                     <div class="col-8">
                         <select class="form-select" id="inputType">
-                            <option selected>Select file type</option>
+                            <option value="none" selected>Select file type</option>
                             <option value="ddi">DDI</option>
                             <option value="excel">Excel</option>
                             <option value="sas">SAS</option>
@@ -61,7 +61,7 @@
                     </div>
                     <div class="col-8">
                         <select class="form-select" id="outputType">
-                            <option selected>Select file type</option>
+                            <option value="none" selected>Select file type</option>
                             <option value="ddi">DDI</option>
                             <option value="excel">Excel</option>
                             <option value="sas">SAS</option>
@@ -162,6 +162,35 @@
         const selectFileTo = document.getElementById('selectFileTo');
         const startConvert = document.getElementById('startConvert');
 
+        var changeOutputTypeOptions = function(inputTypeValue) {
+
+            const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+            
+            let values = ['none', 'ddi', 'excel', 'sas', 'spss', 'stata', 'r'];
+            let texts = ['Select file type', 'DDI', 'Excel', 'SAS', 'SPSS', 'Stata', 'R'];
+            
+            for (i = outputType.options.length - 1; i >= 0; i--) {
+                outputType.options[i] = null;
+            }
+
+            for (let i = 0; i < values.length; i++) {
+                if (values[i] != inputTypeValue || inputTypeValue == 'none') {
+                    let option = document.createElement('option');
+                    option.setAttribute("value", values[i]);
+                    option.text = texts[i];
+                    
+                    if (values[i] == outputTypeValue) {
+                        option.selected = true;
+                    }
+
+                    outputType.append(option);
+                }
+            }
+
+            outputType.dispatchEvent(new Event("change"));
+            
+        }
+
         inputType.addEventListener('change', () => {
             fileFrom.value = "";
             const inputTypeValue = inputType.options[inputType.selectedIndex].value;
@@ -172,6 +201,8 @@
                 selectFileFrom.disabled = true;
                 fromTooltip.enable();
             }
+
+            changeOutputTypeOptions(inputTypeValue);
         })
 
         outputType.addEventListener('change', () => {
