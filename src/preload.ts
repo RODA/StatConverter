@@ -116,7 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         ipcRenderer.send(
             'sendCommand',
-            'DDIwR::convert(' + subset + ', to = "' + inputOutput.fileTo + '")'
+            'DDIwR::convert(' + subset + ', to = "' + inputOutput.fileTo + '", embed = TRUE)'
         );
     });
 
@@ -133,10 +133,18 @@ window.addEventListener('DOMContentLoaded', () => {
     outputType.addEventListener('change', function() {
         
         const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-        
         inputOutput.outputType = outputTypeValue;
+        const ext = helpers.getExtensionFromType(outputTypeValue);
+
+        if (inputOutput.fileToDir == "" && inputOutput.fileFromDir != "") {
+            inputOutput.fileToDir = inputOutput.fileFromDir;
+        }
+
+        if (inputOutput.fileToName == "" && inputOutput.fileFromName != "") {
+            inputOutput.fileToName = inputOutput.fileFromName;
+        }
+        
         if (inputOutput.fileToDir != "" && inputOutput.fileToName != "") {
-            const ext = helpers.getExtensionFromType(outputTypeValue);
             inputOutput.fileTo = path.join(inputOutput.fileToDir, inputOutput.fileToName + ext);
             fileTo.value = inputOutput.fileTo;
             fileTo.dispatchEvent(new Event("change"));
