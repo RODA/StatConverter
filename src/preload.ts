@@ -56,7 +56,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const outputTypeValue = outputType.options[outputType.selectedIndex].value;
         
-        if (outputTypeValue != "Select file type") {
+        if (outputTypeValue != "none") {
+            
             const ext = helpers.getExtensionFromType(outputTypeValue);
             const fileTo = <HTMLInputElement>document.getElementById('fileTo');
             if (inputOutput.fileToDir == '') {

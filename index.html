@@ -96,7 +96,7 @@
                     <div class="col-8 text-center">
                         <span class="d-inline-block" tabindex="0" title="Complete information before conversion" id="startConvertTooltip">
 
-                        <button class="btn btn-success rounded-0" disabled id="startConvert">Convert</button>
+                        <button class="btn btn-secondary rounded-0" disabled id="startConvert">Convert</button>
                     </div>
                     <div class="col-2">
                     </div>
@@ -194,7 +194,7 @@
         inputType.addEventListener('change', () => {
             fileFrom.value = "";
             const inputTypeValue = inputType.options[inputType.selectedIndex].value;
-            if (inputTypeValue != 'Select file type') {
+            if (inputTypeValue != 'none') {
                 selectFileFrom.disabled = false;
                 fromTooltip.disable();
             } else {
@@ -207,12 +207,15 @@
 
         outputType.addEventListener('change', () => {
             const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-            if (outputTypeValue != 'Select file type') {
+            if (outputTypeValue != 'none') {
                 selectFileTo.disabled = false;
                 toTooltip.disable();
             } else {
                 selectFileTo.disabled = true;
-                toTooltip.enable();
+                toTooltip.enable();startConvert.disabled = true;
+                startConvert.classList.remove("btn-success");
+                startConvert.classList.add("btn-secondary");
+                scTooltip.enable();
             }
         })
 
@@ -220,15 +223,19 @@
             const inputTypeValue = inputType.options[inputType.selectedIndex].value;
             const outputTypeValue = outputType.options[outputType.selectedIndex].value;
             if (
-                inputTypeValue != 'Select file type' &&
-                outputTypeValue != 'Select file type' &&
+                inputTypeValue != 'none' &&
+                outputTypeValue != 'none' &&
                 fileFrom.value != "" && fileTo.value != ""
             ) {
                 startConvert.disabled = false;
+                startConvert.classList.remove("btn-secondary");
+                startConvert.classList.add("btn-success");
                 scTooltip.disable();
             }
             else {
                 startConvert.disabled = true;
+                startConvert.classList.remove("btn-success");
+                startConvert.classList.add("btn-secondary");
                 scTooltip.enable();
             }
         })
