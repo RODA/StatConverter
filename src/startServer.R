@@ -12,7 +12,7 @@ for (i in seq(length(packages))) {
 if (sum(installed) < length(packages)) {
     cat(paste("Package(s) not installed:", paste(packages[!installed], collapse = ", "), "\n"))
 } else {
-    cat("everything ok so far\n")
+    
     env$RGUI_server <- httpuv::startServer("127.0.0.1", 12345,
         list(
             onHeaders = function(req) {
@@ -26,6 +26,7 @@ if (sum(installed) < length(packages)) {
                     # if (grepl("RGUI_call\\.R", message)) {
                     #     eval(parse(text = message), envir = .GlobalEnv)
                     # } else {
+                        
                         console <- RGUI_tryCatchWEM(
                             # I have my own function RGUI_evalparse()
                             # but don't remember why I need that function
@@ -39,8 +40,15 @@ if (sum(installed) < length(packages)) {
                             console <- list(visible = c())
                         }
 
-                        toreturn <- RGUI_call()
+                        toreturn <- list()
+                        objects <- ls(envir = .GlobalEnv)
+
+                        if (length(objects) > 0) {
+                            toreturn <- RGUI_call()
+                        }
+                        
                         toreturn$console <- console
+                        # print(console)
 
                         ws$send(
                             jsonlite::toJSON(
@@ -58,9 +66,10 @@ if (sum(installed) < length(packages)) {
         )
     )
     
-    cat("_server_started_")
-}
+    cat("_server_started_\n")
 
+
+}
 
 
 env$RGUI_formatted <- FALSE
@@ -422,7 +431,7 @@ env$RGUI_call <- function() {
         }
         return(0)
     }))
-
+    
     objtype <- objtype[order(names(objtype))]
 
     hashes <- unlist(lapply(.GlobalEnv, digest::digest)) # current objects
