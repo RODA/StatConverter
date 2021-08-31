@@ -252,7 +252,7 @@ app.on('window-all-closed', () => {
 
 
 const start_R_server = function(R_path: string): void {
-    
+
     const RptyProcess = pty.spawn(R_path, ['-q', '--no-save'], {});
 
     RptyProcess.write(
@@ -289,3 +289,49 @@ const start_R_server = function(R_path: string): void {
 
     
 }
+
+
+
+
+/* --- Direct pe proces, fara pty... dar nu merge
+
+    const blah = commandExec.spawn(R_path, ['-q', '--no-save'], {});
+    blah.stdin.write('source("' + path.join(__dirname, "../src/") + 'startServer.R")\n');
+
+    blah.on('close', (code) => {
+        if (code !== 0) {
+          console.log(`grep process exited with code ${code}`);
+        }
+    });
+
+    blah.stdout.on("data", (data) => {
+        data = data.toString();
+        console.log(data);
+
+        if (data.includes("_server_started_")) {
+            console.log("server started");
+            Rws = new WebSocket('ws://127.0.0.1:12345');
+
+            Rws.on('open', function open() {
+                console.log("open!")
+                Rws.send('(aa <- 2 + 2)');
+                Rws.send('bb <- aa + 4');
+                Rws.send('ls()');
+            });
+
+            Rws.addEventListener('message', function(e) {
+                mainWindow.webContents.send('sendCommand-reply', e.data);
+                // event.reply('sendCommand-reply', e.data);
+            });
+
+        } else if (data.includes("Package(s) not installed")) {
+            // server_started = false;
+            dialog.showMessageBox(mainWindow, {
+                type: 'error',
+                title: 'Missing packages',
+                message: data
+            })
+        }
+
+    })
+*/
