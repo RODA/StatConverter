@@ -44,7 +44,7 @@ if (sum(installed) < length(packages)) {
                         objects <- ls(envir = .GlobalEnv)
 
                         if (length(objects) > 0) {
-                            toreturn <- RGUI_call()
+                            toreturn$info <- RGUI_tryCatchWEM(RGUI_call())$visible
                         }
                         
                         toreturn$console <- console
@@ -274,14 +274,20 @@ env$RGUI_infobjs <- function(objtype) {
                 ecol <- min(scol + visiblecols - 1, ncold)
 
                 type <- sapply(.GlobalEnv[[n]], function(x) {
+                    decv <- declared::is_declared(x)
                     datv <- inherits(x, "Date")
                     numv <- env$RGUI_possibleNumeric(x) & !datv
                     chav <- is.character(x) & !numv
                     facv <- is.factor(x) & !numv
-                    if (numv) x <- env$RGUI_asNumeric(x)
-                    calv <- ifelse(numv, all(na.omit(x) >= 0 & na.omit(x) <= 1), FALSE)
-                    binv <- ifelse(numv, all(is.element(x, 0:1)), FALSE)
-                    decv <- declared::is_declared(x)
+                    calv <- binv <- FALSE
+                    if (numv) {
+                        attributes(x) <- NULL
+                        x <- na.omit(env$RGUI_asNumeric(x))
+                        if (length(x) > 0) {
+                            calv <- all(x >= 0 & x <= 1)
+                            binv <- all(is.element(x, 0:1))
+                        }
+                    }
                     return(c(numv, calv, binv, chav, facv, datv, decv))
                 })
 
@@ -521,7 +527,7 @@ env$RGUI_tryCatchWEM <- function(evalparsed) {
         toreturn$visible <- output$value
     } else {
         toreturn$visible <- c()
-    }   
+    }
     
     return(toreturn)
 }
