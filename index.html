@@ -28,7 +28,7 @@
                     <div class="col-8">
                         <select class="form-select" id="inputType">
                             <option value="none" selected>Select file type</option>
-                            <option value="ddi">DDI</option>
+                            <option value="ddi">DDI Codebook</option>
                             <option value="excel">Excel</option>
                             <option value="sas">SAS</option>
                             <option value="spss">SPSS</option>
@@ -62,7 +62,7 @@
                     <div class="col-8">
                         <select class="form-select" id="outputType">
                             <option value="none" selected>Select file type</option>
-                            <option value="ddi">DDI</option>
+                            <option value="ddi">DDI Codebook</option>
                             <option value="excel">Excel</option>
                             <option value="sas">SAS</option>
                             <option value="spss">SPSS</option>
@@ -114,6 +114,11 @@
             <button class="rounded-0 btn btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
             <button class="rounded-0 btn btn-secondary" id="v-pills-cases-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cases" type="button" role="tab" aria-controls="v-pills-cases" aria-selected="false">Cases</button>
             <button class="rounded-0  btn btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto;" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
+            <div class="text-center flex">
+                <div class="align-self-end pb-3">
+                    <img src="./src/assets/RODA.png" alt="poca" style="max-width: 50px;">
+                </div>
+            </div>
             <div class="text-white text-center flex" style="font-size: 0.8rem;">
                 <div class="align-self-end pb-3">
                     <a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br>
@@ -167,7 +172,7 @@
             const outputTypeValue = outputType.options[outputType.selectedIndex].value;
             
             let values = ['none', 'ddi', 'excel', 'sas', 'spss', 'stata', 'r'];
-            let texts = ['Select file type', 'DDI', 'Excel', 'SAS', 'SPSS', 'Stata', 'R'];
+            let texts = ['Select file type', 'DDI Codebook', 'Excel', 'SAS', 'SPSS', 'Stata', 'R'];
             
             for (i = outputType.options.length - 1; i >= 0; i--) {
                 outputType.options[i] = null;
@@ -176,7 +181,7 @@
             for (let i = 0; i < values.length; i++) {
                 if (values[i] != inputTypeValue || inputTypeValue == 'none') {
                     let option = document.createElement('option');
-                    option.setAttribute("value", values[i]);
+                    option.setAttribute('value', values[i]);
                     option.text = texts[i];
                     
                     if (values[i] == outputTypeValue) {
@@ -187,7 +192,7 @@
                 }
             }
 
-            outputType.dispatchEvent(new Event("change"));
+            outputType.dispatchEvent(new Event('change'));
             
         }
 
@@ -213,8 +218,8 @@
             } else {
                 selectFileTo.disabled = true;
                 toTooltip.enable();startConvert.disabled = true;
-                startConvert.classList.remove("btn-success");
-                startConvert.classList.add("btn-secondary");
+                startConvert.classList.remove('btn-success');
+                startConvert.classList.add('btn-secondary');
                 scTooltip.enable();
             }
         })
@@ -228,14 +233,14 @@
                 fileFrom.value != "" && fileTo.value != ""
             ) {
                 startConvert.disabled = false;
-                startConvert.classList.remove("btn-secondary");
-                startConvert.classList.add("btn-success");
+                startConvert.classList.remove('btn-secondary');
+                startConvert.classList.add('btn-success');
                 scTooltip.disable();
             }
             else {
                 startConvert.disabled = true;
-                startConvert.classList.remove("btn-success");
-                startConvert.classList.add("btn-secondary");
+                startConvert.classList.remove('btn-success');
+                startConvert.classList.add('btn-secondary');
                 scTooltip.enable();
             }
         })

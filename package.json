@@ -1,7 +1,7 @@
 {
   "name": "statconverter",
   "version": "1.0.0",
-  "description": "Convert from SPSS to Stata using R",
+  "description": "Convert statistical data using R",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
@@ -17,8 +17,10 @@
   },
   "keywords": [
     "convert",
-    "stata",
-    "spss"
+    "SAS",
+    "SPSS",
+    "Stata",
+    "R"
   ],
   "author": "RODA",
   "license": "MIT",
@@ -74,5 +76,28 @@
         }
       ]
     }
+  },
+  "build": {
+      "appId": "StatConverter.tool",
+      "productName": "StatConverter",
+      "directories": {
+          "output": "build/output"
+      },
+      "extraResources": [
+          {
+              "from": "src/assets/",
+              "to": "assets"
+          }
+      ],
+      "win": {
+          "icon": "build/icon.ico",
+          "legalTrademarks": "MIT Licence",
+          "target": {
+              "target": "dir"
+          }
+      },
+      "mac": {
+          "target": "dir"
+      }
   }
 }
