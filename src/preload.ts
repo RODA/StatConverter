@@ -50,7 +50,10 @@ window.addEventListener('DOMContentLoaded', () => {
         inputOutput.fileFromDir = io.fileFromDir;
         inputOutput.fileFromName = io.fileFromName;
 
-        ipcRenderer.send('sendCommand', 'xyz <- DDIwR::convert("' + io.fileFrom + '")')
+        ipcRenderer.send(
+            'sendCommand',
+            'xyz <- DDIwR::convert("' + io.fileFrom + '", declared = TRUE)'
+        )
         
         fileFrom.value = io.fileFrom;
 
