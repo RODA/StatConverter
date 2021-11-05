@@ -1,263 +1,280 @@
 <!DOCTYPE html>
 <html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>StatConverter</title>
+		<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+		<link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+		<style>
+			.btn:focus {
+				outline: none;
+				box-shadow: none !important;
+			}
+		</style>
+	</head>
 
-<head>
-    <meta charset="UTF-8">
-    <title>StatConverter</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-    <link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .btn:focus {
-            outline: none;
-            box-shadow: none !important;
-        }
-    </style>
-</head>
+	<body style="background: white">
+		<div class="d-flex align-items-start">
+			<div class="tab-content" id="v-pills-tabContent" style="width: 858px">
+				<div class="tab-pane fade show active p-4" id="v-pills-convert" role="tabpanel" aria-labelledby="v-pills-convert-tab">
+					<div class="row align-items-center mt-5 mb-3">
+						<div class="col-2 text-end">
+							<label for="inputType" class="col-form-label">Input type</label>
+						</div>
+						<div class="col-8">
+							<select class="form-select" id="inputType">
+								<option value="none" selected>Select file type</option>
+								<option value="ddi">DDI Codebook</option>
+								<option value="excel">Excel</option>
+								<option value="sas">SAS</option>
+								<option value="spss">SPSS</option>
+								<option value="stata">Stata</option>
+								<option value="r">R</option>
+							</select>
+						</div>
+						<div class="col-2"></div>
+					</div>
+					<div class="row align-items-center mb-5">
+						<div class="col-2 text-end">
+							<label for="fileFrom" class="col-form-label">Convert to</label>
+						</div>
+						<div class="col-8">
+							<input type="input" readonly class="rounded-0 form-control" id="fileFrom" />
+							<!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
+						</div>
+						<div class="col-2">
+							<span class="d-inline-block" tabindex="0" title="Select input type" id="fromTooltip">
+								<button class="btn btn-secondary rounded-0" disabled id="selectFileFrom">Browse</button>
+							</span>
+						</div>
+					</div>
 
-<body style="background: white;">
+					<hr />
 
-    <div class="d-flex align-items-start">
+					<div class="row align-items-center mt-5 mb-3">
+						<div class="col-2 text-end">
+							<label for="outputType" class="col-form-label">Output type</label>
+						</div>
+						<div class="col-8">
+							<select class="form-select" id="outputType">
+								<option value="none" selected>Select file type</option>
+								<option value="ddi">DDI Codebook</option>
+								<option value="excel">Excel</option>
+								<option value="sas">SAS</option>
+								<option value="spss">SPSS</option>
+								<option value="stata">Stata</option>
+								<option value="r">R</option>
+							</select>
+						</div>
+						<div class="col-2"></div>
+					</div>
+					<div class="row align-items-center mb-2">
+						<div class="col-2 text-end">
+							<label for="fileTo" class="col-form-label">Convert to</label>
+						</div>
+						<div class="col-8">
+							<input type="input" readonly class="rounded-0 form-control" id="fileTo" />
+							<!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
+						</div>
+						<div class="col-2">
+							<span class="d-inline-block" tabindex="0" title="Select output type" id="toTooltip">
+								<button class="btn btn-secondary rounded-0" disabled id="selectFileTo">Browse</button>
+							</span>
+						</div>
+					</div>
+					<br />
+					<hr />
 
-        <div class="tab-content" id="v-pills-tabContent" style="width: 858px;">
-            <div class="tab-pane fade show active p-4" id="v-pills-convert" role="tabpanel" aria-labelledby="v-pills-convert-tab">
+					<div class="row align-items-center mt-5">
+						<div class="col-2 text-end"></div>
+						<div class="col-8 text-center">
+							<span class="d-inline-block" tabindex="0" title="Complete information before conversion" id="startConvertTooltip">
+								<button class="btn btn-secondary rounded-0" disabled id="startConvert">Convert</button>
+							</span>
+						</div>
+						<div class="col-2"></div>
+					</div>
+				</div>
+				<!-- ========= Variables ========= -->
+				<div class="tab-pane fade" id="v-pills-variables" role="tabpanel" aria-labelledby="v-pills-variables-tab">
+					<div class="row align-items-center mt-3">
+						<div class="col-4 text-start">
+							<strong style="margin-left: 10px">Variables</strong>
+							<div style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 55px); overflow-y: scroll;"></div>
+						</div>
+						<div class="col-8">
+							<strong style="margin-left: 10px">Variable label</strong>
+							<div style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 75px"></div>
+							<strong class="d-block mt-3" style="margin-left: 10px">Value labels</strong>
+							<div style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 282px; overflow-y: scroll;"></div>
+							<div class="buttons mt-3 text-center">
+								<button id="select-all-variables" class="btn btn-secondary rounded-0">Select all</button>
+								<button id="deselect-all-variables" class="btn btn-secondary rounded-0">Deselect all</button>
+							</div>
+							<div class="mt-3">
+								<strong class="d-block text-left mb-3">Find variables containing:</strong>
+								<div class="row">
+									<div class="col-4">
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="filter" id="filter1" />
+											<label class="form-check-label" for="filter1"> text </label>
+										</div>
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="filter" id="filter2" />
+											<label class="form-check-label" for="filter2"> pattern </label>
+										</div>
+									</div>
+									<div class="col-8">
+										<div class="mb-3">
+											<input type="text" class="form-control" id="filter" />
+										</div>
+									</div>
+								</div>
+								<div class="buttons mt-3">
+									<button id="keep-variables" class="btn btn-secondary rounded-0">Keep</button>
+									<button id="drop-variables" class="btn btn-secondary rounded-0">Drop</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="tab-pane fade" id="v-pills-cases" role="tabpanel" aria-labelledby="v-pills-cases-tab">...</div>
+				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">...</div>
+			</div>
+			<div class="nav bg-secondary flex-column nav-pills ms-3 border-start pt-4" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="height: 100vh; width: 150px">
+				<button class="rounded-0 btn btn-secondary active" id="v-pills-convert-tab" data-bs-toggle="pill" data-bs-target="#v-pills-convert" type="button" role="tab" aria-controls="v-pills-convert" aria-selected="true">Convert</button>
+				<button class="rounded-0 btn btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
+				<button class="rounded-0 btn btn-secondary" id="v-pills-cases-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cases" type="button" role="tab" aria-controls="v-pills-cases" aria-selected="false">Cases</button>
+				<button class="rounded-0 btn btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
+				<div class="text-center flex">
+					<div class="align-self-end pb-3">
+						<img src="./src/assets/RODA.png" alt="poca" style="max-width: 50px" />
+					</div>
+				</div>
+				<div class="text-white text-center flex" style="font-size: 0.8rem">
+					<div class="align-self-end pb-3">
+						<a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br />
+						version 1.0
+					</div>
+				</div>
+			</div>
+		</div>
 
-                <div class="row align-items-center mt-5 mb-3">
-                    <div class="col-2 text-end">
-                        <label for="inputType" class="col-form-label">Input type</label>
-                    </div>
-                    <div class="col-8">
-                        <select class="form-select" id="inputType">
-                            <option value="none" selected>Select file type</option>
-                            <option value="ddi">DDI Codebook</option>
-                            <option value="excel">Excel</option>
-                            <option value="sas">SAS</option>
-                            <option value="spss">SPSS</option>
-                            <option value="stata">Stata</option>
-                            <option value="r">R</option>
-                        </select>
-                    </div>
-                    <div class="col-2"></div>
-                </div>
-                <div class="row align-items-center mb-5">
-                    <div class="col-2 text-end">
-                        <label for="fileFrom" class="col-form-label">Convert to</label>
-                    </div>
-                    <div class="col-8">
-                        <input type="input" readonly class="rounded-0 form-control" id="fileFrom">
-                        <!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
-                    </div>
-                    <div class="col-2">
-                        <span class="d-inline-block" tabindex="0" title="Select input type" id="fromTooltip">
-                        <button class="btn btn-secondary rounded-0" disabled id="selectFileFrom">Browse</button>
-                        </span>
-                    </div>
-                </div>
+		<!-- You can also require other files to run in this process -->
+		<!-- <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script> -->
+		<script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+		<script src="./dist/renderer.js"></script>
+		<script>
+			// let focusintext = "";
 
-                <hr>
+			// const fileTo = document.getElementById('fileTo');
 
-                <div class="row align-items-center mt-5 mb-3">
-                    <div class="col-2 text-end">
-                        <label for="outputType" class="col-form-label">Output type</label>
-                    </div>
-                    <div class="col-8">
-                        <select class="form-select" id="outputType">
-                            <option value="none" selected>Select file type</option>
-                            <option value="ddi">DDI Codebook</option>
-                            <option value="excel">Excel</option>
-                            <option value="sas">SAS</option>
-                            <option value="spss">SPSS</option>
-                            <option value="stata">Stata</option>
-                            <option value="r">R</option>
-                        </select>
-                    </div>
-                    <div class="col-2"></div>
-                </div>
-                <div class="row align-items-center mb-2">
-                    <div class="col-2 text-end">
-                        <label for="fileTo" class="col-form-label">Convert to</label>
-                    </div>
-                    <div class="col-8">
-                        <input type="input" readonly class="rounded-0 form-control" id="fileTo">
-                        <!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
-                    </div>
-                    <div class="col-2">
-                        <span class="d-inline-block" tabindex="0" title="Select output type" id="toTooltip">
-                        <button class="btn btn-secondary rounded-0" disabled id="selectFileTo">Browse</button>
-                        </span>
-                    </div>
-                </div>
-                <br>
-                <hr>
+			// fileTo.addEventListener('focusin', (event) => {
+			//     event.target.style.background = 'pink';
+			// });
 
-                <div class="row align-items-center mt-5">
-                    <div class="col-2 text-end">
-                   
-                    </div>
-                    <div class="col-8 text-center">
-                        <span class="d-inline-block" tabindex="0" title="Complete information before conversion" id="startConvertTooltip">
+			// fileTo.addEventListener('focusout', (event) => {
+			//     event.target.style.background = '';
+			// });
 
-                        <button class="btn btn-secondary rounded-0" disabled id="startConvert">Convert</button>
-                    </div>
-                    <div class="col-2">
-                    </div>
-                </div>
-               
+			// document.addEventListener('keydown', event => {
+			// 	if (event.keyCode == 13) { // enter
+			// 		// autentificaFunc();
+			//         document.activeElement.blur();
+			// 	}
+			// });
 
+			const inputType = document.getElementById("inputType");
+			const fileFrom = document.getElementById("fileFrom");
+			const selectFileFrom = document.getElementById("selectFileFrom");
+			const outputType = document.getElementById("outputType");
+			const fileTo = document.getElementById("fileTo");
+			const selectFileTo = document.getElementById("selectFileTo");
+			const startConvert = document.getElementById("startConvert");
 
-            </div>
-            <div class="tab-pane fade" id="v-pills-variables" role="tabpanel" aria-labelledby="v-pills-variables-tab">...</div>
-            <div class="tab-pane fade" id="v-pills-cases" role="tabpanel" aria-labelledby="v-pills-cases-tab">...</div>
-            <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">...</div>
-        </div>
-        <div class="nav bg-secondary flex-column nav-pills ms-3 border-start pt-4" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="height: 100vh; width: 150px;">
-            <button class="rounded-0 btn btn-secondary active" id="v-pills-convert-tab" data-bs-toggle="pill" data-bs-target="#v-pills-convert" type="button" role="tab" aria-controls="v-pills-convert" aria-selected="true">Convert</button>
-            <button class="rounded-0 btn btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
-            <button class="rounded-0 btn btn-secondary" id="v-pills-cases-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cases" type="button" role="tab" aria-controls="v-pills-cases" aria-selected="false">Cases</button>
-            <button class="rounded-0  btn btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto;" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
-            <div class="text-center flex">
-                <div class="align-self-end pb-3">
-                    <img src="./src/assets/RODA.png" alt="poca" style="max-width: 50px;">
-                </div>
-            </div>
-            <div class="text-white text-center flex" style="font-size: 0.8rem;">
-                <div class="align-self-end pb-3">
-                    <a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br>
-                    version 1.0
-                </div>
-            </div>
-        </div>
+			var changeOutputTypeOptions = function (inputTypeValue) {
+				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
 
+				let values = ["none", "ddi", "excel", "sas", "spss", "stata", "r"];
+				let texts = ["Select file type", "DDI Codebook", "Excel", "SAS", "SPSS", "Stata", "R"];
 
-    </div>
+				for (i = outputType.options.length - 1; i >= 0; i--) {
+					outputType.options[i] = null;
+				}
 
+				for (let i = 0; i < values.length; i++) {
+					if (values[i] != inputTypeValue || inputTypeValue == "none") {
+						let option = document.createElement("option");
+						option.setAttribute("value", values[i]);
+						option.text = texts[i];
 
+						if (values[i] == outputTypeValue) {
+							option.selected = true;
+						}
 
+						outputType.append(option);
+					}
+				}
 
+				outputType.dispatchEvent(new Event("change"));
+			};
 
-    <!-- You can also require other files to run in this process -->
-    <!-- <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script> -->
-    <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="./dist/renderer.js"></script>
-    <script>
+			inputType.addEventListener("change", () => {
+				fileFrom.value = "";
+				const inputTypeValue = inputType.options[inputType.selectedIndex].value;
+				if (inputTypeValue != "none") {
+					selectFileFrom.disabled = false;
+					fromTooltip.disable();
+				} else {
+					selectFileFrom.disabled = true;
+					fromTooltip.enable();
+				}
 
-        // let focusintext = "";
+				changeOutputTypeOptions(inputTypeValue);
+			});
 
-        // const fileTo = document.getElementById('fileTo');
+			outputType.addEventListener("change", () => {
+				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+				if (outputTypeValue != "none") {
+					selectFileTo.disabled = false;
+					toTooltip.disable();
+				} else {
+					selectFileTo.disabled = true;
+					toTooltip.enable();
+					startConvert.disabled = true;
+					startConvert.classList.remove("btn-success");
+					startConvert.classList.add("btn-secondary");
+					scTooltip.enable();
+				}
+			});
 
-        // fileTo.addEventListener('focusin', (event) => {
-        //     event.target.style.background = 'pink';
-        // });
+			fileTo.addEventListener("change", () => {
+				const inputTypeValue = inputType.options[inputType.selectedIndex].value;
+				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+				if (inputTypeValue != "none" && outputTypeValue != "none" && fileFrom.value != "" && fileTo.value != "") {
+					startConvert.disabled = false;
+					startConvert.classList.remove("btn-secondary");
+					startConvert.classList.add("btn-success");
+					scTooltip.disable();
+				} else {
+					startConvert.disabled = true;
+					startConvert.classList.remove("btn-success");
+					startConvert.classList.add("btn-secondary");
+					scTooltip.enable();
+				}
+			});
 
-        // fileTo.addEventListener('focusout', (event) => {
-        //     event.target.style.background = '';
-        // });
+			var fromTooltip = new bootstrap.Tooltip(document.getElementById("fromTooltip"), {
+				boundary: document.body, // or document.querySelector('#boundary')
+			});
 
-        // document.addEventListener('keydown', event => {
-		// 	if (event.keyCode == 13) { // enter
-		// 		// autentificaFunc();
-        //         document.activeElement.blur();
-		// 	}
-		// });
-        
-        const inputType = document.getElementById('inputType');
-        const fileFrom = document.getElementById('fileFrom');
-        const selectFileFrom = document.getElementById('selectFileFrom');
-        const outputType = document.getElementById('outputType');
-        const fileTo = document.getElementById('fileTo');
-        const selectFileTo = document.getElementById('selectFileTo');
-        const startConvert = document.getElementById('startConvert');
+			var toTooltip = new bootstrap.Tooltip(document.getElementById("toTooltip"), {
+				boundary: document.body, // or document.querySelector('#boundary')
+			});
 
-        var changeOutputTypeOptions = function(inputTypeValue) {
-
-            const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-            
-            let values = ['none', 'ddi', 'excel', 'sas', 'spss', 'stata', 'r'];
-            let texts = ['Select file type', 'DDI Codebook', 'Excel', 'SAS', 'SPSS', 'Stata', 'R'];
-            
-            for (i = outputType.options.length - 1; i >= 0; i--) {
-                outputType.options[i] = null;
-            }
-
-            for (let i = 0; i < values.length; i++) {
-                if (values[i] != inputTypeValue || inputTypeValue == 'none') {
-                    let option = document.createElement('option');
-                    option.setAttribute('value', values[i]);
-                    option.text = texts[i];
-                    
-                    if (values[i] == outputTypeValue) {
-                        option.selected = true;
-                    }
-
-                    outputType.append(option);
-                }
-            }
-
-            outputType.dispatchEvent(new Event('change'));
-            
-        }
-
-        inputType.addEventListener('change', () => {
-            fileFrom.value = "";
-            const inputTypeValue = inputType.options[inputType.selectedIndex].value;
-            if (inputTypeValue != 'none') {
-                selectFileFrom.disabled = false;
-                fromTooltip.disable();
-            } else {
-                selectFileFrom.disabled = true;
-                fromTooltip.enable();
-            }
-
-            changeOutputTypeOptions(inputTypeValue);
-        })
-
-        outputType.addEventListener('change', () => {
-            const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-            if (outputTypeValue != 'none') {
-                selectFileTo.disabled = false;
-                toTooltip.disable();
-            } else {
-                selectFileTo.disabled = true;
-                toTooltip.enable();startConvert.disabled = true;
-                startConvert.classList.remove('btn-success');
-                startConvert.classList.add('btn-secondary');
-                scTooltip.enable();
-            }
-        })
-
-        fileTo.addEventListener('change', () => {
-            const inputTypeValue = inputType.options[inputType.selectedIndex].value;
-            const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-            if (
-                inputTypeValue != 'none' &&
-                outputTypeValue != 'none' &&
-                fileFrom.value != "" && fileTo.value != ""
-            ) {
-                startConvert.disabled = false;
-                startConvert.classList.remove('btn-secondary');
-                startConvert.classList.add('btn-success');
-                scTooltip.disable();
-            }
-            else {
-                startConvert.disabled = true;
-                startConvert.classList.remove('btn-success');
-                startConvert.classList.add('btn-secondary');
-                scTooltip.enable();
-            }
-        })
-
-        var fromTooltip = new bootstrap.Tooltip(document.getElementById('fromTooltip'), {
-            boundary: document.body // or document.querySelector('#boundary')
-        })
-
-        var toTooltip = new bootstrap.Tooltip(document.getElementById('toTooltip'), {
-            boundary: document.body // or document.querySelector('#boundary')
-        })
-
-        var scTooltip = new bootstrap.Tooltip(document.getElementById('startConvertTooltip'), {
-            boundary: document.body // or document.querySelector('#boundary')
-        })
-
-    </script>
-</body>
-
+			var scTooltip = new bootstrap.Tooltip(document.getElementById("startConvertTooltip"), {
+				boundary: document.body, // or document.querySelector('#boundary')
+			});
+		</script>
+	</body>
 </html>

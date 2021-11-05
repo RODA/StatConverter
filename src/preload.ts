@@ -15,6 +15,31 @@ const inputOutput: InputOutputType = {
     fileToName: '',
 };
 
+const variabile = {
+  timpliber: {
+    label: "Prima variabila",
+    values: {
+      Da: 1,
+      Nu: 2,
+      "Nu stiu": -1,
+    },
+  },
+  gender: {
+    label: "A doua variabila",
+    values: {
+      M: 1,
+      F: 2,
+    },
+  },
+  timplucrat: {
+    label: "A doua variabila",
+    values: {
+      Minute: 1,
+      Ore: 2,
+    },
+  },
+};
+
 window.addEventListener('DOMContentLoaded', () => {
     // const replaceText = (selector: string, text: string) => {
     //     const element = document.getElementById(selector)
@@ -152,6 +177,11 @@ window.addEventListener('DOMContentLoaded', () => {
             fileTo.value = inputOutput.fileTo;
             fileTo.dispatchEvent(new Event("change"));
         }
-
     });
+
+    // =================================================
+    // ================= Variables =====================
+
+
+    
 }) 
