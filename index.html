@@ -10,6 +10,9 @@
 				outline: none;
 				box-shadow: none !important;
 			}
+			.activeVariable {
+				background-color: #ccc;
+			}
 		</style>
 	</head>
 
@@ -100,13 +103,13 @@
 					<div class="row align-items-center mt-3">
 						<div class="col-4 text-start">
 							<strong style="margin-left: 10px">Variables</strong>
-							<div style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 55px); overflow-y: scroll;"></div>
+							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 55px); overflow-y: scroll;padding: 5px 0px;"></div>
 						</div>
 						<div class="col-8">
 							<strong style="margin-left: 10px">Variable label</strong>
-							<div style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 75px"></div>
+							<div id="variable-label" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 75px"></div>
 							<strong class="d-block mt-3" style="margin-left: 10px">Value labels</strong>
-							<div style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 282px; overflow-y: scroll;"></div>
+							<div id="value-labels" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 282px; overflow-y: scroll;"></div>
 							<div class="buttons mt-3 text-center">
 								<button id="select-all-variables" class="btn btn-secondary rounded-0">Select all</button>
 								<button id="deselect-all-variables" class="btn btn-secondary rounded-0">Deselect all</button>
