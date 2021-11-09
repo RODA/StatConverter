@@ -5,7 +5,8 @@ import {
     app,
     BrowserWindow,
     ipcMain,
-    dialog
+    dialog,
+    shell
 } from 'electron';
 
 import * as path from "path";
@@ -227,6 +228,10 @@ app.whenReady().then(() => {
     ipcMain.on('sendCommand', (event, command) => {
         Rws.send(command);
     })
+
+    ipcMain.on("gotoRODA", () => {
+        shell.openExternal("http://www.roda.ro")
+    });
 
 
 

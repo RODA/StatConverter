@@ -50,6 +50,10 @@ window.addEventListener("DOMContentLoaded", () => {
 	//     replaceText(`${type}-version`, <any> process.versions[type as keyof NodeJS.ProcessVersions]);
 	// }
 
+	document.getElementById("gotoRODA")?.addEventListener("click", ()=> {
+		ipcRenderer.send("gotoRODA");
+	});
+
 	// TODO: change <const> to <let> when it will be used to subset data
 	const subset = "xyz";
 
