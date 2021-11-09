@@ -44,10 +44,11 @@ if (sum(installed) < length(packages)) {
                         objects <- ls(envir = .GlobalEnv)
 
                         if (length(objects) > 0) {
-                            toreturn$info <- RGUI_tryCatchWEM(RGUI_call())$visible
+                            # toreturn$info <- RGUI_tryCatchWEM(RGUI_call())$visible
+                            toreturn <- RGUI_tryCatchWEM(RGUI_variables())$visible
                         }
                         
-                        toreturn$console <- console
+                        # toreturn$console <- console
                         # print(console)
 
                         ws$send(
@@ -419,7 +420,6 @@ env$RGUI_import <- function(objlist) {
 
 env$RGUI_call <- function() {
     env <- as.environment("RGUI")
-
     toreturn <- list()
     
     objtype <- unlist(lapply(.GlobalEnv, function(x) {
@@ -503,7 +503,28 @@ env$RGUI_call <- function() {
     env$RGUI_hashes <- hashes # overwrite the hash information
     env$RGUI_objtype <- objtype
 
+    
     return(toreturn)
+}
+
+env$RGUI_variables <- function() {
+    return(lapply(.GlobalEnv[["xyz"]], function(x) {
+        values <- attr(x, "labels", exact = TRUE)
+        
+        na_values <- declared::missing_values(x)
+        if (is.null(na_values)) {
+            na_range <- declared::missing_range(x)
+            if (!is.null(na_range)) {
+                na_values <- as.numeric(values[values >= na_range[1] & values <= na_range[2]])
+            }
+        }
+
+        return(list(
+            label = attr(x, "label", exact = TRUE),
+            values = as.list(values),
+            missing = na_values
+        ))
+    }))
 }
 
 env$RGUI_tryCatchWEM <- function(evalparsed) {
