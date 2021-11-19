@@ -50,7 +50,7 @@ window.addEventListener("DOMContentLoaded", () => {
 	//     replaceText(`${type}-version`, <any> process.versions[type as keyof NodeJS.ProcessVersions]);
 	// }
 
-	document.getElementById("gotoRODA")?.addEventListener("click", ()=> {
+	document.getElementById("gotoRODA")?.addEventListener("click", () => {
 		ipcRenderer.send("gotoRODA");
 	});
 
@@ -130,8 +130,6 @@ window.addEventListener("DOMContentLoaded", () => {
 		fileTo.dispatchEvent(new Event("change"));
 	});
 
-
-
 	startConvert.addEventListener("click", function () {
 		ipcRenderer.send("sendCommand", "DDIwR::convert(" + subset + ', to = "' + inputOutput.fileTo + '", embed = TRUE)');
 	});
@@ -167,7 +165,6 @@ window.addEventListener("DOMContentLoaded", () => {
 	// =================================================
 	// ================= Variables =====================
 	ipcRenderer.on("sendCommand-reply", (event, data) => {
-
 		console.log(data);
 		const variabile = JSON.parse(data);
 		//load variable list
@@ -197,22 +194,22 @@ window.addEventListener("DOMContentLoaded", () => {
 
 				if (formCheck.classList.contains("activeVariable")) {
 					removeActive();
-					(<HTMLDivElement>document.getElementById('variable-label')).innerHTML = '';
-					(<HTMLDivElement>document.getElementById('value-labels')).innerHTML = '';
+					(<HTMLDivElement>document.getElementById("variable-label")).innerHTML = "";
+					(<HTMLDivElement>document.getElementById("value-labels")).innerHTML = "";
 				} else {
 					removeActive();
 					formCheck.classList.add("activeVariable");
 
-					const el = <HTMLInputElement>document.querySelector('.activeVariable input[type="checkbox"]')
+					const el = <HTMLInputElement>document.querySelector('.activeVariable input[type="checkbox"]');
 					// console.log(formCheck);
 					// console.log(variabile[formCheck.id]);
-					if(variabile[el.id]){
-						(<HTMLDivElement>document.getElementById('variable-label')).innerHTML = variabile[el.id].label;
-						const vals = <HTMLDivElement>document.getElementById('value-labels');
-						let valList = '';
-						if(Object.keys(variabile[el.id].values).length > 0){
-							for(const key in variabile[el.id].values){
-								valList += '<div class="ms-2">' + key + ' : ' + variabile[el.id].values[key] + '</div>';
+					if (variabile[el.id]) {
+						(<HTMLDivElement>document.getElementById("variable-label")).innerHTML = variabile[el.id].label;
+						const vals = <HTMLDivElement>document.getElementById("value-labels");
+						let valList = "";
+						if (Object.keys(variabile[el.id].values).length > 0) {
+							for (const key in variabile[el.id].values) {
+								valList += '<div class="ms-2">' + key + " : " + variabile[el.id].values[key] + "</div>";
 							}
 						}
 						vals.innerHTML = valList;
@@ -223,39 +220,43 @@ window.addEventListener("DOMContentLoaded", () => {
 
 		document.getElementById("select-all-variables")?.addEventListener("click", () => {
 			Object.keys(variabile).forEach((item) => {
-				( < HTMLInputElement > document.getElementById(item)).checked = true;
+				(<HTMLInputElement>document.getElementById(item)).checked = true;
 			});
 		});
 		document.getElementById("deselect-all-variables")?.addEventListener("click", () => {
 			Object.keys(variabile).forEach((item) => {
-				( < HTMLInputElement > document.getElementById(item)).checked = false;
+				(<HTMLInputElement>document.getElementById(item)).checked = false;
 			});
 		});
 
-
-		document.getElementById('keep-variables')?.addEventListener('click', () => {
-			let f1 = null;
-			document.getElementsByName('filterRadio').forEach( item => {
-				if((<HTMLInputElement>item).checked){
+		document.getElementById("keep-variables")?.addEventListener("click", () => {
+			let f1 = "";
+			document.getElementsByName("filterRadio").forEach((item) => {
+				if ((<HTMLInputElement>item).checked) {
 					f1 = (<HTMLInputElement>item).value;
 				}
 			});
 
-			const f2 = (<HTMLInputElement>document.getElementById('filterInput')).value;
+			const f2 = (<HTMLInputElement>document.getElementById("filterInput")).value;
 
-			console.log(f1);
-			console.log(f2);
-
-			if(!f1 || f2 == ''){
-				alert('Please select something!');
-			} else {
-				console.log('working...');
-				
-			}
-			
+			// console.log(f1);
+			// console.log(f2);
+			filterVar(variabile, f1, f2, true);
 		});
+		document.getElementById("drop-variables")?.addEventListener("click", () => {
+			let f1 = "";
+			document.getElementsByName("filterRadio").forEach((item) => {
+				if ((<HTMLInputElement>item).checked) {
+					f1 = (<HTMLInputElement>item).value;
+				}
+			});
 
+			const f2 = (<HTMLInputElement>document.getElementById("filterInput")).value;
 
+			// console.log(f1);
+			// console.log(f2);
+			filterVar(variabile, f1, f2, false);
+		});
 	});
 });
 
@@ -263,4 +264,43 @@ function removeActive() {
 	document.querySelectorAll("#variables .form-check").forEach((item) => {
 		item.classList.remove("activeVariable");
 	});
+}
+
+function filterVar(variabile: { [key: string]: { label: string; values: { [key: string]: string } } }, f1: string, f2: string, make: boolean) {
+	if (f1 == "" || f2 == "") {
+		alert("Please select something!");
+	} else {
+		console.log("working...");
+		if (f1 == "1") {
+			for (const key in variabile) {
+				if (key.indexOf(f2) != -1) {
+					(<HTMLInputElement>document.getElementById(key)).checked = make;
+				}
+			}
+		} else {
+			for (const key in variabile) {
+				// check pattern
+				if (f2.indexOf("*") != -1) {
+					// ends with
+					if (f2.slice(0, 1) == "*") {
+						const searchFor = f2.slice(-f2.length + 1);
+						if (key.slice(-searchFor.length) == searchFor) {
+							(<HTMLInputElement>document.getElementById(key)).checked = make;
+						}
+					}
+					// starts with
+					if (f2.slice(-1) == "*") {
+						const searchFor = f2.slice(0,-1);
+						console.log(searchFor);
+						
+						if (key.slice(0, searchFor.length) == searchFor) {
+							(<HTMLInputElement>document.getElementById(key)).checked = make;
+						}
+					}
+				} else {
+					alert("Wrong patern!");
+				}
+			}
+		}
+	}
 }
