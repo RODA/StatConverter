@@ -15,30 +15,30 @@ const inputOutput: InputOutputType = {
 	fileToName: "",
 };
 
-const variabile = {
-	timpliber: {
-		label: "Prima variabila",
-		values: {
-			Da: 1,
-			Nu: 2,
-			"Nu stiu": -1,
-		},
-	},
-	gender: {
-		label: "A doua variabila",
-		values: {
-			M: 1,
-			F: 2,
-		},
-	},
-	timplucrat: {
-		label: "A doua variabila",
-		values: {
-			Minute: 1,
-			Ore: 2,
-		},
-	},
-};
+// const variabile = {
+// 	timpliber: {
+// 		label: "Prima variabila",
+// 		values: {
+// 			Da: 1,
+// 			Nu: 2,
+// 			"Nu stiu": -1,
+// 		},
+// 	},
+// 	gender: {
+// 		label: "A doua variabila",
+// 		values: {
+// 			M: 1,
+// 			F: 2,
+// 		},
+// 	},
+// 	timplucrat: {
+// 		label: "A doua variabila",
+// 		values: {
+// 			Minute: 1,
+// 			Ore: 2,
+// 		},
+// 	},
+// };
 
 window.addEventListener("DOMContentLoaded", () => {
 	// const replaceText = (selector: string, text: string) => {
@@ -130,9 +130,7 @@ window.addEventListener("DOMContentLoaded", () => {
 		fileTo.dispatchEvent(new Event("change"));
 	});
 
-	ipcRenderer.on("sendCommand-reply", (event, data) => {
-		console.log(data);
-	});
+
 
 	startConvert.addEventListener("click", function () {
 		ipcRenderer.send("sendCommand", "DDIwR::convert(" + subset + ', to = "' + inputOutput.fileTo + '", embed = TRUE)');
@@ -168,50 +166,96 @@ window.addEventListener("DOMContentLoaded", () => {
 
 	// =================================================
 	// ================= Variables =====================
+	ipcRenderer.on("sendCommand-reply", (event, data) => {
 
-	//load variable list
-	const variablesList = document.getElementById("variables");
-	for (const key in variabile) {
-		const formCheck = document.createElement("div");
-		formCheck.classList.add("form-check");
-		formCheck.style.marginLeft = "5px";
-		formCheck.style.cursor = "pointer";
+		console.log(data);
+		const variabile = JSON.parse(data);
+		//load variable list
+		const variablesList = document.getElementById("variables");
+		for (const key in variabile) {
+			const formCheck = document.createElement("div");
+			formCheck.classList.add("form-check");
+			formCheck.style.marginLeft = "5px";
+			formCheck.style.cursor = "pointer";
 
-		const elInput = document.createElement("input");
-		elInput.classList.add("form-check-input");
-		elInput.type = "checkbox";
-		// TODO -- is this okay? are the variables unique?
-		elInput.id = key;
-		const elLabel = document.createElement("label");
-		elLabel.classList.add("form-check-label");
-		elLabel.htmlFor = key;
-		elLabel.innerHTML = key;
-		formCheck.appendChild(elInput);
-		formCheck.appendChild(elLabel);
-		// console.log(formCheck);
-		variablesList?.appendChild(formCheck);
+			const elInput = document.createElement("input");
+			elInput.classList.add("form-check-input");
+			elInput.type = "checkbox";
+			// TODO -- is this okay? are the variables unique?
+			elInput.id = key;
+			const elLabel = document.createElement("label");
+			elLabel.classList.add("form-check-label");
+			// elLabel.htmlFor = key;
+			elLabel.innerHTML = key;
+			formCheck.appendChild(elInput);
+			formCheck.appendChild(elLabel);
+			// console.log(formCheck);
+			variablesList?.appendChild(formCheck);
 
-		formCheck.addEventListener("click", () => {
-            console.log(formCheck.classList.contains("activeVariable"));
-            
-			if (formCheck.classList.contains("activeVariable")) {
-                removeActive();
+			formCheck.addEventListener("click", () => {
+				// console.log(formCheck.classList.contains("activeVariable"));
+
+				if (formCheck.classList.contains("activeVariable")) {
+					removeActive();
+					(<HTMLDivElement>document.getElementById('variable-label')).innerHTML = '';
+					(<HTMLDivElement>document.getElementById('value-labels')).innerHTML = '';
+				} else {
+					removeActive();
+					formCheck.classList.add("activeVariable");
+
+					const el = <HTMLInputElement>document.querySelector('.activeVariable input[type="checkbox"]')
+					// console.log(formCheck);
+					// console.log(variabile[formCheck.id]);
+					if(variabile[el.id]){
+						(<HTMLDivElement>document.getElementById('variable-label')).innerHTML = variabile[el.id].label;
+						const vals = <HTMLDivElement>document.getElementById('value-labels');
+						let valList = '';
+						if(Object.keys(variabile[el.id].values).length > 0){
+							for(const key in variabile[el.id].values){
+								valList += '<div class="ms-2">' + key + ' : ' + variabile[el.id].values[key] + '</div>';
+							}
+						}
+						vals.innerHTML = valList;
+					}
+				}
+			});
+		}
+
+		document.getElementById("select-all-variables")?.addEventListener("click", () => {
+			Object.keys(variabile).forEach((item) => {
+				( < HTMLInputElement > document.getElementById(item)).checked = true;
+			});
+		});
+		document.getElementById("deselect-all-variables")?.addEventListener("click", () => {
+			Object.keys(variabile).forEach((item) => {
+				( < HTMLInputElement > document.getElementById(item)).checked = false;
+			});
+		});
+
+
+		document.getElementById('keep-variables')?.addEventListener('click', () => {
+			let f1 = null;
+			document.getElementsByName('filterRadio').forEach( item => {
+				if((<HTMLInputElement>item).checked){
+					f1 = (<HTMLInputElement>item).value;
+				}
+			});
+
+			const f2 = (<HTMLInputElement>document.getElementById('filterInput')).value;
+
+			console.log(f1);
+			console.log(f2);
+
+			if(!f1 || f2 == ''){
+				alert('Please select something!');
 			} else {
-				removeActive();
-				formCheck.classList.add("activeVariable");
+				console.log('working...');
+				
 			}
+			
 		});
-	}
 
-	document.getElementById("select-all-variables")?.addEventListener("click", () => {
-		Object.keys(variabile).forEach((item) => {
-			(<HTMLInputElement>document.getElementById(item)).checked = true;
-		});
-	});
-	document.getElementById("deselect-all-variables")?.addEventListener("click", () => {
-		Object.keys(variabile).forEach((item) => {
-			(<HTMLInputElement>document.getElementById(item)).checked = false;
-		});
+
 	});
 });
 
