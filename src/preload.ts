@@ -166,7 +166,8 @@ window.addEventListener("DOMContentLoaded", () => {
 	// ================= Variables =====================
 	ipcRenderer.on("sendCommand-reply", (event, data) => {
 		console.log(data);
-		const variabile = JSON.parse(data);
+		const response = JSON.parse(data);
+		const variabile = response.variables;
 		//load variable list
 		const variablesList = document.getElementById("variables");
 		for (const key in variabile) {
@@ -178,6 +179,7 @@ window.addEventListener("DOMContentLoaded", () => {
 			const elInput = document.createElement("input");
 			elInput.classList.add("form-check-input");
 			elInput.type = "checkbox";
+			elInput.checked = true;
 			// TODO -- is this okay? are the variables unique?
 			elInput.id = key;
 			const elLabel = document.createElement("label");

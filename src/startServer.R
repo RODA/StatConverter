@@ -27,7 +27,7 @@ if (sum(installed) < length(packages)) {
                     #     eval(parse(text = message), envir = .GlobalEnv)
                     # } else {
                         
-                        console <- RGUI_tryCatchWEM(
+                        toreturn <- RGUI_tryCatchWEM(
                             # I have my own function RGUI_evalparse()
                             # but don't remember why I need that function
                             eval(
@@ -36,19 +36,23 @@ if (sum(installed) < length(packages)) {
                             )
                         )
 
-                        if (length(console) == 0) {
-                            console <- list(visible = c())
+                        if (length(toreturn) == 0) {
+                            toreturn <- list(error = "")
+                        }
+                        else {
+                            toreturn$visible <- NULL
+                            if (is.null(toreturn$error)) {
+                                toreturn.error <- ""
+                            }
                         }
 
-                        toreturn <- list()
                         objects <- ls(envir = .GlobalEnv)
 
                         if (length(objects) > 0) {
                             # toreturn$info <- RGUI_tryCatchWEM(RGUI_call())$visible
-                            toreturn <- RGUI_tryCatchWEM(RGUI_variables())$visible
+                            toreturn$variables <- RGUI_tryCatchWEM(RGUI_variables())$visible
                         }
                         
-                        # toreturn$console <- console
                         # print(console)
 
                         ws$send(
@@ -519,9 +523,12 @@ env$RGUI_variables <- function() {
             }
         }
 
+        nms <- names(values)
+        names(nms) <- values
+
         return(list(
             label = attr(x, "label", exact = TRUE),
-            values = as.list(values),
+            values = as.list(nms),
             missing = na_values
         ))
     }))
