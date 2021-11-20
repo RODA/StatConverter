@@ -165,7 +165,7 @@ window.addEventListener("DOMContentLoaded", () => {
 	// =================================================
 	// ================= Variables =====================
 	ipcRenderer.on("sendCommand-reply", (event, data) => {
-		console.log(data);
+		// console.log(data);
 		const response = JSON.parse(data);
 		const variabile = response.variables;
 		//load variable list
