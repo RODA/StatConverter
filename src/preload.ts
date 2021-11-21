@@ -280,8 +280,8 @@ function filterVar(variables: { [key: string]: { label: string; values: { [key: 
 				}
 			}
 		} else {
-			if (f2.indexOf("*") != -1) {
-				alert("Pattern should include a star sign *");
+			if (f2.indexOf("*") == -1) {
+				alert("Pattern should include a star sign * at the beginning or at the end");
 			} else {
 				// check pattern
 				// ends with
