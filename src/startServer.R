@@ -42,7 +42,7 @@ if (sum(installed) < length(packages)) {
                         else {
                             toreturn$visible <- NULL
                             if (is.null(toreturn$error)) {
-                                toreturn.error <- ""
+                                toreturn$error <- ""
                             }
                         }
 

@@ -240,13 +240,12 @@ const start_R_server = function (R_path: string): void {
 			// });
 
 			Rws.addEventListener("message", function (e) {
-                if (e.data.error && e.data.error != "") {
-					dialog.showErrorBox("R says:", e.data.error);
+				const response = JSON.parse(e.data);
+				if (response.error && response.error[0] != "") {
+					dialog.showErrorBox("R says:", response.error[0]);
 				} else {
-					mainWindow.webContents.send("sendCommand-reply", e.data);
+					mainWindow.webContents.send("sendCommand-reply", response.variables);
 				}
-				// mainWindow.webContents.send("sendCommand-reply", e.data);
-				// event.reply('sendCommand-reply', e.data);
 			});
 		} else if (data.includes("Package(s) not installed")) {
 			// server_started = false;

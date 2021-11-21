@@ -15,7 +15,7 @@ const inputOutput: InputOutputType = {
 	fileToName: "",
 };
 
-// const variabile = {
+// const variables = {
 // 	timpliber: {
 // 		label: "Prima variabila",
 // 		values: {
@@ -164,13 +164,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
 	// =================================================
 	// ================= Variables =====================
-	ipcRenderer.on("sendCommand-reply", (event, data) => {
-		// console.log(data);
-		const response = JSON.parse(data);
-		const variabile = response.variables;
+	ipcRenderer.on("sendCommand-reply", (event, variables) => {
+		
 		//load variable list
 		const variablesList = document.getElementById("variables");
-		for (const key in variabile) {
+		for (const key in variables) {
 			const formCheck = document.createElement("div");
 			formCheck.classList.add("form-check");
 			formCheck.style.marginLeft = "5px";
@@ -204,14 +202,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
 					const el = <HTMLInputElement>document.querySelector('.activeVariable input[type="checkbox"]');
 					// console.log(formCheck);
-					// console.log(variabile[formCheck.id]);
-					if (variabile[el.id]) {
-						(<HTMLDivElement>document.getElementById("variable-label")).innerHTML = variabile[el.id].label;
+					// console.log(variables[formCheck.id]);
+					if (variables[el.id]) {
+						(<HTMLDivElement>document.getElementById("variable-label")).innerHTML = variables[el.id].label;
 						const vals = <HTMLDivElement>document.getElementById("value-labels");
 						let valList = "";
-						if (Object.keys(variabile[el.id].values).length > 0) {
-							for (const key in variabile[el.id].values) {
-								valList += '<div class="ms-2">' + key + " : " + variabile[el.id].values[key] + "</div>";
+						if (Object.keys(variables[el.id].values).length > 0) {
+							for (const key in variables[el.id].values) {
+								valList += '<div class="ms-2">' + key + " : " + variables[el.id].values[key] + "</div>";
 							}
 						}
 						vals.innerHTML = valList;
@@ -221,12 +219,13 @@ window.addEventListener("DOMContentLoaded", () => {
 		}
 
 		document.getElementById("select-all-variables")?.addEventListener("click", () => {
-			Object.keys(variabile).forEach((item) => {
+			Object.keys(variables).forEach((item) => {
 				(<HTMLInputElement>document.getElementById(item)).checked = true;
 			});
 		});
+
 		document.getElementById("deselect-all-variables")?.addEventListener("click", () => {
-			Object.keys(variabile).forEach((item) => {
+			Object.keys(variables).forEach((item) => {
 				(<HTMLInputElement>document.getElementById(item)).checked = false;
 			});
 		});
@@ -243,8 +242,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
 			// console.log(f1);
 			// console.log(f2);
-			filterVar(variabile, f1, f2, true);
+			filterVar(variables, f1, f2, true);
 		});
+
 		document.getElementById("drop-variables")?.addEventListener("click", () => {
 			let f1 = "";
 			document.getElementsByName("filterRadio").forEach((item) => {
@@ -257,7 +257,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 			// console.log(f1);
 			// console.log(f2);
-			filterVar(variabile, f1, f2, false);
+			filterVar(variables, f1, f2, false);
 		});
 	});
 });
@@ -268,19 +268,19 @@ function removeActive() {
 	});
 }
 
-function filterVar(variabile: { [key: string]: { label: string; values: { [key: string]: string } } }, f1: string, f2: string, make: boolean) {
+function filterVar(variables: { [key: string]: { label: string; values: { [key: string]: string } } }, f1: string, f2: string, make: boolean) {
 	if (f1 == "" || f2 == "") {
 		alert("Please select something!");
 	} else {
 		console.log("working...");
 		if (f1 == "1") {
-			for (const key in variabile) {
+			for (const key in variables) {
 				if (key.indexOf(f2) != -1) {
 					(<HTMLInputElement>document.getElementById(key)).checked = make;
 				}
 			}
 		} else {
-			for (const key in variabile) {
+			for (const key in variables) {
 				// check pattern
 				if (f2.indexOf("*") != -1) {
 					// ends with
