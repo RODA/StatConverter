@@ -269,8 +269,8 @@ function removeActive() {
 }
 
 function filterVar(variables: { [key: string]: { label: string; values: { [key: string]: string } } }, f1: string, f2: string, make: boolean) {
-	if (f1 == "" || f2 == "") {
-		alert("Please select something!");
+	if (f2 == "") {
+		alert("Text or pattern should be specified.");
 	} else {
 		console.log("working...");
 		if (f1 == "1") {
@@ -280,27 +280,28 @@ function filterVar(variables: { [key: string]: { label: string; values: { [key: 
 				}
 			}
 		} else {
-			for (const key in variables) {
+			if (f2.indexOf("*") != -1) {
+				alert("Pattern should include a star sign *");
+			} else {
 				// check pattern
-				if (f2.indexOf("*") != -1) {
-					// ends with
-					if (f2.slice(0, 1) == "*") {
-						const searchFor = f2.slice(-f2.length + 1);
+				// ends with
+				if (f2.slice(0, 1) == "*") {
+					const searchFor = f2.slice(-f2.length + 1);
+					for (const key in variables) {
 						if (key.slice(-searchFor.length) == searchFor) {
 							(<HTMLInputElement>document.getElementById(key)).checked = make;
 						}
 					}
-					// starts with
-					if (f2.slice(-1) == "*") {
-						const searchFor = f2.slice(0,-1);
-						console.log(searchFor);
-						
+				}
+				// starts with
+				if (f2.slice(-1) == "*") {
+					const searchFor = f2.slice(0,-1);
+					console.log(searchFor);
+					for (const key in variables) {
 						if (key.slice(0, searchFor.length) == searchFor) {
 							(<HTMLInputElement>document.getElementById(key)).checked = make;
 						}
 					}
-				} else {
-					alert("Wrong patern!");
 				}
 			}
 		}
