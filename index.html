@@ -19,6 +19,9 @@
 	<body style="background: white">
 		<div class="d-flex align-items-start">
 			<div class="tab-content" id="v-pills-tabContent" style="width: 858px">
+
+
+				<!-- ========= Convert ========= -->
 				<div class="tab-pane fade show active p-4" id="v-pills-convert" role="tabpanel" aria-labelledby="v-pills-convert-tab">
 					<div class="row align-items-center mt-5 mb-3">
 						<div class="col-2 text-end">
@@ -104,8 +107,9 @@
 				<div class="tab-pane fade" id="v-pills-variables" role="tabpanel" aria-labelledby="v-pills-variables-tab">
 					<div class="row align-items-center mt-3">
 						<div class="col-4 text-start">
-							<strong style="margin-left: 10px">Variables</strong>
-							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 55px); overflow-y: scroll;padding: 5px 0px;"></div>
+							<strong style="margin-left: 10px">Find variables:</strong>
+							<input type="text" class="form-control ms-2 mb-2" id="varsearch" style="width: 100%; left: 15px"/>
+							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 100px); overflow-y: scroll;padding: 5px 0px;"></div>
 						</div>
 						<div class="col-8">
 							<strong style="margin-left: 10px">Variable label</strong>
@@ -117,7 +121,7 @@
 								<button id="deselect-all-variables" class="btn btn-secondary rounded-0">Deselect all</button>
 							</div>
 							<div class="mt-3">
-								<strong class="d-block text-left mb-3">Find variables containing:</strong>
+								<strong class="d-block text-left mb-3">Variables containing:</strong>
 								<div class="row">
 									<div class="col-4">
 										<div class="form-check">
@@ -151,6 +155,8 @@
 				<!-- ========= Settings ========= -->
 				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">...</div>
 			</div>
+
+
 			<div class="nav bg-secondary flex-column nav-pills ms-3 border-start pt-4" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="height: 100vh; width: 150px">
 				<button class="rounded-0 btn btn-secondary active" id="v-pills-convert-tab" data-bs-toggle="pill" data-bs-target="#v-pills-convert" type="button" role="tab" aria-controls="v-pills-convert" aria-selected="true">Convert</button>
 				<button class="rounded-0 btn btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
