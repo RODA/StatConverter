@@ -54,8 +54,18 @@ window.addEventListener("DOMContentLoaded", () => {
 		ipcRenderer.send("gotoRODA");
 	});
 
-	// TODO: change <const> to <let> when it will be used to subset data
-	const subset = "xyz";
+	let dataset = "dataset";
+	let all_vars_selected = true;
+	let variables: {
+		[key: string]: {
+			label: [string];
+			values: { 
+				[key: string]: [string]
+			},
+			missing: [string],
+			selected: [boolean]
+		}
+	} = {};
 
 	const inputType = <HTMLSelectElement>document.getElementById("inputType");
 	const outputType = <HTMLSelectElement>document.getElementById("outputType");
@@ -78,7 +88,7 @@ window.addEventListener("DOMContentLoaded", () => {
 		inputOutput.fileFromDir = io.fileFromDir;
 		inputOutput.fileFromName = io.fileFromName;
 
-		ipcRenderer.send("sendCommand", 'xyz <- DDIwR::convert("' + io.fileFrom + '", declared = TRUE)');
+		ipcRenderer.send("sendCommand", 'dataset <- DDIwR::convert("' + io.fileFrom + '", declared = TRUE)');
 
 		fileFrom.value = io.fileFrom;
 
@@ -131,7 +141,46 @@ window.addEventListener("DOMContentLoaded", () => {
 	});
 
 	startConvert.addEventListener("click", function () {
-		ipcRenderer.send("sendCommand", "DDIwR::convert(" + subset + ', to = "' + inputOutput.fileTo + '", embed = TRUE)');
+		const indices = [];
+		let i = 1;
+		for (const key in variables) {
+			if (!variables[key].selected[0] && all_vars_selected) {
+				indices.push(i);
+			}
+			
+			if (variables[key].selected[0] && !all_vars_selected) {
+				indices.push(i);
+			}
+
+			i += 1;
+		}
+
+		if (indices.length == 0 && !all_vars_selected) {
+			//
+		}
+		else {
+			dataset = "dataset";
+			const subset = ""; // for case selection: document.getElementById("blah").value;
+			let select = "";
+			if (indices.length > 0) {
+				select = (all_vars_selected ? "-" : "") + "c(" + helpers.paste(indices, {sep: ","}) + ")";
+			}
+
+			if (subset != "" || select != "") {
+				dataset = "subset(" + dataset;
+				if (subset != "") {
+					dataset += ", subset = " + subset;
+				}
+
+				if (select != "") {
+					dataset += ", select = " + select;
+				}
+
+				dataset += ")";
+			}
+			
+			ipcRenderer.send("sendCommand", "DDIwR::convert(" + dataset + ', to = "' + inputOutput.fileTo + '", embed = TRUE)');
+		}
 	});
 
 	inputType.addEventListener("change", function () {
@@ -164,10 +213,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
 	// =================================================
 	// ================= Variables =====================
-	ipcRenderer.on("sendCommand-reply", (event, variables) => {
+	ipcRenderer.on("sendCommand-reply", (event, response) => {
 		
+		variables = response.variables;
 		//load variable list
 		const variablesList = document.getElementById("variables");
+		all_vars_selected = true;
+
 		for (const key in variables) {
 			const formCheck = document.createElement("div");
 			formCheck.classList.add("form-check");
@@ -204,7 +256,7 @@ window.addEventListener("DOMContentLoaded", () => {
 					// console.log(formCheck);
 					// console.log(variables[formCheck.id]);
 					if (variables[el.id]) {
-						(<HTMLDivElement>document.getElementById("variable-label")).innerHTML = variables[el.id].label;
+						(<HTMLDivElement>document.getElementById("variable-label")).innerHTML = variables[el.id].label[0];
 						const vals = <HTMLDivElement>document.getElementById("value-labels");
 						let valList = "";
 						if (Object.keys(variables[el.id].values).length > 0) {
@@ -216,18 +268,26 @@ window.addEventListener("DOMContentLoaded", () => {
 					}
 				}
 			});
+
+			elInput.addEventListener("click", () => {
+				variables[key].selected[0] = elInput.checked;
+			})
 		}
 
 		document.getElementById("select-all-variables")?.addEventListener("click", () => {
 			Object.keys(variables).forEach((item) => {
 				(<HTMLInputElement>document.getElementById(item)).checked = true;
+				variables[item].selected[0] = true;
 			});
+			all_vars_selected = true;
 		});
 
 		document.getElementById("deselect-all-variables")?.addEventListener("click", () => {
 			Object.keys(variables).forEach((item) => {
 				(<HTMLInputElement>document.getElementById(item)).checked = false;
+				variables[item].selected[0] = false;
 			});
+			all_vars_selected = false;
 		});
 
 		document.getElementById("keep-variables")?.addEventListener("click", () => {
@@ -268,7 +328,10 @@ function removeActive() {
 	});
 }
 
-function filterVar(variables: { [key: string]: { label: string; values: { [key: string]: string } } }, f1: string, f2: string, make: boolean) {
+function filterVar(
+	variables: { [key: string]: { label: [string]; values: { [key: string]: [string] }, missing: [string], selected: [boolean] } },
+	f1: string, f2: string, make: boolean
+) {
 	if (f2 == "") {
 		alert("Text or pattern should be specified.");
 	} else {
@@ -277,6 +340,7 @@ function filterVar(variables: { [key: string]: { label: string; values: { [key: 
 			for (const key in variables) {
 				if (key.indexOf(f2) != -1) {
 					(<HTMLInputElement>document.getElementById(key)).checked = make;
+					variables[key].selected[0] = make;
 				}
 			}
 		} else {
@@ -290,6 +354,7 @@ function filterVar(variables: { [key: string]: { label: string; values: { [key: 
 					for (const key in variables) {
 						if (key.slice(-searchFor.length) == searchFor) {
 							(<HTMLInputElement>document.getElementById(key)).checked = make;
+							variables[key].selected[0] = make;
 						}
 					}
 				}
@@ -300,6 +365,7 @@ function filterVar(variables: { [key: string]: { label: string; values: { [key: 
 					for (const key in variables) {
 						if (key.slice(0, searchFor.length) == searchFor) {
 							(<HTMLInputElement>document.getElementById(key)).checked = make;
+							variables[key].selected[0] = make;
 						}
 					}
 				}

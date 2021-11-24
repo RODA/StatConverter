@@ -244,7 +244,7 @@ const start_R_server = function (R_path: string): void {
 				if (response.error && response.error[0] != "") {
 					dialog.showErrorBox("R says:", response.error[0]);
 				} else {
-					mainWindow.webContents.send("sendCommand-reply", response.variables);
+					mainWindow.webContents.send("sendCommand-reply", response);
 				}
 			});
 		} else if (data.includes("Package(s) not installed")) {

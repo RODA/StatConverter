@@ -512,7 +512,7 @@ env$RGUI_call <- function() {
 }
 
 env$RGUI_variables <- function() {
-    return(lapply(.GlobalEnv[["xyz"]], function(x) {
+    return(lapply(.GlobalEnv[["dataset"]], function(x) {
         values <- attr(x, "labels", exact = TRUE)
         
         na_values <- declared::missing_values(x)
@@ -529,7 +529,8 @@ env$RGUI_variables <- function() {
         return(list(
             label = attr(x, "label", exact = TRUE),
             values = as.list(nms),
-            missing = na_values
+            missing = as.character(na_values),
+            selected = TRUE
         ))
     }))
 }
