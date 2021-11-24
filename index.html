@@ -103,13 +103,13 @@
 					<div class="row align-items-center mt-3">
 						<div class="col-4 text-start">
 							<strong style="margin-left: 10px">Variables</strong>
-							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 55px); overflow-y: scroll;padding: 5px 0px;"></div>
+							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 55px); overflow-y: scroll; padding: 5px 0px"></div>
 						</div>
 						<div class="col-8">
 							<strong style="margin-left: 10px">Variable label</strong>
 							<div id="variable-label" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 75px"></div>
 							<strong class="d-block mt-3" style="margin-left: 10px">Value labels</strong>
-							<div id="value-labels" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 282px; overflow-y: scroll;"></div>
+							<div id="value-labels" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 282px; overflow-y: scroll"></div>
 							<div class="buttons mt-3 text-center">
 								<button id="select-all-variables" class="btn btn-secondary rounded-0">Select all</button>
 								<button id="deselect-all-variables" class="btn btn-secondary rounded-0">Deselect all</button>
@@ -141,7 +141,134 @@
 						</div>
 					</div>
 				</div>
-				<div class="tab-pane fade" id="v-pills-cases" role="tabpanel" aria-labelledby="v-pills-cases-tab">...</div>
+				<!-- ========= Cases ========= -->
+				<div class="tab-pane fade" id="v-pills-cases" role="tabpanel" aria-labelledby="v-pills-cases-tab">
+					<div class="row mt-5 px-4">
+						<div class="col-5">
+							<h5 class="text-center mb-5">Read</h5>
+							<div class="row">
+								<div class="col-4">
+									<input type="input" class="rounded-0 form-control" id="noLinesToSkip" />
+								</div>
+								<div class="col-8">
+									<p>Number of lines to skip before reading the data</p>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-4">
+									<input type="input" class="rounded-0 form-control" id="maxLineToRead" />
+								</div>
+								<div class="col-8">
+									<p>Maximum number of lines to read</p>
+								</div>
+							</div>
+							<hr />
+							<p><strong>General options</strong></p>
+							<div class="row">
+								<div class="col-4">
+									<select class="form-select" id="fileEncoding">
+										<option value="utf8" selected>UTF8</option>
+									</select>
+								</div>
+								<div class="col-8">
+									<label class="mt-2" for="fileEncoding">File encoding</label>
+								</div>
+							</div>
+						</div>
+						<div class="col-1">
+							<div style="width: 50%; display: inline-block; height: 100%; margin: 0 auto; border-right: 1px solid #ccc"></div>
+						</div>
+						<div class="col-6">
+							<h5 class="text-center mb-5">Write</h5>
+							<div class="row mb-4">
+								<div class="col-8">
+									<p>Stata version</p>
+								</div>
+								<div class="col-4">
+									<select class="form-select" id="stataVersion">
+										<option value="14" selected>14</option>
+										<option value="13">13</option>
+										<option value="12">12</option>
+										<option value="11">11</option>
+										<option value="10">10</option>
+									</select>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-7">
+									<p>Convert character categories to numeric categories</p>
+								</div>
+								<div class="col-5 text-center">
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="convertCharacterToNumeric" id="convertCharacterToNumeric1" value="yes" checked />
+										<label class="form-check-label" for="convertCharacterToNumeric1">Yes</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="convertCharacterToNumeric" id="convertCharacterToNumeric2" value="no" />
+										<label class="form-check-label" for="convertCharacterToNumeric2">No</label>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-7">
+									<p>Recode Stata missing values to real numbers</p>
+								</div>
+								<div class="col-5 text-center">
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="recodeMissingValues" id="recodeMissingValues" value="yes" checked />
+										<label class="form-check-label" for="recodeMissingValues1">Yes</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="recodeMissingValues" id="recodeMissingValues2" value="no" />
+										<label class="form-check-label" for="recodeMissingValues2">No</label>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-7">
+									<p>Convert to a declared dataset in R</p>
+								</div>
+								<div class="col-5 text-center">
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="convertTODeclaredDataset" id="convertTODeclaredDataset" value="yes" checked />
+										<label class="form-check-label" for="convertTODeclaredDataset1">Yes</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="convertTODeclaredDataset" id="convertTODeclaredDataset2" value="no" />
+										<label class="form-check-label" for="convertTODeclaredDataset2">No</label>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-3">
+								<div class="col-7">
+									<p>Embed the CSV file into the DDI codebook</p>
+								</div>
+								<div class="col-5 text-center">
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="embetCSVFileToDDI" id="embetCSVFileToDDI" value="yes" checked />
+										<label class="form-check-label" for="embetCSVFileToDDI1">Yes</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" name="embetCSVFileToDDI" id="embetCSVFileToDDI2" value="no" />
+										<label class="form-check-label" for="embetCSVFileToDDI2">No</label>
+									</div>
+								</div>
+							</div>
+							<div class="row mb-4">
+								<div class="col-8">
+									<p>End of line for the DDI XML file</p>
+								</div>
+								<div class="col-4">
+									<select class="form-select" id="stataVersion">
+										<option value="macos" selected>MacOS</option>
+										<option value="linux">Linux</option>
+										<option value="windows">Windows</option>									
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">...</div>
 			</div>
 			<div class="nav bg-secondary flex-column nav-pills ms-3 border-start pt-4" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="height: 100vh; width: 150px">
@@ -151,7 +278,7 @@
 				<button class="rounded-0 btn btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
 				<div class="text-center flex">
 					<div class="align-self-end pb-3">
-						<a id="gotoRODA" href="#"><img src="./src/assets/RODA.png" alt="RODA" style="max-width: 50px;"></a>
+						<a id="gotoRODA" href="#"><img src="./src/assets/RODA.png" alt="RODA" style="max-width: 50px" /></a>
 					</div>
 				</div>
 				<div class="text-white text-center flex" style="font-size: 0.8rem">
