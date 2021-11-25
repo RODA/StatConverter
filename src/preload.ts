@@ -59,12 +59,12 @@ window.addEventListener("DOMContentLoaded", () => {
 	let variables: {
 		[key: string]: {
 			label: [string];
-			values: { 
-				[key: string]: [string]
-			},
-			missing: [string],
-			selected: [boolean]
-		}
+			values: {
+				[key: string]: [string];
+			};
+			missing: [string];
+			selected: [boolean];
+		};
 	} = {};
 
 	const inputType = <HTMLSelectElement>document.getElementById("inputType");
@@ -147,7 +147,7 @@ window.addEventListener("DOMContentLoaded", () => {
 			if (!variables[key].selected[0] && all_vars_selected) {
 				indices.push(i);
 			}
-			
+
 			if (variables[key].selected[0] && !all_vars_selected) {
 				indices.push(i);
 			}
@@ -157,13 +157,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
 		if (indices.length == 0 && !all_vars_selected) {
 			//
-		}
-		else {
+		} else {
 			dataset = "dataset";
 			const subset = ""; // for case selection: document.getElementById("blah").value;
 			let select = "";
 			if (indices.length > 0) {
-				select = (all_vars_selected ? "-" : "") + "c(" + helpers.paste(indices, {sep: ","}) + ")";
+				select = (all_vars_selected ? "-" : "") + "c(" + helpers.paste(indices, { sep: "," }) + ")";
 			}
 
 			if (subset != "" || select != "") {
@@ -178,7 +177,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 				dataset += ")";
 			}
-			
+
 			ipcRenderer.send("sendCommand", "DDIwR::convert(" + dataset + ', to = "' + inputOutput.fileTo + '", embed = TRUE)');
 		}
 	});
@@ -214,7 +213,6 @@ window.addEventListener("DOMContentLoaded", () => {
 	// =================================================
 	// ================= Variables =====================
 	ipcRenderer.on("sendCommand-reply", (event, response) => {
-		
 		variables = response.variables;
 		//load variable list
 		const variablesList = document.getElementById("variables");
@@ -225,6 +223,7 @@ window.addEventListener("DOMContentLoaded", () => {
 			formCheck.classList.add("form-check");
 			formCheck.style.marginLeft = "5px";
 			formCheck.style.cursor = "pointer";
+			formCheck.id = "div-" + key;
 
 			const elInput = document.createElement("input");
 			elInput.classList.add("form-check-input");
@@ -271,8 +270,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
 			elInput.addEventListener("click", () => {
 				variables[key].selected[0] = elInput.checked;
-			})
+			});
 		}
+
+		// Search for variables
+		(<HTMLInputElement>document.getElementById("varsearch")).addEventListener("keyup", debounce(varSearchF.bind(this, variables), 750));
 
 		document.getElementById("select-all-variables")?.addEventListener("click", () => {
 			Object.keys(variables).forEach((item) => {
@@ -328,10 +330,9 @@ function removeActive() {
 	});
 }
 
-function filterVar(
-	variables: { [key: string]: { label: [string]; values: { [key: string]: [string] }, missing: [string], selected: [boolean] } },
-	f1: string, f2: string, make: boolean
-) {
+type variablesType = { [key: string]: { label: [string]; values: { [key: string]: [string] }; missing: [string]; selected: [boolean] } };
+
+function filterVar(variables: variablesType, f1: string, f2: string, make: boolean) {
 	if (f2 == "") {
 		alert("Text or pattern should be specified.");
 	} else {
@@ -360,7 +361,7 @@ function filterVar(
 				}
 				// starts with
 				if (f2.slice(-1) == "*") {
-					const searchFor = f2.slice(0,-1);
+					const searchFor = f2.slice(0, -1);
 					console.log(searchFor);
 					for (const key in variables) {
 						if (key.slice(0, searchFor.length) == searchFor) {
@@ -372,4 +373,29 @@ function filterVar(
 			}
 		}
 	}
+}
+
+function varSearchF(variables: variablesType): void {
+	const value = (<HTMLInputElement>document.getElementById("varsearch")).value;
+	if (value != "") {
+		for (const key in variables) {
+			if (key.indexOf(value) == -1) {
+				(<HTMLInputElement>document.getElementById("div-" + key)).style.display = "none";
+			} else {
+				(<HTMLInputElement>document.getElementById("div-" + key)).style.display = "block";
+			}
+		}
+	} else {
+		for (const key in variables) {
+			(<HTMLInputElement>document.getElementById("div-" + key)).style.display = "block";
+		}
+	}
+}
+
+function debounce(callback: () => void, delay: number) {
+	let timeout: NodeJS.Timeout;
+	return function () {
+		clearTimeout(timeout);
+		timeout = setTimeout(callback, delay);
+	};
 }
