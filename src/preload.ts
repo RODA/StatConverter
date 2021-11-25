@@ -216,6 +216,7 @@ window.addEventListener("DOMContentLoaded", () => {
 		variables = response.variables;
 		//load variable list
 		const variablesList = document.getElementById("variables");
+		const variablesListCases = document.getElementById("variablesCases");
 		all_vars_selected = true;
 
 		for (const key in variables) {
@@ -271,10 +272,30 @@ window.addEventListener("DOMContentLoaded", () => {
 			elInput.addEventListener("click", () => {
 				variables[key].selected[0] = elInput.checked;
 			});
+
+			const caseVar = document.createElement("div");
+			caseVar.classList.add("caseVar");
+			caseVar.style.paddingLeft = "10px";
+			caseVar.style.cursor = "pointer";
+			caseVar.innerHTML = key;
+			caseVar.dataset.id = key;
+			caseVar.id = "case-" + key;
+			variablesListCases?.appendChild(caseVar);
+			caseVar.addEventListener("click", (e) => {
+				// console.log((<HTMLDivElement>e.target).getAttribute("data-id"));
+				const key = (<HTMLDivElement>e.target).getAttribute("data-id");
+				if (key) {
+					// added space after name/key
+					insertAtPosition("cases-procedure", key+ ' ');
+				}
+			});
 		}
 
 		// Search for variables
 		(<HTMLInputElement>document.getElementById("varsearch")).addEventListener("keyup", debounce(varSearchF.bind(this, variables), 750));
+
+		// Search for variables in cases
+		(<HTMLInputElement>document.getElementById("varSearchCases")).addEventListener("keyup", debounce(varSearchCasesF.bind(this, variables), 750));
 
 		document.getElementById("select-all-variables")?.addEventListener("click", () => {
 			Object.keys(variables).forEach((item) => {
@@ -391,6 +412,22 @@ function varSearchF(variables: variablesType): void {
 		}
 	}
 }
+function varSearchCasesF(variables: variablesType): void {
+	const value = (<HTMLInputElement>document.getElementById("varSearchCases")).value;
+	if (value != "") {
+		for (const key in variables) {
+			if (key.indexOf(value) == -1) {
+				(<HTMLInputElement>document.getElementById("case-" + key)).style.display = "none";
+			} else {
+				(<HTMLInputElement>document.getElementById("case-" + key)).style.display = "block";
+			}
+		}
+	} else {
+		for (const key in variables) {
+			(<HTMLInputElement>document.getElementById("case-" + key)).style.display = "block";
+		}
+	}
+}
 
 function debounce(callback: () => void, delay: number) {
 	let timeout: NodeJS.Timeout;
@@ -398,4 +435,30 @@ function debounce(callback: () => void, delay: number) {
 		clearTimeout(timeout);
 		timeout = setTimeout(callback, delay);
 	};
+}
+// insert element at the position
+// https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
+function insertAtPosition(areaId: string, text: string) {
+	const txtarea = <HTMLTextAreaElement>document.getElementById(areaId);
+	if (!txtarea) {
+		return;
+	}
+
+	console.log('gasit');
+	console.log(text);
+	
+	const scrollPos = txtarea.scrollTop;
+	let strPos = 0;
+	strPos = txtarea.selectionStart;
+
+	if(txtarea.value){
+		const front = txtarea.value.substring(0, strPos);
+		const back = txtarea.value.substring(strPos, txtarea.value.length);
+		txtarea.value = front + text + back;
+		strPos = strPos + text.length;
+	} else {
+		txtarea.value = text;
+	}
+	
+	txtarea.scrollTop = scrollPos;
 }
