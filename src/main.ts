@@ -243,7 +243,7 @@ const start_R_server = function (R_path: string): void {
 				const response = JSON.parse(e.data);
 				if (response.error && response.error[0] != "") {
 					dialog.showErrorBox("R says:", response.error[0]);
-				} else {
+				} else if (response.variables) {
 					mainWindow.webContents.send("sendCommand-reply", response);
 				}
 			});

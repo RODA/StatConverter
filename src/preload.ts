@@ -54,7 +54,9 @@ window.addEventListener("DOMContentLoaded", () => {
 		ipcRenderer.send("gotoRODA");
 	});
 
-	let dataset = "dataset";
+	
+	// ipcRenderer.send("sendCommand", 'require(DDIwR)');
+
 	let all_vars_selected = true;
 	let variables: {
 		[key: string]: {
@@ -68,6 +70,7 @@ window.addEventListener("DOMContentLoaded", () => {
 	} = {};
 
 	const inputType = <HTMLSelectElement>document.getElementById("inputType");
+	const fileEncoding = <HTMLSelectElement>document.getElementById("fileEncoding");
 	const outputType = <HTMLSelectElement>document.getElementById("outputType");
 	const fileFrom = <HTMLInputElement>document.getElementById("fileFrom");
 	const fileTo = <HTMLInputElement>document.getElementById("fileTo");
@@ -88,7 +91,15 @@ window.addEventListener("DOMContentLoaded", () => {
 		inputOutput.fileFromDir = io.fileFromDir;
 		inputOutput.fileFromName = io.fileFromName;
 
-		ipcRenderer.send("sendCommand", 'dataset <- DDIwR::convert("' + io.fileFrom + '", declared = TRUE)');
+		let command = 'dataset <- convert("' + io.fileFrom + '", declared = FALSE, n_max = 10'
+		if (fileEncoding.value != "latin1") {
+			command += ', encoding = "' + fileEncoding.value + '"';
+		}
+
+		command += ')';
+
+		ipcRenderer.send("sendCommand", 'require(DDIwR)');
+		ipcRenderer.send("sendCommand", command);
 
 		fileFrom.value = io.fileFrom;
 
@@ -156,29 +167,87 @@ window.addEventListener("DOMContentLoaded", () => {
 		}
 
 		if (indices.length == 0 && !all_vars_selected) {
-			//
+			ipcRenderer.send("showError", { message: "At least one variable has to be selected." });
 		} else {
-			dataset = "dataset";
-			const subset = ""; // for case selection: document.getElementById("blah").value;
+
+			let command = 'dataset <- convert("' + inputOutput.fileFrom + '"';
+
+			const targetOS = document.getElementById("targetOS") as HTMLInputElement;
+			if (targetOS.value != "local") {
+				command += ', OS = ' + targetOS.value;
+			}
+
+			const recode = document.getElementById("recodeFALSE") as HTMLInputElement;
+			if (recode.checked) {
+				command += ', recode = FALSE';
+			}
+
+			const chartonum = document.getElementById("chartonumFALSE") as HTMLInputElement;
+			if (chartonum.checked) {
+				command += ', chartonum = FALSE';
+			}
+
+			const fileEncoding = document.getElementById("fileEncoding") as HTMLInputElement;
+			if (fileEncoding.value != "latin1") {
+				command += ', encoding = ' + fileEncoding.value;
+			}
+
+			command += ')';
+			ipcRenderer.send("sendCommand", command);
+
+
+			const subset = document.getElementById("select_cases") as HTMLInputElement;
 			let select = "";
 			if (indices.length > 0) {
 				select = (all_vars_selected ? "-" : "") + "c(" + helpers.paste(indices, { sep: "," }) + ")";
 			}
 
-			if (subset != "" || select != "") {
-				dataset = "subset(" + dataset;
-				if (subset != "") {
-					dataset += ", subset = " + subset;
+			if (subset.value != "" || select != "") {
+				command = "dataset <- subset(dataset";
+				if (subset.value != "") {
+					command += ", subset = " + subset.value;
 				}
 
 				if (select != "") {
-					dataset += ", select = " + select;
+					command += ", select = " + select;
 				}
 
-				dataset += ")";
+				command += ")";
+				ipcRenderer.send("sendCommand", command);
 			}
 
-			ipcRenderer.send("sendCommand", "DDIwR::convert(" + dataset + ', to = "' + inputOutput.fileTo + '", embed = TRUE)');
+
+			command = 'convert(dataset, to = "' + inputOutput.fileTo + '"';
+
+			const embed = document.getElementById("embedFALSE") as HTMLInputElement;
+			if (embed.checked) {
+				command += ', embed = FALSE';
+			}
+
+			const declared = document.getElementById("declaredFALSE") as HTMLInputElement;
+			if (declared.checked) {
+				command += ', declared = FALSE';
+			}
+
+			const stataVersion = document.getElementById("stataVersion") as HTMLInputElement;
+			if (stataVersion.value != "14") {
+				command += ', version = ' + stataVersion.value;
+			}
+
+			command += ')';
+			ipcRenderer.send("sendCommand", command);
+		}
+	});
+
+	fileEncoding.addEventListener("change", function () {
+		if (inputOutput.fileFrom != "") {
+			let command = 'dataset <- convert("' + inputOutput.fileFrom + '", declared = FALSE, n_max = 10'
+			if (fileEncoding.value != "latin1") {
+				command += ', encoding = "' + fileEncoding.value + '"';
+			}
+
+			command += ')';
+			ipcRenderer.send("sendCommand", command);
 		}
 	});
 

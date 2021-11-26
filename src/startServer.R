@@ -48,7 +48,7 @@ if (sum(installed) < length(packages)) {
 
                         objects <- ls(envir = .GlobalEnv)
 
-                        if (length(objects) > 0) {
+                        if (length(objects) > 0 & grepl("n_max", message)) {
                             # toreturn$info <- RGUI_tryCatchWEM(RGUI_call())$visible
                             toreturn$variables <- RGUI_tryCatchWEM(RGUI_variables())$visible
                         }
