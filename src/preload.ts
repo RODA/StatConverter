@@ -214,6 +214,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
 				command += ")";
 				ipcRenderer.send("sendCommand", command);
+
+				const keep = document.getElementById("keepSelectionCases") as HTMLInputElement;
+				if (!keep.checked) {
+					subset.value = "";
+				}
 			}
 
 
