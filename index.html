@@ -55,10 +55,11 @@
 	</head>
 
 	<body style="background: white">
-		<div class="loader d-none" id="loader">Converting....</div>
+		<div class="loader d-none" id="loader">Processing....</div>
 		<div class="cover d-none" id="cover"></div>
 		<div class="d-flex align-items-start">
 			<div class="tab-content" id="v-pills-tabContent" style="width: 858px">
+
 				<!-- ========= Convert ========= -->
 				<div class="tab-pane fade show active p-4" id="v-pills-convert" role="tabpanel" aria-labelledby="v-pills-convert-tab">
 					<div class="row align-items-center mt-5 mb-3">
@@ -67,8 +68,10 @@
 						</div>
 						<div class="col-8">
 							<select class="form-select" id="fileEncoding">
-								<option value="latin1" selected>Latin 1 (ISO-8859-1)</option>
+								<option value="default" selected>As specified in the file</option>
+								<option value="latin1">Latin 1 (ISO-8859-1)</option>
 								<option value="utf8">UTF-8</option>
+								<option value="bytes">Multi-byte</option>
 							</select>
 						</div>
 						<div class="col-2"></div>
@@ -196,6 +199,7 @@
 						</div>
 					</div>
 				</div>
+
 				<!-- ========= Cases ========= -->
 				<div class="tab-pane fade" id="v-pills-cases" role="tabpanel" aria-labelledby="v-pills-cases-tab">
 					<div class="row mt-3">
@@ -255,6 +259,7 @@
 						</div>
 					</div>
 				</div>
+				
 				<!-- ========= Settings ========= -->
 				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
 					<div class="row mt-5">
@@ -263,7 +268,7 @@
 								<p class="mb-5"><strong>Settings:</strong></p>
 								<div class="row mb-4">
 									<div class="col-7">
-										<p>Stata version</p>
+										<p>Output to Stata version</p>
 									</div>
 									<div class="col-3">
 										<select class="form-select" id="stataVersion">
