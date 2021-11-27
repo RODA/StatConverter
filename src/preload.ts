@@ -366,7 +366,7 @@ window.addEventListener("DOMContentLoaded", () => {
 			caseVar.dataset.id = key;
 			caseVar.id = "case-" + key;
 			variablesListCases?.appendChild(caseVar);
-			caseVar.addEventListener("click", (e) => {
+			caseVar.addEventListener("dblclick", (e) => {
 				// console.log((<HTMLDivElement>e.target).getAttribute("data-id"));
 				const key = (<HTMLDivElement>e.target).getAttribute("data-id");
 				if (key) {
