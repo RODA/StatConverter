@@ -54,7 +54,21 @@ window.addEventListener("DOMContentLoaded", () => {
 		ipcRenderer.send("gotoRODA");
 	});
 
-	
+	ipcRenderer.on("startLoader", () => {
+		console.log("start loader");
+
+		document.body.classList.add("stop-scrolling");
+		(<HTMLDivElement>document.getElementById("loader")).classList.remove("d-none");
+		(<HTMLDivElement>document.getElementById("cover")).classList.remove("d-none");
+	});
+
+	ipcRenderer.on("clearLoader", () => {
+		console.log("clear loader");
+		document.body.classList.remove("stop-scrolling");
+		(<HTMLDivElement>document.getElementById("loader")).classList.add("d-none");
+		(<HTMLDivElement>document.getElementById("cover")).classList.add("d-none");
+	});
+
 	// ipcRenderer.send("sendCommand", 'require(DDIwR)');
 
 	let all_vars_selected = true;
@@ -91,14 +105,14 @@ window.addEventListener("DOMContentLoaded", () => {
 		inputOutput.fileFromDir = io.fileFromDir;
 		inputOutput.fileFromName = io.fileFromName;
 
-		let command = 'dataset <- convert("' + io.fileFrom + '", declared = FALSE, n_max = 10'
+		let command = 'dataset <- convert("' + io.fileFrom + '", declared = FALSE, n_max = 10';
 		if (fileEncoding.value != "latin1") {
 			command += ', encoding = "' + fileEncoding.value + '"';
 		}
 
-		command += ')';
+		command += ")";
 
-		ipcRenderer.send("sendCommand", 'require(DDIwR)');
+		ipcRenderer.send("sendCommand", "require(DDIwR)");
 		ipcRenderer.send("sendCommand", command);
 
 		fileFrom.value = io.fileFrom;
@@ -169,32 +183,30 @@ window.addEventListener("DOMContentLoaded", () => {
 		if (indices.length == 0 && !all_vars_selected) {
 			ipcRenderer.send("showError", { message: "At least one variable has to be selected." });
 		} else {
-
 			let command = 'dataset <- convert("' + inputOutput.fileFrom + '"';
 
 			const targetOS = document.getElementById("targetOS") as HTMLInputElement;
 			if (targetOS.value != "local") {
-				command += ', OS = ' + targetOS.value;
+				command += ", OS = " + targetOS.value;
 			}
 
 			const recode = document.getElementById("recodeFALSE") as HTMLInputElement;
 			if (recode.checked) {
-				command += ', recode = FALSE';
+				command += ", recode = FALSE";
 			}
 
 			const chartonum = document.getElementById("chartonumFALSE") as HTMLInputElement;
 			if (chartonum.checked) {
-				command += ', chartonum = FALSE';
+				command += ", chartonum = FALSE";
 			}
 
 			const fileEncoding = document.getElementById("fileEncoding") as HTMLInputElement;
 			if (fileEncoding.value != "latin1") {
-				command += ', encoding = ' + fileEncoding.value;
+				command += ", encoding = " + fileEncoding.value;
 			}
 
-			command += ')';
+			command += ")";
 			ipcRenderer.send("sendCommand", command);
-
 
 			const subset = document.getElementById("select_cases") as HTMLInputElement;
 			let select = "";
@@ -221,37 +233,36 @@ window.addEventListener("DOMContentLoaded", () => {
 				}
 			}
 
-
 			command = 'convert(dataset, to = "' + inputOutput.fileTo + '"';
 
 			const embed = document.getElementById("embedFALSE") as HTMLInputElement;
 			if (embed.checked) {
-				command += ', embed = FALSE';
+				command += ", embed = FALSE";
 			}
 
 			const declared = document.getElementById("declaredFALSE") as HTMLInputElement;
 			if (declared.checked) {
-				command += ', declared = FALSE';
+				command += ", declared = FALSE";
 			}
 
 			const stataVersion = document.getElementById("stataVersion") as HTMLInputElement;
 			if (stataVersion.value != "14") {
-				command += ', version = ' + stataVersion.value;
+				command += ", version = " + stataVersion.value;
 			}
 
-			command += ')';
+			command += ")";
 			ipcRenderer.send("sendCommand", command);
 		}
 	});
 
 	fileEncoding.addEventListener("change", function () {
 		if (inputOutput.fileFrom != "") {
-			let command = 'dataset <- convert("' + inputOutput.fileFrom + '", declared = FALSE, n_max = 10'
+			let command = 'dataset <- convert("' + inputOutput.fileFrom + '", declared = FALSE, n_max = 10';
 			if (fileEncoding.value != "latin1") {
 				command += ', encoding = "' + fileEncoding.value + '"';
 			}
 
-			command += ')';
+			command += ")";
 			ipcRenderer.send("sendCommand", command);
 		}
 	});
@@ -360,7 +371,7 @@ window.addEventListener("DOMContentLoaded", () => {
 				const key = (<HTMLDivElement>e.target).getAttribute("data-id");
 				if (key) {
 					// added space after name/key
-					insertAtPosition("cases-procedure", key+ ' ');
+					insertAtPosition("select_cases", key + " ");
 				}
 			});
 		}
@@ -514,18 +525,25 @@ function debounce(callback: () => void, delay: number) {
 // https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
 function insertAtPosition(areaId: string, text: string) {
 	const txtarea = <HTMLTextAreaElement>document.getElementById(areaId);
+
+	console.log(areaId);
+	console.log(text);
+
 	if (!txtarea) {
 		return;
 	}
 
-	console.log('gasit');
-	console.log(text);
+	console.log('aici');
 	
+
+	console.log("gasit");
+	console.log(text);
+
 	const scrollPos = txtarea.scrollTop;
 	let strPos = 0;
 	strPos = txtarea.selectionStart;
 
-	if(txtarea.value){
+	if (txtarea.value) {
 		const front = txtarea.value.substring(0, strPos);
 		const back = txtarea.value.substring(strPos, txtarea.value.length);
 		txtarea.value = front + text + back;
@@ -533,6 +551,6 @@ function insertAtPosition(areaId: string, text: string) {
 	} else {
 		txtarea.value = text;
 	}
-	
+
 	txtarea.scrollTop = scrollPos;
 }

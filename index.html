@@ -13,22 +13,65 @@
 			.activeVariable {
 				background-color: #ccc;
 			}
-			.caseVar:hover{
+			.caseVar:hover {
 				background-color: #ccc;
+			}
+			.loader {
+				font-size: 3rem;
+				font-weight: 700;
+				color: #ffffff;
+				position: fixed;
+				z-index: 1050;
+				left: calc(50% - 250px);
+				top: calc(50% - 70px);
+				text-align: center;
+			}
+
+			.cover {
+				top: 0;
+				display: block;
+				position: fixed;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, 0.7);
+				z-index: 1040;
+			}
+
+			@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+
+			.stop-scrolling {
+				height: 100%;
+				overflow: hidden;
 			}
 		</style>
 	</head>
 
 	<body style="background: white">
+		<div class="loader d-none" id="loader">Processing. Please wait...</div>
+		<div class="cover d-none" id="cover"></div>
 		<div class="d-flex align-items-start">
 			<div class="tab-content" id="v-pills-tabContent" style="width: 858px">
 				<!-- ========= Convert ========= -->
 				<div class="tab-pane fade show active p-4" id="v-pills-convert" role="tabpanel" aria-labelledby="v-pills-convert-tab">
-					<div class="row align-items-center mt-5 mb-1">
-						<div class="col-10"></div>
-						<div class="col-2 text-center">
-							<label for="fileEncoding" class="col-form-label">Encoding:</label>
+					<div class="row align-items-center mt-5 mb-3">
+						<div class="col-2 text-end">
+							<label for="inputType" class="col-form-label">Encoding</label>
 						</div>
+						<div class="col-8">
+							<select class="form-select" id="fileEncoding">
+								<option value="latin1" selected>Latin 1 &nbsp;&nbsp;&nbsp;(ISO-8859-1)</option>
+								<option value="utf8">UTF-8</option>
+							</select>
+						</div>
+						<div class="col-2"></div>
 					</div>
 					<div class="row align-items-center mb-3">
 						<div class="col-2 text-end">
@@ -45,12 +88,7 @@
 								<option value="r">R</option>
 							</select>
 						</div>
-						<div class="col-2">
-							<select class="form-select" id="fileEncoding">
-								<option value="latin1" selected>Latin 1 &nbsp;&nbsp;&nbsp;(ISO-8859-1)</option>
-								<option value="utf8">UTF-8</option>
-							</select>
-						</div>
+						<div class="col-2"></div>
 					</div>
 					<div class="row align-items-center mb-5">
 						<div class="col-2 text-end">
@@ -119,7 +157,7 @@
 					<div class="row align-items-center mt-3">
 						<div class="col-4 text-start">
 							<strong style="margin-left: 10px">Search variables:</strong>
-							<input type="text" class="form-control mb-2 rounded-0" id="varsearch" style="margin: 0 10px;" />
+							<input type="text" class="form-control mb-2 rounded-0" id="varsearch" style="margin: 0 10px" />
 							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 100px); overflow-y: scroll; padding: 5px 0px"></div>
 						</div>
 						<div class="col-8">
@@ -163,42 +201,42 @@
 					<div class="row mt-3">
 						<div class="col-4 text-start">
 							<strong style="margin-left: 10px">Search variables:</strong>
-							<input type="text" class="form-control mb-2 rounded-0" id="varSearchCases" style="margin: 0 10px;" />
+							<input type="text" class="form-control mb-2 rounded-0" id="varSearchCases" style="margin: 0 10px" />
 							<div id="variablesCases" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 100px); overflow-y: scroll; padding: 5px 0px"></div>
 						</div>
 						<div class="col-8">
 							<strong style="margin-left: 10px">How to subset cases</strong>
-							<div id="cases-selection-procedure" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 380px; padding: 10px; overflow-y: scroll;">
-								<p>The formal language to select cases is R, however the actual selection symbols are universal, for instance:
-									<br>
+							<div id="cases-selection-procedure" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 380px; padding: 10px; overflow-y: scroll">
+								<p>
+									The formal language to select cases is R, however the actual selection symbols are universal, for instance:
+									<br />
 									Less than: <b>&lt;</b>
-									<br>
+									<br />
 									Less than or equal to: <b>&lt;=</b>
-									<br>
+									<br />
 									Not equal to: <b>!=</b>
-									<br>
+									<br />
 									Equal to: <b>==</b> (double equal sign), etc.
-									<br>
-									<br>
-									The input data is generically called "dataset", and the result of the expression should be a logical vector. Examples:<br>
-									- all cases where age is less than 35:<br><b>age < 35</b><br>
-									- all cases where age is at least 30, and only from the first 100 cases:<br><b>seq(nrow(dataset)) <= 100 & age >= 30</b>
-									<br>
-									<br>
-									Values from character categorical variables (or R factors) should be quoted, for example all cases from region "REG1":<br>
+									<br />
+									<br />
+									The input data is generically called "dataset", and the result of the expression should be a logical vector. Examples:<br />
+									- all cases where age is less than 35:<br /><b>age < 35</b><br />
+									- all cases where age is at least 30, and only from the first 100 cases:<br /><b>seq(nrow(dataset)) <= 100 & age >= 30</b>
+									<br />
+									<br />
+									Values from character categorical variables (or R factors) should be quoted, for example all cases from region "REG1":<br />
 									<b>region == "REG1"</b>
-									<br>
-									<br>
+									<br />
+									<br />
 									Do notice that R is a case sensitive language, and that applies to both string values and variable names, where
 									<b>age</b> and <b>Age</b> refer to two different variables, and "reg1" is not the same thing with "REG1".
-									<br>
-									<br>
-									Base R functions are naturally applicable to search for certain patterns within strings, for instance retain all cases
-									where the variable <b>regname</b> (region name) contains the word "west":
-									<br>
+									<br />
+									<br />
+									Base R functions are naturally applicable to search for certain patterns within strings, for instance retain all cases where the variable <b>regname</b> (region name) contains the word "west":
+									<br />
 									<b>grepl("west", regname)</b>
-									<br>
-									<br>
+									<br />
+									<br />
 									Regular expressions can be used within the function <b>grepl()</b>, and they can optionally be compatible with Perl expressions.
 								</p>
 								<p></p>
@@ -210,7 +248,7 @@
 
 							<div class="mt-3">
 								<div class="form-check">
-									<input class="form-check-input" type="checkbox" value="" id="keepSelectionCases" checked/>
+									<input class="form-check-input" type="checkbox" value="" id="keepSelectionCases" checked />
 									<label class="form-check-label" for="keepSelectionCases"> Keep selection between conversions </label>
 								</div>
 							</div>
@@ -219,98 +257,101 @@
 				</div>
 				<!-- ========= Settings ========= -->
 				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
-					<div class="row mt-5 px-4">
-						<div class="col-8">
-							<div class="row mb-4">
-								<div class="col-7">
-									<p>Stata version</p>
-								</div>
-								<div class="col-3">
-									<select class="form-select" id="stataVersion">
-										<option value="14" selected>14</option>
-										<option value="13">13</option>
-										<option value="12">12</option>
-										<option value="11">11</option>
-										<option value="10">10</option>
-									</select>	
-								</div>
-								<div class="col-2"></div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-7">
-									<p>Convert character categories to numeric categories</p>
-								</div>
-								<div class="col-5 text-start">
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="chartonum" id="chartonumTRUE" value="yes" checked />
-										<label class="form-check-label" for="chartonumTRUE">Yes</label>
+					<div class="row mt-5">
+						<div class="col-12">
+							<div class="ms-3">
+								<p class="mb-5"><strong>Settings:</strong></p>
+								<div class="row mb-4">
+									<div class="col-7">
+										<p>Stata version</p>
 									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="chartonum" id="chartonumFALSE" value="no" />
-										<label class="form-check-label" for="chartonumFALSE">No</label>
+									<div class="col-3">
+										<select class="form-select" id="stataVersion">
+											<option value="14" selected>14</option>
+											<option value="13">13</option>
+											<option value="12">12</option>
+											<option value="11">11</option>
+											<option value="10">10</option>
+										</select>
 									</div>
+									<div class="col-2"></div>
 								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-7">
-									<p>Recode to and from extended missing values (a-z)</p>
-								</div>
-								<div class="col-5 text-start">
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="recode" id="recodeTRUE" value="yes" checked />
-										<label class="form-check-label" for="recodeTRUE">Yes</label>
+								<div class="row mb-3">
+									<div class="col-7">
+										<p>Convert character categories to numeric categories</p>
 									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="recode" id="recodeFALSE" value="no" />
-										<label class="form-check-label" for="recodeFALSE">No</label>
-									</div>
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-7">
-									<p>Make the R dataset "declared"</p>
-								</div>
-								<div class="col-5 text-start">
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="declared" id="declaredTRUE" value="yes" checked />
-										<label class="form-check-label" for="declaredTRUE">Yes</label>
-									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="declared" id="declaredFALSE" value="no" />
-										<label class="form-check-label" for="declaredFALSE">No</label>
-									</div>
-								</div>
-							</div>
-							<div class="row mb-3">
-								<div class="col-7">
-									<p>Embed the CSV file into the DDI codebook</p>
-								</div>
-								<div class="col-5 text-start">
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="embed" id="embedTRUE" value="yes" checked />
-										<label class="form-check-label" for="embedTRUE">Yes</label>
-									</div>
-									<div class="form-check form-check-inline">
-										<input class="form-check-input" type="radio" name="embed" id="embedFALSE" value="no" />
-										<label class="form-check-label" for="embedFALSE">No</label>
-									</div>
-								</div>
-							</div>
-							<div class="row mb-4">
-								<div class="col-7">
-									<p>End of line for the DDI XML file</p>
-								</div>
-								<div class="col-5">
-									<div class="row">
-										<div class="col-8">
-											<select class="form-select" id="targetOS">
-												<option value="local" selected>local</option>
-												<option value="macos">MacOS</option>
-												<option value="linux">Linux</option>
-												<option value="windows">Windows</option>									
-											</select>
+									<div class="col-5 text-start">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="chartonum" id="chartonumTRUE" value="yes" checked />
+											<label class="form-check-label" for="chartonumTRUE">Yes</label>
 										</div>
-										<div class="col-4"></div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="chartonum" id="chartonumFALSE" value="no" />
+											<label class="form-check-label" for="chartonumFALSE">No</label>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-7">
+										<p>Recode to and from extended missing values (a-z)</p>
+									</div>
+									<div class="col-5 text-start">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="recode" id="recodeTRUE" value="yes" checked />
+											<label class="form-check-label" for="recodeTRUE">Yes</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="recode" id="recodeFALSE" value="no" />
+											<label class="form-check-label" for="recodeFALSE">No</label>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-7">
+										<p>Make the R dataset "declared"</p>
+									</div>
+									<div class="col-5 text-start">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="declared" id="declaredTRUE" value="yes" checked />
+											<label class="form-check-label" for="declaredTRUE">Yes</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="declared" id="declaredFALSE" value="no" />
+											<label class="form-check-label" for="declaredFALSE">No</label>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-7">
+										<p>Embed the CSV file into the DDI codebook</p>
+									</div>
+									<div class="col-5 text-start">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="embed" id="embedTRUE" value="yes" checked />
+											<label class="form-check-label" for="embedTRUE">Yes</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="embed" id="embedFALSE" value="no" />
+											<label class="form-check-label" for="embedFALSE">No</label>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-4">
+									<div class="col-7">
+										<p>End of line for the DDI XML file</p>
+									</div>
+									<div class="col-5">
+										<div class="row">
+											<div class="col-8">
+												<select class="form-select" id="targetOS">
+													<option value="local" selected>local</option>
+													<option value="macos">MacOS</option>
+													<option value="linux">Linux</option>
+													<option value="windows">Windows</option>
+												</select>
+											</div>
+											<div class="col-4"></div>
+										</div>
 									</div>
 								</div>
 							</div>

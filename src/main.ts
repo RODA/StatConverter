@@ -200,6 +200,7 @@ app.whenReady().then(() => {
 	});
 
 	ipcMain.on("sendCommand", (event, command) => {
+		mainWindow.webContents.send("startLoader");
 		Rws.send(command);
 	});
 
@@ -240,6 +241,8 @@ const start_R_server = function (R_path: string): void {
 			// });
 
 			Rws.addEventListener("message", function (e) {
+				mainWindow.webContents.send("clearLoader");
+				
 				const response = JSON.parse(e.data);
 				if (response.error && response.error[0] != "") {
 					dialog.showErrorBox("R says:", response.error[0]);
