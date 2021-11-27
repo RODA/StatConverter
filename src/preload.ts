@@ -1,38 +1,38 @@
-import { ipcRenderer } from "electron";
-import * as path from "path";
-import { helpers } from "./helpers";
-import { InputOutputType } from "./interfaces";
+import { ipcRenderer } from 'electron';
+import * as path from 'path';
+import { helpers } from './helpers';
+import { InputOutputType } from './interfaces';
 
 const inputOutput: InputOutputType = {
-	inputType: "",
-	fileFrom: "",
-	fileFromDir: "",
-	fileFromName: "",
+	inputType: '',
+	fileFrom: '',
+	fileFromDir: '',
+	fileFromName: '',
 
-	outputType: "",
-	fileTo: "",
-	fileToDir: "",
-	fileToName: "",
+	outputType: '',
+	fileTo: '',
+	fileToDir: '',
+	fileToName: '',
 };
 
 // const variables = {
 // 	timpliber: {
-// 		label: "Prima variabila",
+// 		label: 'Prima variabila',
 // 		values: {
 // 			Da: 1,
 // 			Nu: 2,
-// 			"Nu stiu": -1,
+// 			'Nu stiu': -1,
 // 		},
 // 	},
 // 	gender: {
-// 		label: "A doua variabila",
+// 		label: 'A doua variabila',
 // 		values: {
 // 			M: 1,
 // 			F: 2,
 // 		},
 // 	},
 // 	timplucrat: {
-// 		label: "A doua variabila",
+// 		label: 'A doua variabila',
 // 		values: {
 // 			Minute: 1,
 // 			Ore: 2,
@@ -40,36 +40,36 @@ const inputOutput: InputOutputType = {
 // 	},
 // };
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener('DOMContentLoaded', () => {
 	// const replaceText = (selector: string, text: string) => {
 	//     const element = document.getElementById(selector)
 	//     if (element) element.innerText = text
 	// }
 
-	// for (const type of ["chrome", "node", "electron"]) {
+	// for (const type of ['chrome', 'node', 'electron']) {
 	//     replaceText(`${type}-version`, <any> process.versions[type as keyof NodeJS.ProcessVersions]);
 	// }
 
-	document.getElementById("gotoRODA")?.addEventListener("click", () => {
-		ipcRenderer.send("gotoRODA");
+	document.getElementById('gotoRODA')?.addEventListener('click', () => {
+		ipcRenderer.send('gotoRODA');
 	});
 
-	ipcRenderer.on("startLoader", () => {
-		console.log("start loader");
+	ipcRenderer.on('startLoader', () => {
+		console.log('start loader');
 
-		document.body.classList.add("stop-scrolling");
-		(<HTMLDivElement>document.getElementById("loader")).classList.remove("d-none");
-		(<HTMLDivElement>document.getElementById("cover")).classList.remove("d-none");
+		document.body.classList.add('stop-scrolling');
+		(<HTMLDivElement>document.getElementById('loader')).classList.remove('d-none');
+		(<HTMLDivElement>document.getElementById('cover')).classList.remove('d-none');
 	});
 
-	ipcRenderer.on("clearLoader", () => {
-		console.log("clear loader");
-		document.body.classList.remove("stop-scrolling");
-		(<HTMLDivElement>document.getElementById("loader")).classList.add("d-none");
-		(<HTMLDivElement>document.getElementById("cover")).classList.add("d-none");
+	ipcRenderer.on('clearLoader', () => {
+		console.log('clear loader');
+		document.body.classList.remove('stop-scrolling');
+		(<HTMLDivElement>document.getElementById('loader')).classList.add('d-none');
+		(<HTMLDivElement>document.getElementById('cover')).classList.add('d-none');
 	});
 
-	// ipcRenderer.send("sendCommand", 'require(DDIwR)');
+	// ipcRenderer.send('sendCommand', 'require(DDIwR)');
 
 	let all_vars_selected = true;
 	let variables: {
@@ -83,46 +83,48 @@ window.addEventListener("DOMContentLoaded", () => {
 		};
 	} = {};
 
-	const inputType = <HTMLSelectElement>document.getElementById("inputType");
-	const fileEncoding = <HTMLSelectElement>document.getElementById("fileEncoding");
-	const outputType = <HTMLSelectElement>document.getElementById("outputType");
-	const fileFrom = <HTMLInputElement>document.getElementById("fileFrom");
-	const fileTo = <HTMLInputElement>document.getElementById("fileTo");
-	const selectFileFrom = <HTMLInputElement>document.getElementById("selectFileFrom");
-	const selectFileTo = <HTMLInputElement>document.getElementById("selectFileTo");
-	const startConvert = <HTMLInputElement>document.getElementById("startConvert");
+	const inputType = <HTMLSelectElement>document.getElementById('inputType');
+	const fileEncoding = <HTMLSelectElement>document.getElementById('fileEncoding');
+	const outputType = <HTMLSelectElement>document.getElementById('outputType');
+	const fileFrom = <HTMLInputElement>document.getElementById('fileFrom');
+	const fileTo = <HTMLInputElement>document.getElementById('fileTo');
+	const selectFileFrom = <HTMLInputElement>document.getElementById('selectFileFrom');
+	const selectFileTo = <HTMLInputElement>document.getElementById('selectFileTo');
+	const startConvert = <HTMLInputElement>document.getElementById('startConvert');
 
-	selectFileFrom.addEventListener("click", function () {
-		const inputType = <HTMLSelectElement>document.getElementById("inputType");
+	selectFileFrom.addEventListener('click', function () {
+		const loader = document.getElementById('loader') as HTMLDivElement;
+		loader.innerHTML = "Reading...";
+		const inputType = <HTMLSelectElement>document.getElementById('inputType');
 		const inputTypeValue = inputType.options[inputType.selectedIndex].value;
 
-		ipcRenderer.send("selectFileFrom", { inputType: inputTypeValue });
+		ipcRenderer.send('selectFileFrom', { inputType: inputTypeValue });
 	});
 
-	ipcRenderer.on("selectFileFrom-reply", (event, io) => {
+	ipcRenderer.on('selectFileFrom-reply', (event, io) => {
 		inputOutput.inputType = io.inputType;
 		inputOutput.fileFrom = io.fileFrom;
 		inputOutput.fileFromDir = io.fileFromDir;
 		inputOutput.fileFromName = io.fileFromName;
 
 		let command = 'dataset <- convert("' + io.fileFrom + '", declared = FALSE, n_max = 10';
-		if (fileEncoding.value != "latin1") {
+		if (fileEncoding.value != 'default') {
 			command += ', encoding = "' + fileEncoding.value + '"';
 		}
 
-		command += ")";
+		command += ')';
 
-		ipcRenderer.send("sendCommand", "require(DDIwR)");
-		ipcRenderer.send("sendCommand", command);
+		ipcRenderer.send('sendCommand', 'require(DDIwR)');
+		ipcRenderer.send('sendCommand', command);
 
 		fileFrom.value = io.fileFrom;
 
 		const outputTypeValue = outputType.options[outputType.selectedIndex].value;
 
-		if (outputTypeValue != "none") {
+		if (outputTypeValue != 'none') {
 			const ext = helpers.getExtensionFromType(outputTypeValue);
-			const fileTo = <HTMLInputElement>document.getElementById("fileTo");
-			if (inputOutput.fileToDir == "") {
+			const fileTo = <HTMLInputElement>document.getElementById('fileTo');
+			if (inputOutput.fileToDir == '') {
 				inputOutput.fileToDir = io.fileFromDir;
 			}
 
@@ -134,18 +136,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
 		const message = helpers.validate(inputOutput);
 
-		if (message == "Unsupported input type.") {
+		if (message == 'Unsupported input type.') {
 			inputType.selectedIndex = 0;
-			ipcRenderer.send("showError", { message: message });
+			ipcRenderer.send('showError', { message: message });
 		}
 	});
 
-	selectFileTo.addEventListener("click", function () {
+	selectFileTo.addEventListener('click', function () {
 		const outputTypeValue = outputType.options[outputType.selectedIndex].value;
-		ipcRenderer.send("selectFileTo", { outputType: outputTypeValue });
+		ipcRenderer.send('selectFileTo', { outputType: outputTypeValue });
 	});
 
-	ipcRenderer.on("selectFileTo-reply", (event, io) => {
+	ipcRenderer.on('selectFileTo-reply', (event, io) => {
 		inputOutput.outputType = io.outputType;
 		inputOutput.fileTo = io.fileTo;
 		inputOutput.fileToDir = io.fileToDir;
@@ -155,17 +157,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
 		const message = helpers.validate(inputOutput);
 
-		if (message == "Unsupported output type.") {
+		if (message == 'Unsupported output type.') {
 			outputType.selectedIndex = 0;
-			inputOutput.outputType = "";
-			outputType.dispatchEvent(new Event("change"));
-			ipcRenderer.send("showError", { message: message });
+			inputOutput.outputType = '';
+			outputType.dispatchEvent(new Event('change'));
+			ipcRenderer.send('showError', { message: message });
 		}
 
-		fileTo.dispatchEvent(new Event("change"));
+		fileTo.dispatchEvent(new Event('change'));
 	});
 
-	startConvert.addEventListener("click", function () {
+	startConvert.addEventListener('click', function () {
+		const loader = document.getElementById('loader') as HTMLDivElement;
+		loader.innerHTML = "Converting...";
 		const indices = [];
 		let i = 1;
 		for (const key in variables) {
@@ -181,144 +185,144 @@ window.addEventListener("DOMContentLoaded", () => {
 		}
 
 		if (indices.length == 0 && !all_vars_selected) {
-			ipcRenderer.send("showError", { message: "At least one variable has to be selected." });
+			ipcRenderer.send('showError', { message: 'At least one variable has to be selected.' });
 		} else {
 			let command = 'dataset <- convert("' + inputOutput.fileFrom + '"';
 
-			const targetOS = document.getElementById("targetOS") as HTMLInputElement;
-			if (targetOS.value != "local") {
-				command += ", OS = " + targetOS.value;
+			const targetOS = document.getElementById('targetOS') as HTMLInputElement;
+			if (targetOS.value != 'local') {
+				command += ', OS = ' + targetOS.value;
 			}
 
-			const recode = document.getElementById("recodeFALSE") as HTMLInputElement;
+			const recode = document.getElementById('recodeFALSE') as HTMLInputElement;
 			if (recode.checked) {
-				command += ", recode = FALSE";
+				command += ', recode = FALSE';
 			}
 
-			const chartonum = document.getElementById("chartonumFALSE") as HTMLInputElement;
+			const chartonum = document.getElementById('chartonumFALSE') as HTMLInputElement;
 			if (chartonum.checked) {
-				command += ", chartonum = FALSE";
+				command += ', chartonum = FALSE';
 			}
 
-			const fileEncoding = document.getElementById("fileEncoding") as HTMLInputElement;
-			if (fileEncoding.value != "latin1") {
-				command += ", encoding = " + fileEncoding.value;
+			const fileEncoding = document.getElementById('fileEncoding') as HTMLInputElement;
+			if (fileEncoding.value != 'default') {
+				command += ', encoding = "' + fileEncoding.value + '"';
 			}
 
-			command += ")";
-			ipcRenderer.send("sendCommand", command);
+			command += ')';
+			ipcRenderer.send('sendCommand', command);
 
-			const subset = document.getElementById("select_cases") as HTMLInputElement;
-			let select = "";
+			const subset = document.getElementById('select_cases') as HTMLInputElement;
+			let select = '';
 			if (indices.length > 0) {
-				select = (all_vars_selected ? "-" : "") + "c(" + helpers.paste(indices, { sep: "," }) + ")";
+				select = (all_vars_selected ? '-' : '') + 'c(' + helpers.paste(indices, { sep: ',' }) + ')';
 			}
 
-			if (subset.value != "" || select != "") {
-				command = "dataset <- subset(dataset";
-				if (subset.value != "") {
-					command += ", subset = " + subset.value;
+			if (subset.value != '' || select != '') {
+				command = 'dataset <- subset(dataset';
+				if (subset.value != '') {
+					command += ', subset = ' + subset.value;
 				}
 
-				if (select != "") {
-					command += ", select = " + select;
+				if (select != '') {
+					command += ', select = ' + select;
 				}
 
-				command += ")";
-				ipcRenderer.send("sendCommand", command);
+				command += ')';
+				ipcRenderer.send('sendCommand', command);
 
-				const keep = document.getElementById("keepSelectionCases") as HTMLInputElement;
+				const keep = document.getElementById('keepSelectionCases') as HTMLInputElement;
 				if (!keep.checked) {
-					subset.value = "";
+					subset.value = '';
 				}
 			}
 
 			command = 'convert(dataset, to = "' + inputOutput.fileTo + '"';
 
-			const embed = document.getElementById("embedFALSE") as HTMLInputElement;
+			const embed = document.getElementById('embedFALSE') as HTMLInputElement;
 			if (embed.checked) {
-				command += ", embed = FALSE";
+				command += ', embed = FALSE';
 			}
 
-			const declared = document.getElementById("declaredFALSE") as HTMLInputElement;
+			const declared = document.getElementById('declaredFALSE') as HTMLInputElement;
 			if (declared.checked) {
-				command += ", declared = FALSE";
+				command += ', declared = FALSE';
 			}
 
-			const stataVersion = document.getElementById("stataVersion") as HTMLInputElement;
-			if (stataVersion.value != "14") {
-				command += ", version = " + stataVersion.value;
+			const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
+			if (stataVersion.value != '14') {
+				command += ', version = ' + stataVersion.value;
 			}
 
-			command += ")";
-			ipcRenderer.send("sendCommand", command);
+			command += ')';
+			ipcRenderer.send('sendCommand', command);
 		}
 	});
 
-	fileEncoding.addEventListener("change", function () {
-		if (inputOutput.fileFrom != "") {
+	fileEncoding.addEventListener('change', function () {
+		if (inputOutput.fileFrom != '') {
 			let command = 'dataset <- convert("' + inputOutput.fileFrom + '", declared = FALSE, n_max = 10';
-			if (fileEncoding.value != "latin1") {
+			if (fileEncoding.value != 'default') {
 				command += ', encoding = "' + fileEncoding.value + '"';
 			}
 
-			command += ")";
-			ipcRenderer.send("sendCommand", command);
+			command += ')';
+			ipcRenderer.send('sendCommand', command);
 		}
 	});
 
-	inputType.addEventListener("change", function () {
-		inputOutput.fileFrom = "";
-		inputOutput.fileFromName = "";
-		fileTo.value = "";
+	inputType.addEventListener('change', function () {
+		inputOutput.fileFrom = '';
+		inputOutput.fileFromName = '';
+		fileTo.value = '';
 		const inputTypeValue = inputType.options[outputType.selectedIndex].value;
 		inputOutput.inputType = inputTypeValue;
 	});
 
-	outputType.addEventListener("change", function () {
+	outputType.addEventListener('change', function () {
 		const outputTypeValue = outputType.options[outputType.selectedIndex].value;
 		inputOutput.outputType = outputTypeValue;
 		const ext = helpers.getExtensionFromType(outputTypeValue);
 
-		if (inputOutput.fileToDir == "" && inputOutput.fileFromDir != "") {
+		if (inputOutput.fileToDir == '' && inputOutput.fileFromDir != '') {
 			inputOutput.fileToDir = inputOutput.fileFromDir;
 		}
 
-		if (inputOutput.fileToName == "" && inputOutput.fileFromName != "") {
+		if (inputOutput.fileToName == '' && inputOutput.fileFromName != '') {
 			inputOutput.fileToName = inputOutput.fileFromName;
 		}
 
-		if (inputOutput.fileToDir != "" && inputOutput.fileToName != "") {
+		if (inputOutput.fileToDir != '' && inputOutput.fileToName != '') {
 			inputOutput.fileTo = path.join(inputOutput.fileToDir, inputOutput.fileToName + ext);
 			fileTo.value = inputOutput.fileTo;
-			fileTo.dispatchEvent(new Event("change"));
+			fileTo.dispatchEvent(new Event('change'));
 		}
 	});
 
 	// =================================================
 	// ================= Variables =====================
-	ipcRenderer.on("sendCommand-reply", (event, response) => {
+	ipcRenderer.on('sendCommand-reply', (event, response) => {
 		variables = response.variables;
 		//load variable list
-		const variablesList = document.getElementById("variables");
-		const variablesListCases = document.getElementById("variablesCases");
+		const variablesList = document.getElementById('variables');
+		const variablesListCases = document.getElementById('variablesCases');
 		all_vars_selected = true;
 
 		for (const key in variables) {
-			const formCheck = document.createElement("div");
-			formCheck.classList.add("form-check");
-			formCheck.style.marginLeft = "5px";
-			formCheck.style.cursor = "pointer";
-			formCheck.id = "div-" + key;
+			const formCheck = document.createElement('div');
+			formCheck.classList.add('form-check');
+			formCheck.style.marginLeft = '5px';
+			formCheck.style.cursor = 'pointer';
+			formCheck.id = 'div-' + key;
 
-			const elInput = document.createElement("input");
-			elInput.classList.add("form-check-input");
-			elInput.type = "checkbox";
+			const elInput = document.createElement('input');
+			elInput.classList.add('form-check-input');
+			elInput.type = 'checkbox';
 			elInput.checked = true;
 			// TODO -- is this okay? are the variables unique?
 			elInput.id = key;
-			const elLabel = document.createElement("label");
-			elLabel.classList.add("form-check-label");
+			const elLabel = document.createElement('label');
+			elLabel.classList.add('form-check-label');
 			// elLabel.htmlFor = key;
 			elLabel.innerHTML = key;
 			formCheck.appendChild(elInput);
@@ -326,27 +330,27 @@ window.addEventListener("DOMContentLoaded", () => {
 			// console.log(formCheck);
 			variablesList?.appendChild(formCheck);
 
-			formCheck.addEventListener("click", () => {
-				// console.log(formCheck.classList.contains("activeVariable"));
+			formCheck.addEventListener('click', () => {
+				// console.log(formCheck.classList.contains('activeVariable'));
 
-				if (formCheck.classList.contains("activeVariable")) {
+				if (formCheck.classList.contains('activeVariable')) {
 					removeActive();
-					(<HTMLDivElement>document.getElementById("variable-label")).innerHTML = "";
-					(<HTMLDivElement>document.getElementById("value-labels")).innerHTML = "";
+					(<HTMLDivElement>document.getElementById('variable-label')).innerHTML = '';
+					(<HTMLDivElement>document.getElementById('value-labels')).innerHTML = '';
 				} else {
 					removeActive();
-					formCheck.classList.add("activeVariable");
+					formCheck.classList.add('activeVariable');
 
 					const el = <HTMLInputElement>document.querySelector('.activeVariable input[type="checkbox"]');
 					// console.log(formCheck);
 					// console.log(variables[formCheck.id]);
 					if (variables[el.id]) {
-						(<HTMLDivElement>document.getElementById("variable-label")).innerHTML = variables[el.id].label[0];
-						const vals = <HTMLDivElement>document.getElementById("value-labels");
-						let valList = "";
+						(<HTMLDivElement>document.getElementById('variable-label')).innerHTML = variables[el.id].label[0];
+						const vals = <HTMLDivElement>document.getElementById('value-labels');
+						let valList = '';
 						if (Object.keys(variables[el.id].values).length > 0) {
 							for (const key in variables[el.id].values) {
-								valList += '<div class="ms-2">' + key + " : " + variables[el.id].values[key] + "</div>";
+								valList += '<div class="ms-2">' + key + ' : ' + variables[el.id].values[key] + '</div>';
 							}
 						}
 						vals.innerHTML = valList;
@@ -354,35 +358,35 @@ window.addEventListener("DOMContentLoaded", () => {
 				}
 			});
 
-			elInput.addEventListener("click", () => {
+			elInput.addEventListener('click', () => {
 				variables[key].selected[0] = elInput.checked;
 			});
 
-			const caseVar = document.createElement("div");
-			caseVar.classList.add("caseVar");
-			caseVar.style.paddingLeft = "10px";
-			caseVar.style.cursor = "pointer";
+			const caseVar = document.createElement('div');
+			caseVar.classList.add('caseVar');
+			caseVar.style.paddingLeft = '10px';
+			caseVar.style.cursor = 'pointer';
 			caseVar.innerHTML = key;
 			caseVar.dataset.id = key;
-			caseVar.id = "case-" + key;
+			caseVar.id = 'case-' + key;
 			variablesListCases?.appendChild(caseVar);
-			caseVar.addEventListener("dblclick", (e) => {
-				// console.log((<HTMLDivElement>e.target).getAttribute("data-id"));
-				const key = (<HTMLDivElement>e.target).getAttribute("data-id");
+			caseVar.addEventListener('dblclick', (e) => {
+				// console.log((<HTMLDivElement>e.target).getAttribute('data-id'));
+				const key = (<HTMLDivElement>e.target).getAttribute('data-id');
 				if (key) {
 					// added space after name/key
-					insertAtPosition("select_cases", key + " ");
+					insertAtPosition('select_cases', key + ' ');
 				}
 			});
 		}
 
 		// Search for variables
-		(<HTMLInputElement>document.getElementById("varsearch")).addEventListener("keyup", debounce(varSearchF.bind(this, variables), 750));
+		(<HTMLInputElement>document.getElementById('varsearch')).addEventListener('keyup', debounce(varSearchF.bind(this, variables), 750));
 
 		// Search for variables in cases
-		(<HTMLInputElement>document.getElementById("varSearchCases")).addEventListener("keyup", debounce(varSearchCasesF.bind(this, variables), 750));
+		(<HTMLInputElement>document.getElementById('varSearchCases')).addEventListener('keyup', debounce(varSearchCasesF.bind(this, variables), 750));
 
-		document.getElementById("select-all-variables")?.addEventListener("click", () => {
+		document.getElementById('select-all-variables')?.addEventListener('click', () => {
 			Object.keys(variables).forEach((item) => {
 				(<HTMLInputElement>document.getElementById(item)).checked = true;
 				variables[item].selected[0] = true;
@@ -390,7 +394,7 @@ window.addEventListener("DOMContentLoaded", () => {
 			all_vars_selected = true;
 		});
 
-		document.getElementById("deselect-all-variables")?.addEventListener("click", () => {
+		document.getElementById('deselect-all-variables')?.addEventListener('click', () => {
 			Object.keys(variables).forEach((item) => {
 				(<HTMLInputElement>document.getElementById(item)).checked = false;
 				variables[item].selected[0] = false;
@@ -398,30 +402,30 @@ window.addEventListener("DOMContentLoaded", () => {
 			all_vars_selected = false;
 		});
 
-		document.getElementById("keep-variables")?.addEventListener("click", () => {
-			let f1 = "";
-			document.getElementsByName("filterRadio").forEach((item) => {
+		document.getElementById('keep-variables')?.addEventListener('click', () => {
+			let f1 = '';
+			document.getElementsByName('filterRadio').forEach((item) => {
 				if ((<HTMLInputElement>item).checked) {
 					f1 = (<HTMLInputElement>item).value;
 				}
 			});
 
-			const f2 = (<HTMLInputElement>document.getElementById("filterInput")).value;
+			const f2 = (<HTMLInputElement>document.getElementById('filterInput')).value;
 
 			// console.log(f1);
 			// console.log(f2);
 			filterVar(variables, f1, f2, true);
 		});
 
-		document.getElementById("drop-variables")?.addEventListener("click", () => {
-			let f1 = "";
-			document.getElementsByName("filterRadio").forEach((item) => {
+		document.getElementById('drop-variables')?.addEventListener('click', () => {
+			let f1 = '';
+			document.getElementsByName('filterRadio').forEach((item) => {
 				if ((<HTMLInputElement>item).checked) {
 					f1 = (<HTMLInputElement>item).value;
 				}
 			});
 
-			const f2 = (<HTMLInputElement>document.getElementById("filterInput")).value;
+			const f2 = (<HTMLInputElement>document.getElementById('filterInput')).value;
 
 			// console.log(f1);
 			// console.log(f2);
@@ -431,19 +435,19 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 function removeActive() {
-	document.querySelectorAll("#variables .form-check").forEach((item) => {
-		item.classList.remove("activeVariable");
+	document.querySelectorAll('#variables .form-check').forEach((item) => {
+		item.classList.remove('activeVariable');
 	});
 }
 
 type variablesType = { [key: string]: { label: [string]; values: { [key: string]: [string] }; missing: [string]; selected: [boolean] } };
 
 function filterVar(variables: variablesType, f1: string, f2: string, make: boolean) {
-	if (f2 == "") {
-		alert("Text or pattern should be specified.");
+	if (f2 == '') {
+		alert('Text or pattern should be specified.');
 	} else {
-		console.log("working...");
-		if (f1 == "1") {
+		console.log('working...');
+		if (f1 == '1') {
 			for (const key in variables) {
 				if (key.indexOf(f2) != -1) {
 					(<HTMLInputElement>document.getElementById(key)).checked = make;
@@ -451,12 +455,12 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
 				}
 			}
 		} else {
-			if (f2.indexOf("*") == -1) {
-				alert("Pattern should include a star sign * at the beginning or at the end");
+			if (f2.indexOf('*') == -1) {
+				alert('Pattern should include a star sign * at the beginning or at the end');
 			} else {
 				// check pattern
 				// ends with
-				if (f2.slice(0, 1) == "*") {
+				if (f2.slice(0, 1) == '*') {
 					const searchFor = f2.slice(-f2.length + 1);
 					for (const key in variables) {
 						if (key.slice(-searchFor.length) == searchFor) {
@@ -466,7 +470,7 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
 					}
 				}
 				// starts with
-				if (f2.slice(-1) == "*") {
+				if (f2.slice(-1) == '*') {
 					const searchFor = f2.slice(0, -1);
 					console.log(searchFor);
 					for (const key in variables) {
@@ -482,34 +486,34 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
 }
 
 function varSearchF(variables: variablesType): void {
-	const value = (<HTMLInputElement>document.getElementById("varsearch")).value;
-	if (value != "") {
+	const value = (<HTMLInputElement>document.getElementById('varsearch')).value;
+	if (value != '') {
 		for (const key in variables) {
 			if (key.indexOf(value) == -1) {
-				(<HTMLInputElement>document.getElementById("div-" + key)).style.display = "none";
+				(<HTMLInputElement>document.getElementById('div-' + key)).style.display = 'none';
 			} else {
-				(<HTMLInputElement>document.getElementById("div-" + key)).style.display = "block";
+				(<HTMLInputElement>document.getElementById('div-' + key)).style.display = 'block';
 			}
 		}
 	} else {
 		for (const key in variables) {
-			(<HTMLInputElement>document.getElementById("div-" + key)).style.display = "block";
+			(<HTMLInputElement>document.getElementById('div-' + key)).style.display = 'block';
 		}
 	}
 }
 function varSearchCasesF(variables: variablesType): void {
-	const value = (<HTMLInputElement>document.getElementById("varSearchCases")).value;
-	if (value != "") {
+	const value = (<HTMLInputElement>document.getElementById('varSearchCases')).value;
+	if (value != '') {
 		for (const key in variables) {
 			if (key.indexOf(value) == -1) {
-				(<HTMLInputElement>document.getElementById("case-" + key)).style.display = "none";
+				(<HTMLInputElement>document.getElementById('case-' + key)).style.display = 'none';
 			} else {
-				(<HTMLInputElement>document.getElementById("case-" + key)).style.display = "block";
+				(<HTMLInputElement>document.getElementById('case-' + key)).style.display = 'block';
 			}
 		}
 	} else {
 		for (const key in variables) {
-			(<HTMLInputElement>document.getElementById("case-" + key)).style.display = "block";
+			(<HTMLInputElement>document.getElementById('case-' + key)).style.display = 'block';
 		}
 	}
 }
@@ -536,7 +540,7 @@ function insertAtPosition(areaId: string, text: string) {
 	console.log('aici');
 	
 
-	console.log("gasit");
+	console.log('gasit');
 	console.log(text);
 
 	const scrollPos = txtarea.scrollTop;
