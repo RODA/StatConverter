@@ -99,6 +99,10 @@ app.whenReady().then(() => {
 							properties: ["openFile"],
 						})
 						.then((result) => {
+
+							if(result.canceled){
+								app.quit();
+							}
 							// console.log(result.filePaths);
 							R_path = result.filePaths[0];
 
