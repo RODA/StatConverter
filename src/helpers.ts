@@ -400,7 +400,7 @@ export const helpers = {
             case '.dta':
                 type = 'stata';
                 break
-            case 'rds':
+            case '.rds':
                 type = 'r';
                 break
         }
