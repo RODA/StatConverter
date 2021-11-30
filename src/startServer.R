@@ -2,79 +2,79 @@
 attach(NULL, name = "RGUI") 
 env <- as.environment("RGUI")
 
-packages <- c("DDIwR", "digest", "httpuv", "jsonlite")
-installed <- logical(length(packages))
-
-for (i in seq(length(packages))) {
-    installed[i] <- requireNamespace(packages[i], quietly = TRUE)
-}
-
-if (sum(installed) < length(packages)) {
-    cat(paste("Package(s) not installed:", paste(packages[!installed], collapse = ", "), "\n"))
-} else {
     
-    env$RGUI_server <- httpuv::startServer("127.0.0.1", 12345,
-        list(
-            onHeaders = function(req) {
-                # cat(capture.output(str(as.list(req))), sep = "\n")
-            },
-            onWSOpen = function(ws) {
-                cat("Connection opened.\n")
-                ws$onMessage(function(binary, message) {
-                    cat("Server received message:", message, "\n")
-                    
-                    # if (grepl("RGUI_call\\.R", message)) {
-                    #     eval(parse(text = message), envir = .GlobalEnv)
-                    # } else {
-                        
-                        toreturn <- RGUI_tryCatchWEM(
-                            # I have my own function RGUI_evalparse()
-                            # but don't remember why I need that function
-                            eval(
-                                parse(text = message),
-                                envir = .GlobalEnv
-                            )
-                        )
-
-                        if (length(toreturn) == 0) {
-                            toreturn <- list(error = "")
-                        }
-                        else {
-                            toreturn$visible <- NULL
-                            if (is.null(toreturn$error)) {
-                                toreturn$error <- ""
-                            }
-                        }
-
-                        objects <- ls(envir = .GlobalEnv)
-
-                        if (length(objects) > 0 & grepl("n_max", message)) {
-                            # toreturn$info <- RGUI_tryCatchWEM(RGUI_call())$visible
-                            toreturn$variables <- RGUI_tryCatchWEM(RGUI_variables())$visible
-                        }
-                        
-                        # print(console)
-
-                        ws$send(
-                            jsonlite::toJSON(
-                                toreturn,
-                                pretty = TRUE
-                            )
-                        )
-                        
-                    # }
-                })
-                ws$onClose(function() {
-                    cat("Connection closed (message in R).\n")
-                })
+env$RGUI_server <- httpuv::startServer("127.0.0.1", 12345,
+    list(
+        onHeaders = function(req) {
+            # cat(capture.output(str(as.list(req))), sep = "\n")
+        },
+        onWSOpen = function(ws) {
+            
+            packages <- c("DDIwR", "digest", "httpuv", "jsonlite")
+            installed <- logical(length(packages))
+            for (i in seq(length(packages))) {
+                installed[i] <- requireNamespace(packages[i], quietly = TRUE)
             }
-        )
+
+            cat("Connection opened.\n")
+            
+            ws$onMessage(function(binary, message) {
+                cat("Server received message:", message, "\n")
+                
+                # if (grepl("RGUI_call\\.R", message)) {
+                #     eval(parse(text = message), envir = .GlobalEnv)
+                # } else {
+
+                if (sum(installed) < length(packages)) {
+                    toreturn <- list(error = paste("Unable to load packages:", paste(packages[!installed], collapse = ", ")))
+                }
+                else {
+                    toreturn <- RGUI_tryCatchWEM(
+                        # I have my own function RGUI_evalparse()
+                        # but don't remember why I need that function
+                        eval(
+                            parse(text = message),
+                            envir = .GlobalEnv
+                        )
+                    )
+
+                    if (length(toreturn) == 0) {
+                        toreturn <- list(error = "")
+                    }
+                    else {
+                        toreturn$visible <- NULL
+                        if (is.null(toreturn$error)) {
+                            toreturn$error <- ""
+                        }
+                    }
+
+                    objects <- ls(envir = .GlobalEnv)
+
+                    if (length(objects) > 0 & grepl("n_max", message)) {
+                        # toreturn$info <- RGUI_tryCatchWEM(RGUI_call())$visible
+                        toreturn$variables <- RGUI_tryCatchWEM(RGUI_variables())$visible
+                    }
+                }
+                    
+                    # print(console)
+
+                    ws$send(
+                        jsonlite::toJSON(
+                            toreturn,
+                            pretty = TRUE
+                        )
+                    )
+                    
+                # }
+            })
+            ws$onClose(function() {
+                cat("Connection closed (message in R).\n")
+            })
+        }
     )
-    
-    cat("_server_started_\n")
+)
 
-
-}
+cat("_server_started_\n")
 
 
 env$RGUI_formatted <- FALSE
@@ -924,4 +924,4 @@ env$RGUI_evalparse <- function(foo) {
     return(evaluateit)
 }
 
-rm(env, packages, installed, i)
+rm(env, i)

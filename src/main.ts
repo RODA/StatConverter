@@ -84,6 +84,7 @@ app.whenReady().then(() => {
 		}
 
 		R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
+
 	} catch (error) {
 		dialog
 			.showMessageBox(mainWindow, {
@@ -148,6 +149,11 @@ app.whenReady().then(() => {
 						inputOutput.fileFromName = path.basename(inputOutput.fileFrom, ext);
 						inputOutput.fileFromDir = path.dirname(inputOutput.fileFrom);
 
+						if (process.platform == "win32") {
+							inputOutput.fileFrom = inputOutput.fileFrom.replace(/\\/g, '/');
+							inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
+						}
+
 						event.reply("selectFileFrom-reply", inputOutput);
 					}
 				})
@@ -181,6 +187,13 @@ app.whenReady().then(() => {
 						inputOutput.outputType = helpers.getTypeFromExtension(ext);
 						inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
 						inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
+
+						if (process.platform == "win32") {
+							inputOutput.fileTo = inputOutput.fileTo.replace(/\\/g, '/');
+							inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
+						}
+
+						console.log(inputOutput.fileTo);
 						event.reply("selectFileTo-reply", inputOutput);
 					}
 				})
@@ -230,10 +243,21 @@ app.on("window-all-closed", () => {
 const start_R_server = function (R_path: string): void {
 	const RptyProcess = pty.spawn(R_path, ["-q", "--no-save"], {});
 
-	RptyProcess.write('source("' + path.join(__dirname, "../src/") + 'startServer.R")\n');
+	let command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
+	if (process.platform === "win32") {
+		command = command.replace(/\\/g, '/'); // replace backslash with forward slash
+	}
+	
+	command += '\n';
+	// console.log(command);
+	
+	RptyProcess.write(command);
 
 	RptyProcess.onData((data) => {
-		if (data.includes("_server_started_")) {
+		
+		const datanoe = data.replace(/(\r\n|\n|\r)/gm, "");
+		
+		if (datanoe.includes("_server_started_")) {
 			// console.log("server started");
 			// TODO -- check if there is no error on that port
 			Rws = new WebSocket("ws://127.0.0.1:12345");
@@ -253,13 +277,6 @@ const start_R_server = function (R_path: string): void {
 				} else if (response.variables) {
 					mainWindow.webContents.send("sendCommand-reply", response);
 				}
-			});
-		} else if (data.includes("Package(s) not installed")) {
-			// server_started = false;
-			dialog.showMessageBox(mainWindow, {
-				type: "error",
-				title: "Missing packages",
-				message: data,
 			});
 		}
 	});

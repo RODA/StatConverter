@@ -280,6 +280,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	});
 
 	outputType.addEventListener('change', function () {
+		
 		const outputTypeValue = outputType.options[outputType.selectedIndex].value;
 		inputOutput.outputType = outputTypeValue;
 		const ext = helpers.getExtensionFromType(outputTypeValue);
@@ -294,6 +295,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 		if (inputOutput.fileToDir != '' && inputOutput.fileToName != '') {
 			inputOutput.fileTo = path.join(inputOutput.fileToDir, inputOutput.fileToName + ext);
+
+			if (process.platform == "win32") {
+				inputOutput.fileTo = inputOutput.fileTo.replace(/\\/g, '/');
+				inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
+			}
+
 			fileTo.value = inputOutput.fileTo;
 			fileTo.dispatchEvent(new Event('change'));
 		}
