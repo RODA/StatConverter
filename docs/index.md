@@ -6,6 +6,8 @@ It is a graphical user interface using Node.js and Electron, to build cross-plat
 
 This is not a self-contained application, instead it relies on an existing installation of the [R](https://cran.r-project.org/bin/) software, much like RStudio which sits on top of R.
 
+Platform specific binaries will be uploaded here in this page, in the upcoming future, so users can download and run the latest version of the software.
+
 
 ### Installing the necessary R packages
 
