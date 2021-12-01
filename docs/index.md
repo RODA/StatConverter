@@ -4,14 +4,14 @@ StatConverter is a tool to convert to and from various statistical software form
 
 It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript.
 
-This is not a self-contained application, instead it relies on an existing installation of the [R](https://cran.r-project.org/bin/) software, much like RStudio which sits on top of R.
+This is not a self-contained application, instead it relies on an existing installation of the [**R**](https://cran.r-project.org/bin/) software, much like RStudio which sits on top of **R**.
 
 Platform specific binaries will be uploaded here in this page, in the upcoming future, so users can download and run the latest version of the software.
 
 
-### Installing the necessary R packages
+### Installing the necessary **R** packages
 
-StatConverter uses a number of R packages that need to be installed:
+StatConverter uses a number of **R** packages that need to be installed:
 
 ```r
 install.packages(c("DDIwR", "httpuv", "digest", "jsonlite"), dependencies = TRUE)
@@ -33,8 +33,8 @@ On Unix systems (including MacOS), R is automatically added to the system PATH u
 
 - double-click on the "Path" variable to open it
 
-- click on "New", then "Browse" and indicate the folder where R is installed, typically in C:/Program Files/R/R-4.1/bin
-(the actual version number depends on the moment when R is installed)
+- click on "New", then "Browse" and indicate the folder where **R** is installed, typically in C:/Program Files/R/R-4.1/bin
+(the actual version number depends on the moment when **R** is installed)
 
 ### Running StatConverter from within Node
 
