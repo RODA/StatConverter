@@ -91,9 +91,6 @@ app.whenReady().then(() => {
 				env: process.env,
 				encoding: "utf-8" as BufferEncoding,
 			});
-
-			// logging.info(findR);
-			// logging.info("======");
 		}
 
 		R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
@@ -101,41 +98,35 @@ app.whenReady().then(() => {
 		// logging.info(findR);
 		
 	} catch (error) {
-		dialog.showErrorBox('unu', logging.path)
-		logging.info(JSON.stringify(error));
 		dialog
-			.showMessageBox(mainWindow, {
+			const selectR = dialog.showMessageBoxSync(mainWindow, {
 				type: "question",
 				title: "Select R path",
 				message: "Could not find R. Select the path to the binary?",
+				buttons: ['No', 'Yes']
 			})
-			.then((response) => {
-				if (response) {
-					dialog
-						.showOpenDialog(mainWindow, {
-							title: "R path",
-							properties: ["openFile"],
-						})
-						.then((result) => {
+			if(selectR == 1){
+					const result = dialog.showOpenDialogSync(mainWindow, {
+						title: "R path",
+						properties: ["openFile"],
+					});
+					if (result) {
+						if (!result[0]) {
+							app.quit();
+						}
 
-							if(result.canceled){
-								app.quit();
-							}
-							
-							R_path = result.filePaths[0];
+						R_path = result[0];
 
-							if (R_path != "") {
-								start_R_server(R_path);
-							}
-						});
+						if (R_path != "") {
+							start_R_server(R_path);
+						}
+					}
 				}
-			});
 	}
 
 	if (R_path != "") {
 		start_R_server(R_path);
 	}
-	
 	
 	// logging.info('TESTING ===========');
 	// logging.info(R_path);
@@ -269,18 +260,25 @@ const start_R_server = function (R_path: string): void {
 	}
 
 	RptyProcess = pty.spawn(R_path, ["-q", "--no-save"], {
-		env: penv
+		// env: penv
 	});
 
-	let command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
+	let command: string;
+	if (process.env.NODE_ENV === "development") {
+		command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
+	} else {
+		command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
+	}
 	if (process.platform === "win32") {
 		command = command.replace(/\\/g, '/'); // replace backslash with forward slash
 	}
 	
 	command += '\n';
 	
-	dialog.showErrorBox("doi", logging.path);
-	logging.info(command);
+	dialog.showErrorBox('r', command);
+
+	// dialog.showErrorBox("doi", logging.path);
+	// logging.info(command);
 
 	RptyProcess.write(command);
 

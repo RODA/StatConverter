@@ -46,22 +46,31 @@
 		"eslint": "^7.26.0",
 		"typescript": "^4.2.4"
 	},
-  
-  "build": {
-        "appId": "StatConverter.tool",
-        "productName": "StatConverter",
-        "directories": {
-            "output": "build/output"
-        },
-        "win": {
-            "icon": "build/icon.ico",
-            "legalTrademarks": "MIT Licence",
-            "target": {
-                "target": "dir"
-            }
-        },
-        "mac": {
-            "target": "dir"
-        }
-    }
+	"build": {
+		"appId": "StatConverter.tool",
+		"productName": "StatConverter",
+		"directories": {
+			"output": "build/output"
+		},
+		"extraResources": [
+			{
+				"from": "src/startServer.R",
+				"to": "startServer.R"
+			},
+			{
+				"from": "src/assets",
+				"to": "assets"
+			}
+		],
+		"win": {
+			"icon": "build/icon.ico",
+			"legalTrademarks": "MIT Licence",
+			"target": {
+				"target": "dir"
+			}
+		},
+		"mac": {
+			"target": "dir"
+		}
+	}
 }
