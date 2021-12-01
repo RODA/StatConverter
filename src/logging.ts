@@ -18,6 +18,7 @@ const today = new Date();
 export const logging = {
 	theFile: "log-" + today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate() + ".log",
 	path: path.normalize(__dirname + "/../"),
+	// path: "",
 
 	info: function (message: string, file?: string): void {
 		if (file) {
@@ -50,7 +51,7 @@ export const logging = {
 
 	writeToFile: function (data: string): void {
 		if (process.env.NODE_ENV !== "development") {
-			logging.theFile = path.join(logging.path+ "/../../../../") + logging.theFile;
+			logging.theFile = path.normalize(logging.path + "../../../../") + logging.theFile;
 		} else {
 			logging.theFile = path.normalize(logging.path + logging.theFile);
 		}

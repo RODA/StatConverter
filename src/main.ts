@@ -1,9 +1,5 @@
-process.env.NODE_ENV = "development";
-// process.env.NODE_ENV = 'production';
-
-if (require('electron-squirrel-startup')) {
-	app.quit();
-}
+// process.env.NODE_ENV = "development";
+process.env.NODE_ENV = 'production';
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
@@ -14,6 +10,7 @@ import WebSocket from "ws";
 import { InputOutputType } from "./interfaces";
 
 import { helpers } from "./helpers";
+import { logging } from "./logging";
 
 let mainWindow: BrowserWindow;
 let Rws: WebSocket;
@@ -24,7 +21,6 @@ app.on("window-all-closed", () => {
 	if (RptyProcess) {
 		RptyProcess.kill();
 	}
-	
 	app.quit();
 });
 
@@ -80,6 +76,7 @@ app.whenReady().then(() => {
 	let findR;
 	
 	try {
+
 		if (process.platform === "win32") {
 			findR = commandExec.execSync("where.exe R", {
 				shell: "cmd.exe",
@@ -94,11 +91,18 @@ app.whenReady().then(() => {
 				env: process.env,
 				encoding: "utf-8" as BufferEncoding,
 			});
+
+			// logging.info(findR);
+			// logging.info("======");
 		}
 
 		R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
 
+		// logging.info(findR);
+		
 	} catch (error) {
+		dialog.showErrorBox('unu', logging.path)
+		logging.info(JSON.stringify(error));
 		dialog
 			.showMessageBox(mainWindow, {
 				type: "question",
@@ -131,7 +135,10 @@ app.whenReady().then(() => {
 	if (R_path != "") {
 		start_R_server(R_path);
 	}
-
+	
+	
+	// logging.info('TESTING ===========');
+	// logging.info(R_path);
 	ipcMain.on("selectFileFrom", (event, args) => {
 		if (args.inputType === "Select file type") {
 			dialog.showErrorBox("Error", "Select input type");
@@ -272,6 +279,9 @@ const start_R_server = function (R_path: string): void {
 	
 	command += '\n';
 	
+	dialog.showErrorBox("doi", logging.path);
+	logging.info(command);
+
 	RptyProcess.write(command);
 
 	RptyProcess.onData((data) => {
