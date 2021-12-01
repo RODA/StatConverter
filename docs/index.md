@@ -4,7 +4,7 @@ StatConverter is a tool to convert to and from various statistical software form
 
 It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript.
 
-This is not a self-contained application, instead it relies on an existing installation of the [**R**](https://cran.r-project.org/bin/) software, much like RStudio which sits on top of **R**.
+This is not a self-contained application, instead it relies on an existing installation of the **R** software (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio which sits on top of **R**.
 
 Platform specific binaries will be uploaded here in this page, in the upcoming future, so users can download and run the latest version of the software.
 
