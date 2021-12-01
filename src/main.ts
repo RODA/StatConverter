@@ -1,8 +1,11 @@
 process.env.NODE_ENV = "development";
 // process.env.NODE_ENV = 'production';
 
-import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
+if (require('electron-squirrel-startup')) {
+	app.quit();
+}
 
+import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
 import * as commandExec from "child_process";
 import * as pty from "node-pty";
@@ -14,6 +17,16 @@ import { helpers } from "./helpers";
 
 let mainWindow: BrowserWindow;
 let Rws: WebSocket;
+
+let RptyProcess: pty.IPty;
+
+app.on("window-all-closed", () => {
+	if (RptyProcess) {
+		RptyProcess.kill();
+	}
+	
+	app.quit();
+});
 
 const inputOutput: InputOutputType = {
 	inputType: "",
@@ -43,7 +56,7 @@ function createWindow() {
 
 	mainWindow.loadFile(path.join(__dirname, "../index.html"));
 
-	if (process.env.NODE_ENV !== "development") {
+	if (process.env.NODE_ENV === "production") {
 		mainWindow.removeMenu();
 	}
 
@@ -65,10 +78,10 @@ app.whenReady().then(() => {
 	// check if R is installed
 	let R_path = "";
 	let findR;
-
+	
 	try {
 		if (process.platform === "win32") {
-			findR = commandExec.execSync("where.exe R.exe", {
+			findR = commandExec.execSync("where.exe R", {
 				shell: "cmd.exe",
 				cwd: process.cwd(),
 				env: process.env,
@@ -104,7 +117,7 @@ app.whenReady().then(() => {
 							if(result.canceled){
 								app.quit();
 							}
-							// console.log(result.filePaths);
+							
 							R_path = result.filePaths[0];
 
 							if (R_path != "") {
@@ -114,8 +127,6 @@ app.whenReady().then(() => {
 				}
 			});
 	}
-
-	// console.log(shell);
 
 	if (R_path != "") {
 		start_R_server(R_path);
@@ -226,12 +237,6 @@ app.whenReady().then(() => {
 	});
 });
 
-app.on("window-all-closed", () => {
-	if (process.platform !== "darwin") {
-		app.quit();
-	}
-});
-
 // let Rprocess: commandExec.ChildProcessWithoutNullStreams;
 
 // const pause = async function(x: number): Promise<boolean> {
@@ -241,7 +246,24 @@ app.on("window-all-closed", () => {
 // }
 
 const start_R_server = function (R_path: string): void {
-	const RptyProcess = pty.spawn(R_path, ["-q", "--no-save"], {});
+	
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let penv: any;
+	// eslint-disable-next-line prefer-const
+	penv = process.env;
+
+	if (process.platform === "win32") {
+		if (penv.HOME && !(penv.HOME.includes("Documents"))) {
+			penv.HOME = penv.HOME + '\\Documents';
+		}
+	}
+	else {
+		penv.test = "test";
+	}
+
+	RptyProcess = pty.spawn(R_path, ["-q", "--no-save"], {
+		env: penv
+	});
 
 	let command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
 	if (process.platform === "win32") {
@@ -249,7 +271,6 @@ const start_R_server = function (R_path: string): void {
 	}
 	
 	command += '\n';
-	// console.log(command);
 	
 	RptyProcess.write(command);
 

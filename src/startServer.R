@@ -1,7 +1,6 @@
 
 attach(NULL, name = "RGUI") 
 env <- as.environment("RGUI")
-
     
 env$RGUI_server <- httpuv::startServer("127.0.0.1", 12345,
     list(
@@ -21,17 +20,16 @@ env$RGUI_server <- httpuv::startServer("127.0.0.1", 12345,
             ws$onMessage(function(binary, message) {
                 cat("Server received message:", message, "\n")
                 
-                # if (grepl("RGUI_call\\.R", message)) {
-                #     eval(parse(text = message), envir = .GlobalEnv)
-                # } else {
-
                 if (sum(installed) < length(packages)) {
-                    toreturn <- list(error = paste("Unable to load packages:", paste(packages[!installed], collapse = ", ")))
+                    toreturn <- list(
+                        error = paste(
+                            "Unable to load packages:",
+                            paste(packages[!installed], collapse = ", ")
+                        )
+                    )
                 }
                 else {
                     toreturn <- RGUI_tryCatchWEM(
-                        # I have my own function RGUI_evalparse()
-                        # but don't remember why I need that function
                         eval(
                             parse(text = message),
                             envir = .GlobalEnv
@@ -51,22 +49,18 @@ env$RGUI_server <- httpuv::startServer("127.0.0.1", 12345,
                     objects <- ls(envir = .GlobalEnv)
 
                     if (length(objects) > 0 & grepl("n_max", message)) {
-                        # toreturn$info <- RGUI_tryCatchWEM(RGUI_call())$visible
                         toreturn$variables <- RGUI_tryCatchWEM(RGUI_variables())$visible
                     }
                 }
-                    
-                    # print(console)
 
-                    ws$send(
-                        jsonlite::toJSON(
-                            toreturn,
-                            pretty = TRUE
-                        )
+                ws$send(
+                    jsonlite::toJSON(
+                        toreturn,
+                        pretty = TRUE
                     )
-                    
-                # }
+                )
             })
+
             ws$onClose(function() {
                 cat("Connection closed (message in R).\n")
             })

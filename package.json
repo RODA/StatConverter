@@ -80,15 +80,6 @@
   "build": {
     "appId": "StatConverter.tool",
     "productName": "StatConverter",
-    "directories": {
-      "output": "build/output"
-    },
-    "extraResources": [
-      {
-        "from": "src/assets/",
-        "to": "assets"
-      }
-    ],
     "win": {
       "icon": "build/icon.ico",
       "legalTrademarks": "MIT Licence",

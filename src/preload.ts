@@ -55,7 +55,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	});
 
 	ipcRenderer.on('startLoader', () => {
-		console.log('start loader');
+		// console.log('start loader');
 
 		document.body.classList.add('stop-scrolling');
 		(<HTMLDivElement>document.getElementById('loader')).classList.remove('d-none');
@@ -63,7 +63,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	});
 
 	ipcRenderer.on('clearLoader', () => {
-		console.log('clear loader');
+		// console.log('clear loader');
 		document.body.classList.remove('stop-scrolling');
 		(<HTMLDivElement>document.getElementById('loader')).classList.add('d-none');
 		(<HTMLDivElement>document.getElementById('cover')).classList.add('d-none');
@@ -453,7 +453,7 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
 	if (f2 == '') {
 		alert('Text or pattern should be specified.');
 	} else {
-		console.log('working...');
+		// console.log('working...');
 		if (f1 == '1') {
 			for (const key in variables) {
 				if (key.indexOf(f2) != -1) {
@@ -479,7 +479,7 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
 				// starts with
 				if (f2.slice(-1) == '*') {
 					const searchFor = f2.slice(0, -1);
-					console.log(searchFor);
+					// console.log(searchFor);
 					for (const key in variables) {
 						if (key.slice(0, searchFor.length) == searchFor) {
 							(<HTMLInputElement>document.getElementById(key)).checked = make;
@@ -537,18 +537,18 @@ function debounce(callback: () => void, delay: number) {
 function insertAtPosition(areaId: string, text: string) {
 	const txtarea = <HTMLTextAreaElement>document.getElementById(areaId);
 
-	console.log(areaId);
-	console.log(text);
+	// console.log(areaId);
+	// console.log(text);
 
 	if (!txtarea) {
 		return;
 	}
 
-	console.log('aici');
+	// console.log('aici');
 	
 
-	console.log('gasit');
-	console.log(text);
+	// console.log('gasit');
+	// console.log(text);
 
 	const scrollPos = txtarea.scrollTop;
 	let strPos = 0;
