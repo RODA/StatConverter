@@ -9,7 +9,7 @@ This is not a self-contained application, instead it relies on an existing insta
 Platform specific binaries will be uploaded here in this page, in the upcoming future, so users can download and run the latest version of the software.
 
 
-### Installing the necessary **R** packages
+### Installing the necessary R packages
 
 StatConverter uses a number of **R** packages that need to be installed:
 
@@ -36,7 +36,7 @@ On Unix systems (including MacOS), R is automatically added to the system PATH u
 - click on "New", then "Browse" and indicate the folder where **R** is installed, typically in C:/Program Files/R/R-4.1/bin
 (the actual version number depends on the moment when **R** is installed)
 
-### Running StatConverter from within Node
+### Running StatConverter from sources
 
 StatConverter can be started from its source files, not only by using a binary version.
 
