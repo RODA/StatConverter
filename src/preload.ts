@@ -107,9 +107,9 @@ window.addEventListener('DOMContentLoaded', () => {
 		inputOutput.fileFromDir = io.fileFromDir;
 		inputOutput.fileFromName = io.fileFromName;
 
-		let command = 'dataset <- convert("' + io.fileFrom + '", declared = FALSE, n_max = 10';
+		let command = "dataset <- convert('" + io.fileFrom + "', declared = FALSE, n_max = 10";
 		if (fileEncoding.value != 'default') {
-			command += ', encoding = "' + fileEncoding.value + '"';
+			command += ", encoding = '" + fileEncoding.value + "'";
 		}
 
 		command += ')';
@@ -187,7 +187,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (indices.length == 0 && !all_vars_selected) {
 			ipcRenderer.send('showError', { message: 'At least one variable has to be selected.' });
 		} else {
-			let command = 'dataset <- convert("' + inputOutput.fileFrom + '"';
+			let command = "dataset <- convert('" + inputOutput.fileFrom + "'";
 
 			const targetOS = document.getElementById('targetOS') as HTMLInputElement;
 			if (targetOS.value != 'local') {
@@ -206,7 +206,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 			const fileEncoding = document.getElementById('fileEncoding') as HTMLInputElement;
 			if (fileEncoding.value != 'default') {
-				command += ', encoding = "' + fileEncoding.value + '"';
+				command += ", encoding = '" + fileEncoding.value + "'";
 			}
 
 			command += ')';
@@ -237,7 +237,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				}
 			}
 
-			command = 'convert(dataset, to = "' + inputOutput.fileTo + '"';
+			command = "convert(dataset, to = '" + inputOutput.fileTo + "'";
 
 			const embed = document.getElementById('embedFALSE') as HTMLInputElement;
 			if (embed.checked) {
@@ -261,9 +261,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	fileEncoding.addEventListener('change', function () {
 		if (inputOutput.fileFrom != '') {
-			let command = 'dataset <- convert("' + inputOutput.fileFrom + '", declared = FALSE, n_max = 10';
+			let command = "dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE, n_max = 10";
 			if (fileEncoding.value != 'default') {
-				command += ', encoding = "' + fileEncoding.value + '"';
+				command += ", encoding = '" + fileEncoding.value + "'";
 			}
 
 			command += ')';
@@ -296,7 +296,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (inputOutput.fileToDir != '' && inputOutput.fileToName != '') {
 			inputOutput.fileTo = path.join(inputOutput.fileToDir, inputOutput.fileToName + ext);
 
-			if (process.platform == "win32") {
+			if (process.platform == 'win32') {
 				inputOutput.fileTo = inputOutput.fileTo.replace(/\\/g, '/');
 				inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
 			}
