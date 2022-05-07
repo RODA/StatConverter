@@ -337,8 +337,10 @@ window.addEventListener('DOMContentLoaded', () => {
 	ipcRenderer.on('sendCommand-reply', (event, response) => {
 		variables = response.variables;
 		//load variable list
-		const variablesList = document.getElementById('variables');
-		const variablesListCases = document.getElementById('variablesCases');
+		const variablesList = document.getElementById('variables') as HTMLElement;
+		const variablesListCases = document.getElementById('variablesCases') as HTMLElement;
+        variablesList.innerHTML = '';
+        variablesListCases.innerHTML = '';
 		all_vars_selected = true;
 
 		for (const key in variables) {
