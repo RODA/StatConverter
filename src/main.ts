@@ -84,7 +84,7 @@ app.whenReady().then(() => {
 
     if (process.platform == 'win32') {
 		if (process.env.NODE_ENV == "production") {
-        	R_path = path.join(__dirname, '../../R_Portable/bin/R.exe');
+            R_path = path.join(__dirname, '../../R_Portable/bin/R.exe');
 		}
 		else {
 			R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
@@ -114,33 +114,32 @@ app.whenReady().then(() => {
             R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
     
         } catch (error) {
-            dialog
-                .showMessageBox(mainWindow, {
-                    type: "question",
-                    title: "Select R path",
-                    message: "Could not find R. Select the path to the binary?",
-                })
-                .then((response) => {
-                    if (response) {
-                        dialog
-                            .showOpenDialog(mainWindow, {
-                                title: "R path",
-                                properties: ["openFile"],
-                            })
-                            .then((result) => {
-    
-                                if(result.canceled){
-                                    app.quit();
-                                }
-                                
-                                R_path = result.filePaths[0];
-    
-                                if (R_path != "") {
-                                    start_R(R_path);
-                                }
-                            });
-                    }
-                });
+            dialog.showMessageBox(mainWindow, {
+                type: "question",
+                title: "Select R path",
+                message: "Could not find R. Select the path to the binary?",
+            })
+            .then((response) => {
+                if (response) {
+                    dialog
+                        .showOpenDialog(mainWindow, {
+                            title: "R path",
+                            properties: ["openFile"],
+                        })
+                        .then((result) => {
+
+                            if(result.canceled){
+                                app.quit();
+                            }
+                            
+                            R_path = result.filePaths[0];
+
+                            if (R_path != "") {
+                                start_R(R_path);
+                            }
+                        });
+                }
+            });
         }
     }
 
