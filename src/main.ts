@@ -51,7 +51,7 @@ const inputOutput: InputOutputType = {
 function createWindow() {
 	mainWindow = new BrowserWindow({
 		width: 1024,
-		height: 700,
+		height: 700 + (process.platform == "win32" ? 10 : 0),
 		maxWidth: 1024,
 		maxHeight: 700,
 		minWidth: 1024,
