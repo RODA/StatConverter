@@ -1,4 +1,5 @@
 node_modules/
+R_portable/
 dist/
 out/
 package-lock.json

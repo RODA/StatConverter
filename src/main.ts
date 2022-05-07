@@ -8,22 +8,30 @@ if (require('electron-squirrel-startup')) {
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
 import * as commandExec from "child_process";
-import * as pty from "node-pty";
-import WebSocket from "ws";
 
 import { InputOutputType } from "./interfaces";
 
 import { helpers } from "./helpers";
 
 let mainWindow: BrowserWindow;
-let Rws: WebSocket;
-
-let RptyProcess: pty.IPty;
+let Rprocess: commandExec.ChildProcessWithoutNullStreams;
+let longresponse = "";
+let response: {error: string[], variables: {
+    [key: string]: {
+        label: [string];
+        values: {
+            [key: string]: [string];
+        };
+        missing: [string];
+        selected: [boolean];
+    }
+}};
+let startlong = false; // start of a long burst of buffers
 
 app.on("window-all-closed", () => {
-	if (RptyProcess) {
-		RptyProcess.kill();
-	}
+	// if (RptyProcess) {
+	// 	RptyProcess.kill();
+	// }
 	
 	app.quit();
 });
@@ -75,61 +83,69 @@ app.whenReady().then(() => {
 		}
 	});
 
-	// check if R is installed
-	let R_path = "";
-	let findR;
-	
-	try {
-		if (process.platform === "win32") {
-			findR = commandExec.execSync("where.exe R", {
-				shell: "cmd.exe",
-				cwd: process.cwd(),
-				env: process.env,
-				encoding: "utf-8" as BufferEncoding,
-			});
-		} else {
-			findR = commandExec.execSync("which R", {
-				shell: "/bin/bash",
-				cwd: process.cwd(),
-				env: process.env,
-				encoding: "utf-8" as BufferEncoding,
-			});
-		}
+    let R_path = "";
 
-		R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
+    if (process.platform == 'win32') {
+        path.join(__dirname, '../R_Portable/bin/R.exe');
+    }
+    else {
+        // check if R is installed
+        let findR;
 
-	} catch (error) {
-		dialog
-			.showMessageBox(mainWindow, {
-				type: "question",
-				title: "Select R path",
-				message: "Could not find R. Select the path to the binary?",
-			})
-			.then((response) => {
-				if (response) {
-					dialog
-						.showOpenDialog(mainWindow, {
-							title: "R path",
-							properties: ["openFile"],
-						})
-						.then((result) => {
+        try {
+            // if (process.platform === "win32") {
+            //     findR = commandExec.execSync("where.exe R", {
+            //         shell: "cmd.exe",
+            //         cwd: process.cwd(),
+            //         env: process.env,
+            //         encoding: "utf-8" as BufferEncoding,
+            //     });
+            // } else {
+                findR = commandExec.execSync("which R", {
+                    shell: "/bin/bash",
+                    cwd: process.cwd(),
+                    env: process.env,
+                    encoding: "utf-8" as BufferEncoding,
+                });
+            // }
+    
+            R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
+    
+        } catch (error) {
+            dialog
+                .showMessageBox(mainWindow, {
+                    type: "question",
+                    title: "Select R path",
+                    message: "Could not find R. Select the path to the binary?",
+                })
+                .then((response) => {
+                    if (response) {
+                        dialog
+                            .showOpenDialog(mainWindow, {
+                                title: "R path",
+                                properties: ["openFile"],
+                            })
+                            .then((result) => {
+    
+                                if(result.canceled){
+                                    app.quit();
+                                }
+                                
+                                R_path = result.filePaths[0];
+    
+                                if (R_path != "") {
+                                    start_R(R_path);
+                                }
+                            });
+                    }
+                });
+        }
+    }
 
-							if(result.canceled){
-								app.quit();
-							}
-							
-							R_path = result.filePaths[0];
 
-							if (R_path != "") {
-								start_R_server(R_path);
-							}
-						});
-				}
-			});
-	}
 
 	if (R_path != "") {
-		start_R_server(R_path);
+		start_R(R_path);
 	}
 
 	ipcMain.on("selectFileFrom", (event, args) => {
@@ -204,7 +220,7 @@ app.whenReady().then(() => {
 							inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
 						}
 
-						console.log(inputOutput.fileTo);
+						// console.log(inputOutput.fileTo);
 						event.reply("selectFileTo-reply", inputOutput);
 					}
 				})
@@ -229,7 +245,7 @@ app.whenReady().then(() => {
 
 	ipcMain.on("sendCommand", (event, command) => {
 		mainWindow.webContents.send("startLoader");
-		Rws.send(command);
+		Rprocess.stdin.write(command);
 	});
 
 	ipcMain.on("gotoRODA", () => {
@@ -237,20 +253,9 @@ app.whenReady().then(() => {
 	});
 });
 
-// let Rprocess: commandExec.ChildProcessWithoutNullStreams;
-
-// const pause = async function(x: number): Promise<boolean> {
-//   const sleepNow = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
-//   await sleepNow(x);
-//   return(true)
-// }
-
-const start_R_server = function (R_path: string): void {
+const start_R = function (R_path: string): void {
 	
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let penv: any;
-	// eslint-disable-next-line prefer-const
-	penv = process.env;
+	const penv = process.env;
 
 	if (process.platform === "win32") {
 		if (penv.HOME && !(penv.HOME.includes("Documents"))) {
@@ -261,9 +266,7 @@ const start_R_server = function (R_path: string): void {
 		penv.test = "test";
 	}
 
-	RptyProcess = pty.spawn(R_path, ["-q", "--no-save"], {
-		env: penv
-	});
+	Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"]);
 
 	let command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
 	if (process.platform === "win32") {
@@ -271,34 +274,43 @@ const start_R_server = function (R_path: string): void {
 	}
 	
 	command += '\n';
-	
-	RptyProcess.write(command);
 
-	RptyProcess.onData((data) => {
-		
-		const datanoe = data.replace(/(\r\n|\n|\r)/gm, "");
-		
-		if (datanoe.includes("_server_started_")) {
-			// console.log("server started");
-			// TODO -- check if there is no error on that port
-			Rws = new WebSocket("ws://127.0.0.1:12345");
+	Rprocess.stdin.write(command);
+	// Rprocess.stdin.write('1 + 1\n');
+	Rprocess.stdin.write('RGUI_dependencies()\n');
+	// console.log(Rprocess);
+	Rprocess.stdout.on("data", (data: string) => {
+        mainWindow.webContents.send("clearLoader");
+        const datasplit = data.toString().split(/\r?\n/);
+        // console.log(datasplit);
+        for (let i = 0; i < datasplit.length; i++) {
+            if (datasplit[i].charAt(0) == "{") {
+                startlong = datasplit[i].slice(-1) != "}";
+                longresponse = datasplit[i];
+            }
+            else if (startlong) {
+                if (datasplit[i].slice(-1) == "}") {
+                    startlong = false;
+                }
 
-			// Rws.on('open', function open() {
-			//     Rws.send('(aa <- 2 + 2)');
-			//     Rws.send('bb <- aa + 4');
-			//     Rws.send('ls()');
-			// });
+                longresponse += datasplit[i];
+            }
 
-			Rws.addEventListener("message", function (e) {
-				mainWindow.webContents.send("clearLoader");
-				
-				const response = JSON.parse(e.data);
-				if (response.error && response.error[0] != "") {
-					dialog.showErrorBox("R says:", response.error[0]);
-				} else if (response.variables) {
-					mainWindow.webContents.send("sendCommand-reply", response);
-				}
-			});
-		}
+            // console.log(startlong, longresponse);
+
+            if (!startlong && longresponse != "") {
+                response = JSON.parse(longresponse);
+                
+                if (response.error && response.error[0] != "") {
+                    dialog.showErrorBox("R says:", response.error[0]);
+                }
+                else if (response.variables && Object.keys(response.variables).length > 0) {
+                    mainWindow.webContents.send("sendCommand-reply", response);
+                }
+
+                longresponse = "";
+                break;
+            }
+        }
 	});
 };
