@@ -86,7 +86,7 @@ app.whenReady().then(() => {
     let R_path = "";
 
     if (process.platform == 'win32') {
-        path.join(__dirname, '../R_Portable/bin/R.exe');
+        R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
     }
     else {
         // check if R is installed
