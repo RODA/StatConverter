@@ -257,7 +257,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 			const agency = document.getElementById('agency') as HTMLInputElement;
 			if (agency.value != 'default') {
-				command += ", agency = \"" + agency.value + "\"";
+				command += ", agency = '" + agency.value + "'";
+			}
+
+			const xmlang = document.getElementById('xmlang') as HTMLInputElement;
+			if (xmlang.value != 'en') {
+				command += ", xmlang = '" + xmlang.value + "'";
 			}
 
             const monolang = document.getElementById('monolang') as HTMLInputElement;
@@ -267,7 +272,12 @@ window.addEventListener('DOMContentLoaded', () => {
             
             const IDNo = document.getElementById('IDNo') as HTMLInputElement;
 			if (IDNo.value != 'S0000') {
-				command += ", IDNo = \"" + IDNo.value + "\"";
+				command += ", IDNo = '" + IDNo.value + "'";
+			}
+            
+            const URI = document.getElementById('URI') as HTMLInputElement;
+			if (URI.value != 'http://www.default.eu') {
+				command += ", URI = '" + URI.value + "'";
 			}
 
 			command += ")\")\n";
