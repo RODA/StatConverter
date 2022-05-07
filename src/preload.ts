@@ -116,7 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 		// ipcRenderer.send('sendCommand', 'require(DDIwR)');
 		console.log(command);
-		ipcRenderer.send('sendCommand', command);
+		ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
 
 		fileFrom.value = io.fileFrom;
 
@@ -211,7 +211,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			}
 
 			command += ")\")\n";
-			ipcRenderer.send('sendCommand', command);
+			ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
 
 			const subset = document.getElementById('select_cases') as HTMLInputElement;
 			let select = '';
@@ -230,7 +230,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				}
 
 				command += ")\")\n";
-				ipcRenderer.send('sendCommand', command);
+				ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
 
 				const keep = document.getElementById('keepSelectionCases') as HTMLInputElement;
 				if (!keep.checked) {
@@ -281,7 +281,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			}
 
 			command += ")\")\n";
-			ipcRenderer.send('sendCommand', command);
+			ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
 		}
 	});
 
@@ -293,7 +293,8 @@ window.addEventListener('DOMContentLoaded', () => {
 			}
 
 			command += ")\")\n";
-			ipcRenderer.send('sendCommand', command);
+			ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
+			
 		}
 	});
 
