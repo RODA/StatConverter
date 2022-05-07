@@ -64,7 +64,7 @@
             }
         ],
         "win": {
-            "icon": "build/icon.ico",
+            "icon": "build/StatConverter.ico",
             "legalTrademarks": "MIT Licence",
             "target": {
                 "target": "nsis",
