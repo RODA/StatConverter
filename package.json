@@ -1,95 +1,80 @@
 {
-  "name": "statconverter",
-  "version": "1.0.0",
-  "description": "Convert statistical data using R",
-  "main": "dist/main.js",
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "lint": "eslint -c .eslintrc.json --ext .ts ./src",
-    "start": "npm run build && electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/RODA/StatConverter.git"
-  },
-  "keywords": [
-    "convert",
-    "SAS",
-    "SPSS",
-    "Stata",
-    "R"
-  ],
-  "author": "RODA",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/RODA/StatConverter/issues"
-  },
-  "homepage": "https://github.com/RODA/StatConverter#readme",
-  "dependencies": {
-    "@popperjs/core": "^2.9.3",
-    "@types/ws": "^7.4.7",
-    "bootstrap": "^5.1.0",
-    "electron-squirrel-startup": "^1.0.0",
-    "lodash.clonedeep": "^4.5.0",
-    "node-pty": "^0.10.1",
-    "ws": "^8.2.0",
-    "trim-newlines": ">=3.0.1"
-  },
-  "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.54",
-    "@electron-forge/maker-deb": "^6.0.0-beta.54",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
-    "@electron-forge/maker-zip": "^6.0.0-beta.54",
-    "@types/lodash.clonedeep": "^4.5.6",
-    "@typescript-eslint/eslint-plugin": "^4.23.0",
-    "@typescript-eslint/parser": "^4.23.0",
-    "electron": "^12.0.7",
-    "eslint": "^7.26.0",
-    "typescript": "^4.2.4"
-  },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "statconverter"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
-  },
-  "build": {
-    "appId": "StatConverter.tool",
-    "productName": "StatConverter",
-    "win": {
-      "icon": "build/icon.ico",
-      "legalTrademarks": "MIT Licence",
-      "target": {
-        "target": "dir"
-      }
+    "name": "statconverter",
+    "version": "1.0.0",
+    "description": "Convert statistical data using R",
+    "main": "dist/main.js",
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w",
+        "lint": "eslint -c .eslintrc --ext .ts ./src",
+        "start": "npm run build && electron ./dist/main.js",
+        "dist": "npm run build && electron-builder",
+        "pack": "npm run build && electron-builder --dir"
     },
-    "mac": {
-      "target": "dir"
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/RODA/StatConverter.git"
+    },
+    "keywords": [
+        "convert",
+        "SAS",
+        "SPSS",
+        "Stata",
+        "R"
+    ],
+    "author": "RODA",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/RODA/StatConverter/issues"
+    },
+    "homepage": "https://github.com/RODA/StatConverter#readme",
+    "dependencies": {
+        "@popperjs/core": "^2.11.5",
+        "@types/ws": "^7.4.7",
+        "bootstrap": "^5.1.0",
+        "electron-squirrel-startup": "^1.0.0",
+        "lodash.clonedeep": "^4.5.0",
+        "trim-newlines": ">=3.0.1",
+        "ws": "^8.6.0"
+    },
+    "devDependencies": {
+        "@types/lodash.clonedeep": "^4.5.7",
+        "@typescript-eslint/eslint-plugin": "^4.23.0",
+        "@typescript-eslint/parser": "^4.23.0",
+        "electron": "^18.2.0",
+        "electron-builder": "^23.0.3",
+        "electron-rebuild": "^3.2.7",
+        "eslint": "^7.26.0",
+        "typescript": "^4.6.4"
+    },
+    "build": {
+        "appId": "StatConverter.tool",
+        "productName": "StatConverter",
+        "directories": {
+            "output": "build/output"
+        },
+        "extraResources": [
+            {
+                "from": "R_Portable",
+                "to": "R_Portable"
+            },
+            {
+                "from": "src/startServer.R",
+                "to": "startServer.R"
+            }
+        ],
+        "win": {
+            "icon": "build/icon.ico",
+            "legalTrademarks": "MIT Licence",
+            "target": {
+                "target": "nsis",
+                "arch": [
+                    "x64"
+                ]
+            }
+        },
+        "mac": {
+            "target": "dir"
+        }
     }
-  }
 }

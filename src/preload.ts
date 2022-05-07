@@ -339,8 +339,13 @@ window.addEventListener('DOMContentLoaded', () => {
 		//load variable list
 		const variablesList = document.getElementById('variables') as HTMLElement;
 		const variablesListCases = document.getElementById('variablesCases') as HTMLElement;
+		const varlabel = document.getElementById('variable-label') as HTMLElement;
+		const vallabels = document.getElementById('value-labels') as HTMLElement;
         variablesList.innerHTML = '';
         variablesListCases.innerHTML = '';
+        varlabel.innerHTML = '';
+        vallabels.innerHTML = '';
+		
 		all_vars_selected = true;
 
 		for (const key in variables) {

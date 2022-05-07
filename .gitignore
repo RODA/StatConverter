@@ -1,6 +1,6 @@
 node_modules/
 R_portable/
 dist/
-out/
+build/output/
 package-lock.json
 .DS_Store

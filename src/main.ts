@@ -1,9 +1,5 @@
-process.env.NODE_ENV = "development";
-// process.env.NODE_ENV = 'production';
-
-if (require('electron-squirrel-startup')) {
-	app.quit();
-}
+// process.env.NODE_ENV = "development";
+process.env.NODE_ENV = 'production';
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
@@ -50,6 +46,7 @@ const inputOutput: InputOutputType = {
 
 function createWindow() {
 	mainWindow = new BrowserWindow({
+		autoHideMenuBar: true,
 		width: 1024,
 		height: 700 + (process.platform == "win32" ? 10 : 0),
 		maxWidth: 1024,
@@ -65,7 +62,7 @@ function createWindow() {
 	mainWindow.loadFile(path.join(__dirname, "../index.html"));
 
 	if (process.env.NODE_ENV === "production") {
-		mainWindow.removeMenu();
+		// mainWindow.removeMenu();
 	}
 
 	if (process.env.NODE_ENV === "development") {
@@ -86,7 +83,12 @@ app.whenReady().then(() => {
     let R_path = "";
 
     if (process.platform == 'win32') {
-        R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
+		if (process.env.NODE_ENV == "production") {
+        	R_path = path.join(__dirname, '../../R_Portable/bin/R.exe');
+		}
+		else {
+			R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
+		}
     }
     else {
         // check if R is installed
@@ -268,7 +270,14 @@ const start_R = function (R_path: string): void {
 
 	Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"]);
 
-	let command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
+	let command = "";
+	if (process.env.NODE_ENV == 'production') {
+		command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
+	}
+	else {
+		command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
+	}
+	
 	if (process.platform === "win32") {
 		command = command.replace(/\\/g, '/'); // replace backslash with forward slash
 	}
