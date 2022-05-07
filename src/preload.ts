@@ -80,7 +80,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			};
 			missing: [string];
 			selected: [boolean];
-		};
+		}
 	} = {};
 
 	const inputType = <HTMLSelectElement>document.getElementById('inputType');
@@ -107,14 +107,15 @@ window.addEventListener('DOMContentLoaded', () => {
 		inputOutput.fileFromDir = io.fileFromDir;
 		inputOutput.fileFromName = io.fileFromName;
 
-		let command = "dataset <- convert('" + io.fileFrom + "', declared = FALSE, n_max = 10";
+		let command = "RGUI_parseCommand(\"dataset <- convert('" + io.fileFrom + "', declared = FALSE, n_max = 10";
 		if (fileEncoding.value != 'default') {
 			command += ", encoding = '" + fileEncoding.value + "'";
 		}
 
-		command += ')';
+		command += ")\")\n";
 
-		ipcRenderer.send('sendCommand', 'require(DDIwR)');
+		// ipcRenderer.send('sendCommand', 'require(DDIwR)');
+		console.log(command);
 		ipcRenderer.send('sendCommand', command);
 
 		fileFrom.value = io.fileFrom;
@@ -187,7 +188,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (indices.length == 0 && !all_vars_selected) {
 			ipcRenderer.send('showError', { message: 'At least one variable has to be selected.' });
 		} else {
-			let command = "dataset <- convert('" + inputOutput.fileFrom + "'";
+			let command = "RGUI_parseCommand(\"dataset <- convert('" + inputOutput.fileFrom + "'";
 
 			const targetOS = document.getElementById('targetOS') as HTMLInputElement;
 			if (targetOS.value != 'local') {
@@ -209,7 +210,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				command += ", encoding = '" + fileEncoding.value + "'";
 			}
 
-			command += ')';
+			command += ")\")\n";
 			ipcRenderer.send('sendCommand', command);
 
 			const subset = document.getElementById('select_cases') as HTMLInputElement;
@@ -219,7 +220,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			}
 
 			if (subset.value != '' || select != '') {
-				command = 'dataset <- subset(dataset';
+				command = "RGUI_parseCommand(\"dataset <- subset(dataset";
 				if (subset.value != '') {
 					command += ', subset = ' + subset.value;
 				}
@@ -228,7 +229,7 @@ window.addEventListener('DOMContentLoaded', () => {
 					command += ', select = ' + select;
 				}
 
-				command += ')';
+				command += ")\")\n";
 				ipcRenderer.send('sendCommand', command);
 
 				const keep = document.getElementById('keepSelectionCases') as HTMLInputElement;
@@ -237,7 +238,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				}
 			}
 
-			command = "convert(dataset, to = '" + inputOutput.fileTo + "'";
+			command = "RGUI_parseCommand(\"convert(dataset, to = '" + inputOutput.fileTo + "'";
 
 			const embed = document.getElementById('embedFALSE') as HTMLInputElement;
 			if (embed.checked) {
@@ -254,19 +255,34 @@ window.addEventListener('DOMContentLoaded', () => {
 				command += ', version = ' + stataVersion.value;
 			}
 
-			command += ')';
+			const agency = document.getElementById('agency') as HTMLInputElement;
+			if (agency.value != 'default') {
+				command += ", agency = \"" + agency.value + "\"";
+			}
+
+            const monolang = document.getElementById('monolang') as HTMLInputElement;
+            if (monolang.checked) {
+                command += ", monolang = TRUE"
+            }
+            
+            const IDNo = document.getElementById('IDNo') as HTMLInputElement;
+			if (IDNo.value != 'S0000') {
+				command += ", IDNo = \"" + IDNo.value + "\"";
+			}
+
+			command += ")\")\n";
 			ipcRenderer.send('sendCommand', command);
 		}
 	});
 
 	fileEncoding.addEventListener('change', function () {
 		if (inputOutput.fileFrom != '') {
-			let command = "dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE, n_max = 10";
+			let command = "RGUI_parseCommand(\"dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE, n_max = 10";
 			if (fileEncoding.value != 'default') {
 				command += ", encoding = '" + fileEncoding.value + "'";
 			}
 
-			command += ')';
+			command += ")\")\n";
 			ipcRenderer.send('sendCommand', command);
 		}
 	});

@@ -51,6 +51,17 @@
 				height: 100%;
 				overflow: hidden;
 			}
+
+
+      div.settings {
+					display: grid;
+					grid-template-columns: max-content 50px;
+					grid-gap:5px;
+			}
+			div.settings label {
+				text-align:right;
+			}
+
 		</style>
 	</head>
 
@@ -68,10 +79,10 @@
 						</div>
 						<div class="col-8">
 							<select class="form-select" id="fileEncoding">
-								<option value="default" selected>As specified in the file</option>
+								<option value="utf8" selected>UTF-8</option>
 								<option value="latin1">Latin 1 (ISO-8859-1)</option>
-								<option value="utf8">UTF-8</option>
 								<option value="bytes">Multi-byte</option>
+								<option value="default">As specified in the file</option>
 							</select>
 						</div>
 						<div class="col-2"></div>
@@ -214,34 +225,34 @@
 								<p>
 									The formal language to select cases is <b>R</b>, however the actual selection symbols are universal, for instance:
 									<br />
-									Less than: <b>&lt;</b>
+									Less than: <b><span style="font-family: Courier;">&lt;</span></b>
 									<br />
-									Less than or equal to: <b>&lt;=</b>
+									Less than or equal to: <b><span style="font-family: Courier;">&lt;=</span></b>
 									<br />
-									Not equal to: <b>!=</b>
+									Not equal to: <b><span style="font-family: Courier;">!=</span></b>
 									<br />
-									Equal to: <b>==</b> (double equal sign), etc.
+									Equal to: <b><span style="font-family: Courier;">==</span></b> (double equal sign), etc.
 									<br />
 									<br />
 									The input data is generically called "dataset", and the result of the expression should be a logical vector. Examples:<br />
-									- all cases where age is less than 35:<br /><b>age < 35</b><br />
-									- all cases where age is at least 30, and only from the first 100 cases:<br /><b>seq(nrow(dataset)) <= 100 & age >= 30</b>
+									- all cases where age is less than 35:<br /><b><span style="font-family: Courier;">age < 35</span></b><br />
+									- all cases where age is at least 30, out of the first 100 cases:<br /><b><span style="font-family: Courier;">age >= 30 & seq(nrow(dataset)) <= 100</span></b>
 									<br />
 									<br />
 									Values from character categorical variables (or R factors) should be quoted, for example all cases from region "REG1":<br />
-									<b>region == "REG1"</b>
+									<b><span style="font-family: Courier;">region == "REG1"</span></b>
 									<br />
 									<br />
 									Do notice that R is a case sensitive language, and that applies to both string values and variable names, where
-									<b>age</b> and <b>Age</b> refer to two different variables, and "reg1" is not the same thing with "REG1".
+									<b>age</b> and <b>Age</b> refer to two different variables, and <span style="font-family: Courier;">"reg1"</span> is not the same thing with <span style="font-family: Courier;">"REG1"</span>.
 									<br />
 									<br />
 									Base R functions are naturally applicable to search for certain patterns within strings, for instance retain all cases where the variable <b>regname</b> (region name) contains the word "west":
 									<br />
-									<b>grepl("west", regname)</b>
+									<b><span style="font-family: Courier;">grepl("west", regname)</span></b>
 									<br />
 									<br />
-									Regular expressions can be used within the function <b>grepl()</b>, and they can optionally be compatible with Perl expressions.
+									Regular expressions can be used within the function <b><span style="font-family: Courier;">grepl()</span></b>, and they can optionally be compatible with Perl expressions.
 								</p>
 								<p></p>
 							</div>
@@ -262,15 +273,15 @@
 				
 				<!-- ========= Settings ========= -->
 				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
-					<div class="row mt-5">
+					<div class="row mt-5"> <!-- px-4 -->
 						<div class="col-12">
-							<div class="ms-3">
-								<p class="mb-5"><strong>Settings:</strong></p>
-								<div class="row mb-4">
+							<div class="ms-5">
+								<p class="mb-4"><strong>Settings:</strong></p>
+								<div class="row mb-2">
 									<div class="col-7">
 										<p>Output to Stata version</p>
 									</div>
-									<div class="col-3">
+									<div class="col-2">
 										<select class="form-select" id="stataVersion">
 											<option value="14" selected>14</option>
 											<option value="13">13</option>
@@ -281,7 +292,7 @@
 									</div>
 									<div class="col-2"></div>
 								</div>
-								<div class="row mb-3">
+								<div class="row mb-2">
 									<div class="col-7">
 										<p>Convert character categories to numeric categories</p>
 									</div>
@@ -296,9 +307,9 @@
 										</div>
 									</div>
 								</div>
-								<div class="row mb-3">
+								<div class="row mb-2">
 									<div class="col-7">
-										<p>Recode to and from extended missing values (a-z)</p>
+										<p>Recode to and from extended missing values (.a - .z)</p>
 									</div>
 									<div class="col-5 text-start">
 										<div class="form-check form-check-inline">
@@ -311,7 +322,7 @@
 										</div>
 									</div>
 								</div>
-								<div class="row mb-3">
+								<div class="row mb-2">
 									<div class="col-7">
 										<p>Make the R dataset "declared"</p>
 									</div>
@@ -326,9 +337,17 @@
 										</div>
 									</div>
 								</div>
-								<div class="row mb-3">
+
+								<!-- horizontal rule separator -->
+								<br />
+								<hr />
+								<br />
+
+								<p class="mb-4"><strong>DDI / XML specific:</strong></p>
+
+								<div class="row mb-2">
 									<div class="col-7">
-										<p>Embed the CSV file into the DDI codebook</p>
+										<p>Embed the CSV data into the DDI Codebook XML file</p>
 									</div>
 									<div class="col-5 text-start">
 										<div class="form-check form-check-inline">
@@ -341,26 +360,52 @@
 										</div>
 									</div>
 								</div>
-								<div class="row mb-4">
-									<div class="col-7">
-										<p>End of line for the DDI XML file</p>
+								<div class="row mb-2">
+									<div class="col-4">
+										<p>EOL for target operating system</p>
 									</div>
-									<div class="col-5">
-										<div class="row">
-											<div class="col-8">
-												<select class="form-select" id="targetOS">
-													<option value="local" selected>local</option>
-													<option value="macos">MacOS</option>
-													<option value="linux">Linux</option>
-													<option value="windows">Windows</option>
-												</select>
-											</div>
-											<div class="col-4"></div>
+									<div class="col-2">
+										<select class="form-select" id="targetOS">
+											<option value="local" selected>local</option>
+											<option value="macos">MacOS</option>
+											<option value="linux">Linux</option>
+											<option value="windows">Windows</option>
+										</select>
+									</div>
+									<div class="col-1"></div>
+									<div class="col-1">
+										<p>Agency</p>
+									</div>
+									<div class="col-3">
+										<input type="input" class="rounded-0 form-control" id="agency" value="default" />
+									</div>
+									<div class="col-1"></div>
+								</div>
+								<div class="row mb-2">
+									<div class="col-2">
+										<div class="settings">
+											<label for="xmlang">Language</label>
+											<input type="input" class="rounded-0 form-control" id="xmlang" value="en" />
 										</div>
 									</div>
+									<div class="col-5">
+										<input type="checkbox" id="monolang" />
+										<label for="monolang">Mono language</label>
+									</div>
+									<div class="col-1">
+										<p>ID no.</p>
+									</div>
+									<div class="col-3">
+										<input type="input" class="rounded-0 form-control" id="IDNo" value="S0000" />
+									</div>
+									<div class="col-1"></div>
 								</div>
 							</div>
 						</div>
+						<!-- vertical separator -->
+						<!-- <div class="col-1">
+							<div style="width: 50%; display: inline-block; height: 100%; margin: 0 auto; border-right: 1px solid #ccc"></div>
+						</div> -->
 					</div>
 				</div>
 			</div>
