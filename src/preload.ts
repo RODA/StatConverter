@@ -192,7 +192,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 			const targetOS = document.getElementById('targetOS') as HTMLInputElement;
 			if (targetOS.value != 'local') {
-				command += ', OS = ' + targetOS.value;
+				command += ", OS = '" + targetOS.value + "'";
 			}
 
 			const recode = document.getElementById('recodeFALSE') as HTMLInputElement;
