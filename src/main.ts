@@ -280,7 +280,7 @@ const start_R = function (R_path: string): void {
 	Rprocess.stdin.write('RGUI_dependencies()\n');
 	// console.log(Rprocess);
 	Rprocess.stdout.on("data", (data: string) => {
-        mainWindow.webContents.send("clearLoader");
+        
         const datasplit = data.toString().split(/\r?\n/);
         // console.log(datasplit);
         for (let i = 0; i < datasplit.length; i++) {
@@ -300,6 +300,7 @@ const start_R = function (R_path: string): void {
 
             if (!startlong && longresponse != "") {
                 response = JSON.parse(longresponse);
+                mainWindow.webContents.send("clearLoader");
                 
                 if (response.error && response.error[0] != "") {
                     dialog.showErrorBox("R says:", response.error[0]);
