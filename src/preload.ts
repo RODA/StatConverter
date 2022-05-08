@@ -83,8 +83,13 @@ window.addEventListener('DOMContentLoaded', () => {
         inputOutput.fileFromName = io.fileFromName;
 
         let command = "RGUI_parseCommand(\"dataset <- convert('" + io.fileFrom + "', declared = FALSE, n_max = 10";
-        if (fileEncoding.value != 'default') {
-            command += ", encoding = '" + fileEncoding.value + "'";
+        if (fileEncoding.value != 'utf8') {
+            if (fileEncoding.value == "default") {
+                command += ", encoding = NULL";
+            }
+            else {
+                command += ", encoding = '" + fileEncoding.value + "'";
+            }
         }
 
         command += ")\")\n";
@@ -193,14 +198,14 @@ window.addEventListener('DOMContentLoaded', () => {
             command += ")\")\n";
 
             ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
+            
+            let dataset = "dataset";
 
             const subset = document.getElementById('select_cases') as HTMLInputElement;
             let select = '';
             if (indices.length > 0) {
                 select = (all_vars_selected ? '-' : '') + 'c(' + helpers.paste(indices, { sep: ',' }) + ')';
             }
-
-            let dataset = "dataset";
 
             if (subset.value != '' || select != '') {
                 dataset = "subset(dataset";
@@ -227,10 +232,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 command += ', embed = FALSE';
             }
 
-            const declared = document.getElementById('declaredFALSE') as HTMLInputElement;
+            const declared = document.getElementById('declaredTRUE') as HTMLInputElement;
             if (declared.checked) {
-                command += ', declared = FALSE';
             }
+            command += ', declared = ' + ((inputOutput.outputType == "r" && declared.checked) ? 'TRUE' : 'FALSE');
 
             const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
             if (stataVersion.value != '14') {
@@ -275,8 +280,13 @@ window.addEventListener('DOMContentLoaded', () => {
     fileEncoding.addEventListener('change', function () {
         if (inputOutput.fileFrom != '') {
             let command = "RGUI_parseCommand(\"dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE, n_max = 10";
-            if (fileEncoding.value != 'default') {
-                command += ", encoding = '" + fileEncoding.value + "'";
+            if (fileEncoding.value != 'utf8') {
+                if (fileEncoding.value == "default") {
+                    command += ", encoding = NULL";
+                }
+                else {
+                    command += ", encoding = '" + fileEncoding.value + "'";
+                }
             }
 
             command += ")\")\n";
