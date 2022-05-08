@@ -1,5 +1,5 @@
-// process.env.NODE_ENV = "development";
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = "development";
+// process.env.NODE_ENV = 'production';
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
@@ -284,6 +284,20 @@ const start_R = function (R_path: string): void {
 	command += '\n';
 
 	Rprocess.stdin.write(command);
+
+    // make sure we use the R package library from R_Portable, otherwise
+    // a different version of the code depending on using a locally installed R
+    if (process.env.NODE_ENV == "production") {
+        command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
+    }
+    else {
+        command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
+    }
+
+    command += '\n';
+
+	Rprocess.stdin.write(command.replace(/\\/g, '/'));
+
 	// Rprocess.stdin.write('1 + 1\n');
 	Rprocess.stdin.write('RGUI_dependencies()\n');
 	// console.log(Rprocess);
