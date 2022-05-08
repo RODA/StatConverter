@@ -75,16 +75,27 @@ env$RGUI_parseCommand <- function(command) {
     
 }
 
-env$RGUI_formatted <- FALSE
-env$RGUI_hashes <- list()
-env$RGUI_result <- c()
-
-
 env$RGUI_ChangeLog <- function(x) {
     env <- as.environment("RGUI")
     # TODO: verify if file ChangeLog exists
     changes <- gsub("`", "'", readLines(system.file("ChangeLog", package = x)))
     env$RGUI_result <- c(env$RGUI_result, RGUI_jsonify(list(changes = changes)))
+}
+
+env$RGUI_formatted <- FALSE
+env$RGUI_hashes <- list()
+env$RGUI_result <- c()
+
+
+env$RGUI_replaceTicks <- function(x) {
+    # weird A character sometimes from SPSS encoding a single tick quote
+    achar <- rawToChar(as.raw(c(195, 130)))
+    # forward and back ticks
+    irv <- c(194, 180, 96)
+    tick <- unlist(strsplit(rawToChar(as.raw(irv)), split = ""))
+    tick <- c(paste0(achar, "'"), paste0(achar, tick), tick)
+    x <- gsub(paste(tick, collapse = "|"), "'", x)
+    return(x)
 }
 
 env$RGUI_variables <- function() {
@@ -99,11 +110,11 @@ env$RGUI_variables <- function() {
             }
         }
 
-        nms <- names(values)
+        nms <- RGUI_replaceTicks(names(values))
         names(nms) <- values
 
         return(list(
-            label = attr(x, "label", exact = TRUE),
+            label = RGUI_replaceTicks(attr(x, "label", exact = TRUE)),
             values = as.list(nms),
             missing = as.character(na_values),
             selected = TRUE
