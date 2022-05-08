@@ -1,6 +1,6 @@
 ## StatConverter
 
-StatConverter is a tool to convert to and from various statistical software formats: R, SPSS, Stata, SAS and DDI Codebook.
+StatConverter is a tool to convert to and from various statistical software formats: R, SPSS, Stata, SAS (even Excel) and DDI Codebook.
 
 It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript.
 
@@ -17,7 +17,7 @@ On Windows:
 - executable application, no need to install, requiring an existing installation of **R** (compressed file to be added)
 
 
-On MacOS and Linux, **R** can not be made portable. On these platforms, StatConverter requires a local installation of **R** (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio sitting on top of **R**.
+On MacOS and Linux, **R** can not be made portable. On these platforms, StatConverter requires a local installation of **R** (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio sitting on top of **R**. Binaries will be added here, too.
 
 
 
@@ -33,7 +33,7 @@ It is important to have these packages with all their dependencies, otherwise fu
 
 The actual package that does the heavy lifting is `DDIwR` (DDI with R), which uses the package `haven` which in turn uses Evan Miller's `ReadStat` C library.
 
-### R on PATH
+### R needs to be found on the system PATH
 
 On Unix systems (including MacOS), R is automatically added to the system PATH upon installation. On Windows, this has to be done manually:
 
@@ -45,18 +45,18 @@ On Unix systems (including MacOS), R is automatically added to the system PATH u
 
 - double-click on the "Path" variable to open it
 
-- click on "New", then "Browse" and indicate the folder where **R** is installed, typically in C:/Program Files/R/R-4.1/bin
+- click on "New", then "Browse" and indicate the folder where **R** is installed, typically in C:/Program Files/R/R-4.2.0/bin
 (the actual version number depends on the moment when **R** is installed)
 
 ### Running StatConverter from sources
 
-StatConverter can be started from its source files, not only by using a binary version.
+StatConverter can also be started from its source files.
 
 The first step is to create a clone of the [GitHub](https://github.com/RODA/StatConverter) repository.
 
-Obviously, [Node.js](https://nodejs.org/download/release/v14.18.2/) needs to be installed, we recommend version 14 which we are using.
+[Node.js](https://nodejs.org/download/release/v14.18.2/) needs to be installed, we recommend version 14 which we are using.
 
-On Windows, users need to install the Microsoft Visual Studio Tools (we've installed the 2017 version, especially the C++ tools) and also [Git](https://git-scm.com/downloads), which needs to be on the system PATH as well.
+On Windows, users need to install the Microsoft Visual Studio Tools (we've installed the 2019 version, especially the C++ tools) and also [Git](https://git-scm.com/downloads), which needs to be on the system PATH as well.
 
 Then open a Terminal in the clone of the StatConverter directory, and type:
 
