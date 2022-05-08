@@ -8,7 +8,7 @@ This software is available in multiple ways, depending on the operating system.
 
 On Windows:
 
-- install as a self-contained application with **R** embedded: <a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true" class="btn">Download installer</a>
+- install as a self-contained application with **R** embedded: <button type="button"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true">Download installer</a></button>
 
 - install as an application which requires an existing installation of the **R** software (installer to be added)
 
