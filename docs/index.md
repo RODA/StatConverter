@@ -60,4 +60,4 @@ npm start
 
 to start the application from sources.
 
-<a href="tsconfig.json">Download File</a>
+<a href="readme.txt">Download File</a>
