@@ -2,22 +2,20 @@
 
 StatConverter is a tool to convert to and from various statistical software formats: R, SPSS, Stata, SAS (even Excel) and DDI Codebook.
 
-It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript.
-
-This software is available in multiple ways, depending on the operating system.
+It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript, and the actual conversion is done using the **R** environment. This software is available in multiple ways, depending on the operating system. Apart from the sources that are present on GitHub, this page also offers platform specific binaries.
 
 On Windows:
 
-- install as a self-contained application with **R** embedded: <button type="button"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true">Download installer</a></button>
+- install as a self-contained application with **R** embedded: <button type="button" style="background:#3E72AF;color:white;"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true"><span color="white">Download installer</span></a></button>
 
-- install as an application which requires an existing installation of the **R** software (installer to be added)
+- install as an application that relies on a separate, existing installation of **R** (installer to be added)
 
 - executable application, no need to install, with **R** embedded (compressed file to be added)
 
-- executable application, no need to install, requiring an existing installation of **R** (compressed file to be added)
+- executable application, no need to install, requiring a separate installation of **R** (compressed file to be added)
 
 
-On MacOS and Linux, **R** can not be made portable. On these platforms, StatConverter requires a local installation of **R** (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio sitting on top of **R**. Binaries will be added here, too.
+There is no portable **R** on MacOS and Linux. On these platforms, StatConverter requires a local installation of **R** (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio sitting on top of **R**. Binaries for these platforms will be added here, too.
 
 
 
