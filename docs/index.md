@@ -6,7 +6,7 @@ It is a graphical user interface using Node.js and Electron, to build cross-plat
 
 On Windows:
 
-- install as a self-contained application with **R** embedded: <button type="button" style="background:#3E72AF;color:white;"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true"><span color="white">Download installer</span></a></button>
+- install as a self-contained application with **R** embedded: <button type="button" style="background:#3E72AF;color:white;"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true"><span style="color:white">Download installer</span></a></button>
 
 - install as an application that relies on a separate, existing installation of **R** (installer to be added)
 
