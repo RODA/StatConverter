@@ -60,4 +60,4 @@ npm start
 
 to start the application from sources.
 
-<a href="https://github.com/RODA/Files/blob/main/readme.txt?raw=true">Download File</a>
+<a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0?raw=true">Download File</a>
