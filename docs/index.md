@@ -4,17 +4,17 @@ StatConverter is a tool to convert to and from various statistical software form
 
 It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript.
 
-This is not a self-contained application, instead it relies on an existing installation of the **R** software (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio which sits on top of **R**.
+This software is available in a flexible way: either as a self-contained application (on Windows only), or use an existing installation of the **R** software (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio which sits on top of **R**.
 
 Platform specific binaries will be uploaded here in this page, in the upcoming future, so users can download and run the latest version of the software.
 
 
 ### Installing the necessary R packages
 
-StatConverter uses a number of **R** packages that need to be installed:
+StatConverter uses a couple of **R** packages that need to be installed:
 
 ```r
-install.packages(c("DDIwR", "httpuv", "digest", "jsonlite"), dependencies = TRUE)
+install.packages(c("DDIwR", "jsonlite"), dependencies = TRUE)
 ```
 
 It is important to have these packages with all their dependencies, otherwise functionality might be lost.
@@ -59,3 +59,5 @@ npm start
 ```
 
 to start the application from sources.
+
+<a href="tsconfig.json">Download File</a>
