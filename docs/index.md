@@ -4,9 +4,12 @@ StatConverter is a tool to convert to and from various statistical software form
 
 It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript.
 
-This software is available in a flexible way: either as a self-contained application (on Windows only), or use an existing installation of the **R** software (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio which sits on top of **R**.
+This software is available in a flexible way: 
 
-Platform specific binaries will be uploaded here in this page, in the upcoming future, so users can download and run the latest version of the software.
+- as a self-contained application (on Windows only): <a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true" class="btn">Download installer</a>
+
+- use an existing installation of the **R** software (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio which sits on top of **R** (details below)
+
 
 
 ### Installing the necessary R packages
@@ -59,5 +62,3 @@ npm start
 ```
 
 to start the application from sources.
-
-<a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true">Download File</a>
