@@ -233,8 +233,6 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             const declared = document.getElementById('declaredTRUE') as HTMLInputElement;
-            if (declared.checked) {
-            }
             command += ', declared = ' + ((inputOutput.outputType == "r" && declared.checked) ? 'TRUE' : 'FALSE');
 
             const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
