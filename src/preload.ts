@@ -206,8 +206,13 @@ window.addEventListener('DOMContentLoaded', () => {
 			}
 
 			const fileEncoding = document.getElementById('fileEncoding') as HTMLInputElement;
-			if (fileEncoding.value != 'default') {
-				command += ", encoding = '" + fileEncoding.value + "'";
+			if (fileEncoding.value != 'utf8') {
+				if (fileEncoding.value == "default") {
+					command += ", encoding = NULL";
+				}
+				else {
+				    command += ", encoding = '" + fileEncoding.value + "'";
+				}
 			}
 
 			command += ")\")\n";
