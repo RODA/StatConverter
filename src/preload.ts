@@ -188,7 +188,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (indices.length == 0 && !all_vars_selected) {
 			ipcRenderer.send('showError', { message: 'At least one variable has to be selected.' });
 		} else {
-			let command = "RGUI_parseCommand(\"dataset <- convert('" + inputOutput.fileFrom + "'";
+			let command = "RGUI_parseCommand(\"dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE";
 
 			const targetOS = document.getElementById('targetOS') as HTMLInputElement;
 			if (targetOS.value != 'local') {
@@ -211,6 +211,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			}
 
 			command += ")\")\n";
+
 			ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
 
 			const subset = document.getElementById('select_cases') as HTMLInputElement;
@@ -219,18 +220,19 @@ window.addEventListener('DOMContentLoaded', () => {
 				select = (all_vars_selected ? '-' : '') + 'c(' + helpers.paste(indices, { sep: ',' }) + ')';
 			}
 
+			let dataset = "dataset";
+
 			if (subset.value != '' || select != '') {
-				command = "RGUI_parseCommand(\"dataset <- subset(dataset";
+				dataset = "subset(dataset";
 				if (subset.value != '') {
-					command += ', subset = ' + subset.value;
+					dataset += ', subset = ' + subset.value;
 				}
 
 				if (select != '') {
-					command += ', select = ' + select;
+					dataset += ', select = ' + select;
 				}
 
-				command += ")\")\n";
-				ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
+				dataset += ")";
 
 				const keep = document.getElementById('keepSelectionCases') as HTMLInputElement;
 				if (!keep.checked) {
@@ -238,7 +240,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				}
 			}
 
-			command = "RGUI_parseCommand(\"convert(dataset, to = '" + inputOutput.fileTo + "'";
+			command = "RGUI_parseCommand(\"convert(" + dataset + ", to = '" + inputOutput.fileTo + "'";
 
 			const embed = document.getElementById('embedFALSE') as HTMLInputElement;
 			if (embed.checked) {
