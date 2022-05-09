@@ -1,21 +1,22 @@
-<!-- https://github.com/pages-themes/modernist -->
-
 StatConverter v1.0.0 (by [RODA](http://www.roda.ro)) is a tool to convert to and from various statistical software formats: R, SPSS, Stata, SAS (even Excel) and DDI Codebook.
 
 <p align="center">
   <img src="StatConverter.png" alt="StatConverter screenshot" style="width:400px;"/>
 </p>
 
-It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript, and the actual conversion is done using the R environment. This software is available in multiple formats, depending on the operating system. Apart from the GitHub source files, platform specific binaries are also available.
+The actual conversion is done using the R environment. StatConverter is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript. It is available in multiple formats, depending on the operating system: apart from the GitHub source files, platform specific binaries and installers are also available.
 
-On Windows (64 bit), R can be made portable and embedded in the application (no need to separately install it):
+## Everything packed in
+
+On Windows (64 bit), the is no need to separately install R. It can be made portable and packed into the converter:
 
 - install as a self-contained application: <button type="button" style="background:#3E72AF;color:white;"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true"><span style="color:white">Download installer</span></a></button>
 
 - executable application, no need to install (compressed file to be added)
 
+## Separate installation of R
 
-There is no portable R on MacOS and Linux. On these platforms, StatConverter requires a local, separate installation of R (link to [CRAN](https://cran.r-project.org/bin/) download page), in a similar way to RStudio. When R is already installed on the computer, StatConverter can directly communicate with it, on all operating systems Windows, MacOS and Linux:
+Since it is not possible to make R portable on MacOS and Linux, on these platforms StatConverter requires a separate installation of R (link to [CRAN](https://cran.r-project.org/bin/) download page), in a similar way to RStudio. Further instructions about the necessary R packages are presented below. When R is successfully installed on the local computer, StatConverter can directly communicate with it on all operating systems (including Windows):
 
 - install as an application (installers to be added)
 
@@ -23,7 +24,7 @@ There is no portable R on MacOS and Linux. On these platforms, StatConverter req
 
 
 
-### Installing the necessary R packages
+## Installing the necessary R packages
 
 StatConverter uses a couple of R packages that need to be installed:
 
@@ -35,7 +36,7 @@ It is important to have these packages with all their dependencies, otherwise fu
 
 The actual package that does the heavy lifting is `DDIwR` (DDI with R), which uses the package `haven` which in turn uses Evan Miller's `ReadStat` C library.
 
-### R needs to be found on the system PATH
+## R needs to be found on the system PATH
 
 On Unix systems (including MacOS), R is automatically added to the system PATH upon installation. On Windows, this has to be done manually:
 
@@ -50,9 +51,9 @@ On Unix systems (including MacOS), R is automatically added to the system PATH u
 - click on "New", then "Browse" and indicate the folder where R is installed, typically in C:/Program Files/R/R-4.2.0/bin
 (the actual version number depends on the moment when R is installed)
 
-### Running StatConverter from sources
+## Running StatConverter from sources
 
-StatConverter can also be started from its source files.
+For the advanced users (Linux users, for instance) StatConverter can also be started from its source files.
 
 The first step is to create a clone of the [GitHub](https://github.com/RODA/StatConverter) repository.
 
