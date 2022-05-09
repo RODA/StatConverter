@@ -1,31 +1,31 @@
 <!-- https://github.com/pages-themes/modernist -->
 
-StatConverter (by [RODA](http://www.roda.ro)) is a tool to convert to and from various statistical software formats: R, SPSS, Stata, SAS (even Excel) and DDI Codebook.
+StatConverter v1.0.0 (by [RODA](http://www.roda.ro)) is a tool to convert to and from various statistical software formats: R, SPSS, Stata, SAS (even Excel) and DDI Codebook.
 
 <p align="center">
   <img src="StatConverter.png" alt="StatConverter screenshot" style="width:400px;"/>
 </p>
 
-It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript, and the actual conversion is done using the **R** environment. This software is available in multiple ways, depending on the operating system. Apart from the sources that are present on GitHub, this page also offers platform specific binaries.
+It is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript, and the actual conversion is done using the R environment. This software is available in multiple formats, depending on the operating system. Apart from the GitHub source files, this page offers platform specific binaries.
 
-On Windows:
+On Windows (64 bit):
 
-- install as a self-contained application with **R** embedded: <button type="button" style="background:#3E72AF;color:white;"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true"><span style="color:white">Download installer</span></a></button>
+- install as a self-contained application with R embedded: <button type="button" style="background:#3E72AF;color:white;"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true"><span style="color:white">Download installer</span></a></button>
 
-- install as an application that relies on a separate, existing installation of **R** (installer to be added)
+- install as an application that relies on a separate, existing installation of R (installer to be added)
 
-- executable application, no need to install, with **R** embedded (compressed file to be added)
+- executable application, no need to install, with R embedded (compressed file to be added)
 
-- executable application, no need to install, requiring a separate installation of **R** (compressed file to be added)
+- executable application, no need to install, requiring a separate installation of R (compressed file to be added)
 
 
-There is no portable **R** on MacOS and Linux. On these platforms, StatConverter requires a local installation of **R** (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio sitting on top of **R**. Binaries for these platforms will be added here, too.
+There is no portable R on MacOS and Linux. On these platforms, StatConverter requires a local installation of R (link to [CRAN](https://cran.r-project.org/bin/) download page), much like RStudio sitting on top of R. Binaries for these platforms will be added here, too.
 
 
 
 ### Installing the necessary R packages
 
-StatConverter uses a couple of **R** packages that need to be installed:
+StatConverter uses a couple of R packages that need to be installed:
 
 ```r
 install.packages(c("DDIwR", "jsonlite"), dependencies = TRUE)
@@ -47,8 +47,8 @@ On Unix systems (including MacOS), R is automatically added to the system PATH u
 
 - double-click on the "Path" variable to open it
 
-- click on "New", then "Browse" and indicate the folder where **R** is installed, typically in C:/Program Files/R/R-4.2.0/bin
-(the actual version number depends on the moment when **R** is installed)
+- click on "New", then "Browse" and indicate the folder where R is installed, typically in C:/Program Files/R/R-4.2.0/bin
+(the actual version number depends on the moment when R is installed)
 
 ### Running StatConverter from sources
 
