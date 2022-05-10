@@ -7,6 +7,9 @@ env$RGUI_dependencies <- function() {
     installed <- logical(length(packages))
     for (i in seq(length(packages))) {
         installed[i] <- requireNamespace(packages[i], quietly = TRUE)
+        if (installed[i]) {
+            library(packages[i], character.only = TRUE)
+        }
     }
 
     toreturn <- list(
@@ -123,5 +126,3 @@ env$RGUI_variables <- function() {
 }
 
 rm(env)
-library(DDIwR)
-library(jsonlite)

@@ -284,10 +284,12 @@ const start_R = function (R_path: string): void {
         command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
     }
 
-    command += '\n';
+	if (process.platform === "win32") {
+        command = command.replace(/\\/g, '/'); // replace backslash with forward slash
+	}
 
-	Rprocess.stdin.write(command.replace(/\\/g, '/'));
-
+	Rprocess.stdin.write(command + '\n');
+    
 	if (process.env.NODE_ENV == 'production') {
 		command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
 	}
@@ -298,15 +300,11 @@ const start_R = function (R_path: string): void {
 	if (process.platform === "win32") {
 		command = command.replace(/\\/g, '/'); // replace backslash with forward slash
 	}
-	
-	command += '\n';
 
-	Rprocess.stdin.write(command);
+	Rprocess.stdin.write(command + '\n');
 
-
-	// Rprocess.stdin.write('1 + 1\n');
 	Rprocess.stdin.write('RGUI_dependencies()\n');
-	// console.log(Rprocess);
+	
 	Rprocess.stdout.on("data", (data: string) => {
         
         const datasplit = data.toString().split(/\r?\n/);
