@@ -25,6 +25,10 @@ window.addEventListener('DOMContentLoaded', () => {
     //     replaceText(`${type}-version`, <any> process.versions[type as keyof NodeJS.ProcessVersions]);
     // }
 
+    document.getElementById('declared')?.addEventListener('click', () => {
+        ipcRenderer.send('declared');
+    });
+
     document.getElementById('gotoRODA')?.addEventListener('click', () => {
         ipcRenderer.send('gotoRODA');
     });

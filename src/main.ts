@@ -252,6 +252,10 @@ app.whenReady().then(() => {
 	ipcMain.on("gotoRODA", () => {
 		shell.openExternal("http://www.roda.ro");
 	});
+
+	ipcMain.on("declared", () => {
+		shell.openExternal("https://cran.r-project.org/web/packages/declared/index.html");
+	});
 });
 
 const start_R = function (R_path: string): void {
@@ -283,7 +287,7 @@ const start_R = function (R_path: string): void {
     command += '\n';
 
 	Rprocess.stdin.write(command.replace(/\\/g, '/'));
-    
+
 	if (process.env.NODE_ENV == 'production') {
 		command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
 	}
