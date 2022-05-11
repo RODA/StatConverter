@@ -1,7 +1,7 @@
 StatConverter v1.0.0 (by [<b>RODA</b>](http://www.roda.ro)) is a tool to convert to and from various statistical software formats: R, SPSS, Stata, SAS (even Excel) and DDI Codebook.
 
 <p align="center">
-  <img src="StatConverter.png" alt="StatConverter screenshot" style="width:400px;"/>
+  <img src="StatConverter.png" alt="StatConverter screenshot" style="width:600px;"/>
 </p>
 
 The actual conversion is done using the R environment. StatConverter is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript. It is available in multiple formats, depending on the operating system: apart from the GitHub source files, platform specific binaries and installers are also available.
