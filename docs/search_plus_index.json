@@ -1,0 +1,41 @@
+{"/jekyll-gitbook/pages/about/": {
+    "title": "About",
+    "keywords": "Jekyll",
+    "url": "/jekyll-gitbook/pages/about/",
+    "body": "This is an about page."
+  },"/jekyll-gitbook/pages/blabla/": {
+    "title": "Blabla",
+    "keywords": "Jekyll",
+    "url": "/jekyll-gitbook/pages/blabla/",
+    "body": "Blabla page."
+  },"/jekyll-gitbook/pages/contact/": {
+    "title": "Contact",
+    "keywords": "Jekyll",
+    "url": "/jekyll-gitbook/pages/contact/",
+    "body": "This is an contact page."
+  },"/jekyll-gitbook/pages/design/draft/": {
+    "title": "Design Draft",
+    "keywords": "Jekyll",
+    "url": "/jekyll-gitbook/pages/design/draft/",
+    "body": "This is an draft page."
+  },"/jekyll-gitbook/jekyll/2021-08-10-toc.html": {
+    "title": "How to Generate TOC",
+    "keywords": "Jekyll",
+    "url": "/jekyll-gitbook/jekyll/2021-08-10-toc.html",
+    "body": "The jekyll-gitbook theme leverages jekyll-toc to generate the Contents for the page. The TOC feature is not enabled by default. To use the TOC feature, modify the TOC configuration in _config.yml: toc: enabled: true Why this repo long contents ….. a b c d Why this repo long contents ….. 1 2 3 4 Why this repo long contents ….. e f g h Why this repo 5 6 7 8 Why this repo long contents ….. a b c d Why this repo long contents ….. 1 2 3 4 Why this repo long contents ….. e f g h Why this repo 5 6 7 8 Why this repo long contents ….. a b c d Why this repo long contents ….. 1 2 3 4 Why this repo long contents ….. e f g h Why this repo 5 6 7 8 Why this repo long contents ….. a b c d Why this repo long contents ….. 1 2 3 4 Why this repo long contents ….. e f g h Why this repo 5 6 7 8"
+  },"/jekyll-gitbook/jekyll/2019-04-29-license.html": {
+    "title": "License",
+    "keywords": "Jekyll",
+    "url": "/jekyll-gitbook/jekyll/2019-04-29-license.html",
+    "body": "This work is open sourced under the Apache License, Version 2.0, using the same license as the original GitBook repository. Copyright 2019 Tao He."
+  },"/jekyll-gitbook/jekyll/2019-04-28-howto.html": {
+    "title": "How to Get Started",
+    "keywords": "Jekyll",
+    "url": "/jekyll-gitbook/jekyll/2019-04-28-howto.html",
+    "body": "The jekyll-gitbook theme can be used just as other Jekyll themes. Fork this repository and add your markdown posts to the _posts folder, then push to your own Github repository. No need to push generated HTML bundle."
+  },"/jekyll-gitbook/jekyll/2019-04-27-why.html": {
+    "title": "Why Jekyll with GitBook",
+    "keywords": "Jekyll",
+    "url": "/jekyll-gitbook/jekyll/2019-04-27-why.html",
+    "body": "GitBook is an amazing frontend style to present and organize contents (such as book chapters and blogs) on Web. The typical to deploy GitBook at Github Pages is building HTML files locally and then push to Github repository, usually to the gh-pages branch. However, it’s quite annoying to repeat such workload and make it hard for people do version control via git for when there are generated HTML files to be staged in and out. This theme takes style definition out of generated GitBook site and provided the template for Jekyll to rendering markdown documents to HTML, thus the whole site can be deployed to Github Pages without generating and uploading HTML bundle every time when there are changes to the original repository."
+  }}
