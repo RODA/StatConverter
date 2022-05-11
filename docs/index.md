@@ -12,7 +12,7 @@ On Windows (64 bit), the is no need to separately install R. It can be made port
 
 - install as a self-contained application: <button type="button" style="background:#3E72AF;color:white;"><a href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true"><span style="color:white">Download installer</span></a></button>
 
-- executable application, no need to install (compressed file to be added)
+- executable application, no need to install <button type="button" style="background:#3E72AF;color:white;"><a href="https://github.com/RODA/Files/blob/main/StatConverter_1.0.0.zip?raw=true"><span style="color:white">Download .zip</span></a></button>
 
 ## Separate installation of R
 
