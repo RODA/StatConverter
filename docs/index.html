@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./styles.css" rel="stylesheet">
+    <link href="./scripts/prism.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="page" class="page open-menu">
+        <div id="st-sidebar" class="sidebar">
+            <a target="_blank" href="#">Everything packed in</a>
+            <a target="_blank" href="#">Separate installation of R</a>
+            <a target="_blank" href="#">Necessary R packages</a>
+            <a target="_blank" href="#">R on the system PATH</a>
+            <a target="_blank" href="#">Running StatConverter from sources</a>
+        </div>
+
+        <div id="main" class="main-body">
+            <div class="main-header">
+                <button class="openbtn" onclick="toggleNavigation()">☰</button>
+            </div>
+            <div class="main-inner">
+                <section>
+                    <h2>StatConverter</h2>
+                    <p>StatConverter v1.0.0 (by <a target="_blank" href="http://www.roda.ro" target="_blank">RODA</a>) is a tool to convert to and from various statistical software formats: R, SPSS, Stata, SAS (even Excel) and DDI Codebook.</p>
+
+                    <p style="text-align:center">
+                        <img src="./images/StatConverter.png" alt="StatConverter screenshot" style="max-width:600px; display: inline;" />
+                    </p>
+
+                    <p>The actual conversion is done using the R environment. StatConverter is a graphical user interface using Node.js and Electron, to build cross-platform desktop applications using HTML, CSS, and JavaScript. It is available in multiple formats, depending on the operating system: apart from the GitHub source files, platform specific binaries and installers are also available.</p>
+
+                    <h2 id="everything-packed-in">Everything packed in</h2>
+
+                    <p>On Windows (64 bit), the is no need to separately install R. It can be made portable and packed into the converter:</p>
+
+                    <ul>
+                        <li>
+                            <p>install as a self-contained application: 
+                                <a class="button" target="_blank" href="https://github.com/RODA/Files/blob/main/StatConverter_Setup_1.0.0.exe?raw=true">Download installer</a>
+                            </p>
+                        </li>
+                        <li>
+                            <p>executable application, no need to install (compressed file to be added)</p>
+                        </li>
+                    </ul>
+
+                    <h2 id="separate-installation-of-r">Separate installation of R</h2>
+
+                    <p>Since it is not possible to make R portable on MacOS and Linux, on these platforms StatConverter requires a separate installation of R (link to <a target="_blank" href="https://cran.r-project.org/bin/"><b>CRAN</b></a> download page), in a similar way to RStudio. Further instructions about the necessary R packages are presented below. When R is successfully installed on the local computer, StatConverter can directly communicate with it on all operating systems (including Windows):</p>
+
+                    <ul>
+                        <li>
+                            <p>install as an application (installers to be added)</p>
+                        </li>
+                        <li>
+                            <p>executable binaries, no need to install (compressed files to be added)</p>
+                        </li>
+                    </ul>
+
+                    <h2 id="necessary-r-packages">Necessary R packages</h2>
+
+                    <p>StatConverter uses a couple of R packages that need to be installed:</p>
+
+                    <div class="language-r highlighter-rouge">
+                        <div class="highlight">
+                            <!-- <pre class="highlight"><code><span class="n">install.packages</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="s2">"DDIwR"</span><span class="p">,</span><span class="w"> </span><span class="s2">"jsonlite"</span><span class="p">),</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w"></span></code></pre> -->
+                        </div>
+                    </div>
+
+                    <p>It is important to have these packages with all their dependencies, otherwise functionality might be lost.</p>
+
+                    <p>The actual package that does the heavy lifting is <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html"><b>DDIwR</b></a> (DDI with R), which uses the package <a target="_blank" href="https://cran.r-project.org/web/packages/haven/index.html"><b>haven</b></a> which in turn uses Evan Miller’s <a target="_blank" href="https://github.com/WizardMac/ReadStat"><b>ReadStat</b></a> C library.</p>
+
+                    <h2 id="r-on-the-system-path">R on the system PATH</h2>
+
+                    <p>On Unix systems (including MacOS), R is automatically added to the system PATH upon installation. On Windows, this has to be done manually:</p>
+
+                    <ul>
+                        <li>
+                            <p>search for “Edit the system environment variabled” in Control Panel</p>
+                        </li>
+                        <li>
+                            <p>click the “Advanced” tab</p>
+                        </li>
+                        <li>
+                            <p>click on the “Environment Variables…” button</p>
+                        </li>
+                        <li>
+                            <p>double-click on the “Path” variable to open it</p>
+                        </li>
+                        <li>
+                            <p>click on “New”, then “Browse” and indicate the folder where R is installed, typically in C:/Program Files/R/R-4.2.0/bin
+                                (the actual version number depends on the moment when R is installed)</p>
+                        </li>
+                    </ul>
+
+                    <h2 id="running-statconverter-from-sources">Running StatConverter from sources</h2>
+
+                    <p>For the advanced users (Linux, usually) StatConverter can also be started from its source files.</p>
+
+                    <p>The first step is to create a clone of the <a target="_blank" href="https://github.com/RODA/StatConverter">GitHub</a> repository.</p>
+
+                    <p><a target="_blank" href="https://nodejs.org/download/release/v14.18.2/">Node.js</a> needs to be installed, we recommend version 14 which we are using.</p>
+
+                    <p>On Windows, users need to install the <a target="_blank" href="https://visualstudio.microsoft.com/downloads/">Microsoft Visual Studio Tools</a> (we’ve installed the 2019 community version, especially the C++ build tools) and also <a target="_blank" href="https://git-scm.com/downloads">Git</a>, which needs to be on the system PATH as well.</p>
+
+                    <p>Then open a Terminal in the clone of the StatConverter directory, and type:</p>
+
+                    <div class="language-plaintext highlighter-rouge">
+                        <div class="highlight">
+                            <pre class="highlight"><code>npm install</code></pre>
+                        </div>
+                    </div>
+
+                    <p>After Node.js will install all the necessary modules, type:</p>
+
+                    <div class="language-plaintext highlighter-rouge">
+                        <div class="highlight">
+                            <pre class="highlight"><code>npm start</code></pre>
+                        </div>
+                    </div>
+
+                    <p>to start the application.</p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="./scripts/scripts.js"></script>
+    <script src="./scripts/prism.js"></script>
+
+</body>
+
+</html>
