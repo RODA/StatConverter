@@ -1,0 +1,261 @@
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+/* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}
+
+/* Set core root defaults */
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+/* Set core body defaults */
+body {
+  min-height: 100vh;
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+}
+
+/* A elements that don't have a class get default styles */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+}
+
+/* Make images easier to work with */
+img,
+picture {
+  max-width: 100%;
+  display: block;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+   scroll-behavior: auto;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+body, html {
+    height: 100%;
+}
+body {
+    font-family: "LM-Regular", sans-serif;
+    font-size: 1.1rem;
+    margin: 0;
+}
+a {
+    color: rgb(65, 131, 196);
+    text-decoration: none;
+}
+.button{
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    background-color: rgba(65, 131, 196, 0.9);
+    border-color: rgba(65, 131, 196, 0.9);
+    text-decoration: none;
+    color: #fff;
+    padding: 3px 10px 5px 10px;
+    font-size: 1rem;
+    border-radius: 0.15rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    user-select: none;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+}
+.button:hover{
+    background-color: rgba(65, 131, 196, 1);
+    border-color: rgb(63, 125, 188);
+}
+
+.page{
+    position: relative;
+    width: 100%;
+    height: 100%
+}
+.sidebar {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    position: absolute;
+    top: 0;
+    left: -300px;
+    bottom: 0;
+    z-index: 1;
+    overflow-y: auto;
+    width: 300px;
+    background: #fafafa;
+    border-right: 1px solid rgba(0, 0, 0, .07);
+    -webkit-transition: left 250ms ease;
+    -moz-transition: left 250ms ease;
+    -o-transition: left 250ms ease;
+    transition: left 250ms ease;
+    background-color: #fafafa;
+    color: #364149;
+    padding-top: 60px;
+    border-right: 1px solid rgba(0,0,0,.07);
+}
+.sidebar a {
+    padding: 10px 10px 10px 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+.sidebar .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+.openbtn {
+    font-size: 1.5rem;
+    cursor: pointer;
+    background-color: #fff;
+    color: #333;
+    padding: 5px 10px;
+    border: none;
+}
+
+.openbtn:hover {
+    background-color: #e2dfdf;
+}
+@media (max-width:600px) {    
+    .sidebar {
+        width: calc(100% - 60px);
+        bottom: 0;
+        left: -100%;
+    }
+    .page.open-menu .main-body{
+        transform: translate(calc(100% - 60px),0);
+    }
+    .page.open-menu {
+        overflow: hidden;
+    }
+    .main-body .main-inner {
+        overflow: hidden;
+    }
+
+}
+
+.page.open-menu .sidebar {
+    left: 0;
+}
+
+.page.open-menu .main-body{
+    left: 300px;
+}
+
+.main-body {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: scroll;
+    color: #000;
+    background: #fff;
+    -webkit-transition: left 250ms ease;
+    -moz-transition: left 250ms ease;
+    -o-transition: left 250ms ease;
+    transition: left 250ms ease
+}
+.main-body .main-header {
+    overflow: visible;
+    height: 50px;
+    padding: 0 8px;
+    z-index: 2;
+    font-size: .85em;
+    color: #7e888b;
+    background: 0 0
+}
+.main-body .main-inner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: scroll;
+    margin-top: 50px;
+    min-height: calc(100% - 50px);
+}
+
+.main-body .main-inner section{
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px 15px 40px 15px
+}
+
+
+@font-face {
+    font-family: 'LM-Regular';
+    src: url('./fonts/LM-regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'LM-Regular';
+    src: url('./fonts/LM-bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'LM-Regular';
+    src: url('./fonts/LM-italic.ttf') format('truetype');
+    font-weight: 400;
+    font-style: italic;
+}
+@font-face {
+    font-family: 'LM-Regular';
+    src: url('./fonts/LM-bold-italic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
