@@ -326,15 +326,24 @@ const start_R = function (R_path: string): void {
 
             if (!startlong && longresponse != "") {
                 response = JSON.parse(longresponse);
-                mainWindow.webContents.send("clearLoader");
                 
                 if (response.error && response.error[0] != "") {
-                    dialog.showErrorBox("R says:", response.error[0]);
+					// dialog.showErrorBox("R says:", response.error[0]);
+					dialog.showMessageBox(mainWindow, {
+						type: "error",
+						title: "R says error:",
+						message: response.error[0]
+					}).then(() => {
+						mainWindow.webContents.send("clearLoader");
+					})
                 }
-                else if (response.variables && Object.keys(response.variables).length > 0) {
-                    mainWindow.webContents.send("sendCommand-reply", response);
+                else {
+					if (response.variables && Object.keys(response.variables).length > 0) {
+						mainWindow.webContents.send("sendCommand-reply", response);
+					}
+					mainWindow.webContents.send("clearLoader");
                 }
-
+				
                 longresponse = "";
                 break;
             }
