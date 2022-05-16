@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>StatConverter - Install R</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com"> 
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="./styles.css" rel="stylesheet">
+    <link href="./scripts/prism.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="page" class="page open-menu">
+        <div id="st-sidebar" class="sidebar">
+            <a href="./index.html">About StatConverter</a>
+            <a href="./download-with-r.html">Download including R</a>
+            <a href="./download-without-r.html">Download without R</a>
+            <a href="./install-r.html">Install R</a>
+            <a href="./run-from-sources.html">Run from sources</a>
+            <a href="./change-log.html">Change log</a>
+            <a class="roda-logo" href="http://www.roda.ro" target="_blank">
+                <img src="./images/RODA.png" alt="RODA"/>
+            </a>
+        </div>
+
+        <div id="main" class="main-body">
+            <div class="main-header">
+                <button class="openbtn" onclick="toggleNavigation()">☰</button>
+                <a class="github" href="https://github.com/roda/StatConverter/" target="_blank">
+                    <img src="./images/GitHub-Mark-32px.png" alt="GitHub StatConverter">
+                </a>
+            </div>
+            <div class="main-inner">
+                <section>
+                    <h1>R installation and necessary packages</h1>
+                    
+                    <h2 id="r-on-the-system-path">R on the system PATH</h2>
+
+                    <p>
+                        On MacOS and Linux, R is automatically added to the system PATH. On Windows, this must be done manually:
+                    </p>
+
+
+                    <ul>
+                        <li>
+                            <p>search for “Edit the system environment variabled” in Control Panel</p>
+                        </li>
+                        <li>
+                            <p>click the “Advanced” tab</p>
+                        </li>
+                        <li>
+                            <p>click on the “Environment Variables…” button</p>
+                        </li>
+                        <li>
+                            <p>double-click on the “Path” variable to open it</p>
+                        </li>
+                        <li>
+                            <p>click on “New”, then “Browse” and indicate the folder where R is installed, typically in C:/Program Files/R/R-4.2.0/bin
+                                (the actual version number depends on the moment when R is installed)</p>
+                        </li>
+                    </ul>
+
+                    <h2 id="r-on-the-system-path">Necessary R packages</h2>
+
+                    <p>StatConverter uses a couple of R packages that need to be installed. The following R command installs them:</p>
+
+                    <div class="language-r highlighter-rouge">
+                        <div class="highlight">
+                            <pre class="highlight"><code><span class="n">install.packages</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="s2">"DDIwR"</span><span class="p">,</span><span class="w"> </span><span class="s2">"jsonlite"</span><span class="p">),</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w"></span></code></pre>
+                        </div>
+                    </div>
+
+                    <p>It is important to have these packages with all their dependencies, otherwise functionality might be lost.</p>
+
+                    <p>The actual package that does the heavy lifting is <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a> (DDI with R), which uses the package <a target="_blank" href="https://cran.r-project.org/web/packages/haven/index.html">haven</a> which in turn uses Evan Miller’s <a target="_blank" href="https://github.com/WizardMac/ReadStat">ReadStat</a> C library.</p>
+
+                    
+
+
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="./scripts/scripts.js"></script>
+    <script src="./scripts/prism.js"></script>
+
+</body>
+
+</html>

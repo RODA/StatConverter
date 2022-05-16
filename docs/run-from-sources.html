@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>StatConverter - Run from sources</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com"> 
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="./styles.css" rel="stylesheet">
+    <link href="./scripts/prism.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="page" class="page open-menu">
+        <div id="st-sidebar" class="sidebar">
+            <a href="./index.html">About StatConverter</a>
+            <a href="./download-with-r.html">Download including R</a>
+            <a href="./download-without-r.html">Download without R</a>
+            <a href="./install-r.html">Install R</a>
+            <a href="./run-from-sources.html">Run from sources</a>
+            <a href="./change-log.html">Change log</a>
+            <a class="roda-logo" href="http://www.roda.ro" target="_blank">
+                <img src="./images/RODA.png" alt="RODA"/>
+            </a>
+        </div>
+
+        <div id="main" class="main-body">
+            <div class="main-header">
+                <button class="openbtn" onclick="toggleNavigation()">☰</button>
+                <a class="github" href="https://github.com/roda/StatConverter/" target="_blank">
+                    <img src="./images/GitHub-Mark-32px.png" alt="GitHub StatConverter">
+                </a>
+            </div>
+            <div class="main-inner">
+                <section>
+                    <h1>Running StatConverter from sources</h1>
+                    
+
+                    <p>For the advanced users (Linux, usually) StatConverter can also be started from its source files.</p>
+
+                    <p>&nbsp;</p>
+                    <p>The first step is to create a clone of the <a target="_blank" href="https://github.com/RODA/StatConverter"><b>GitHub</b></a> repository.</p>
+                    
+                    <p>&nbsp;</p>
+                    <p><a target="_blank" href="https://nodejs.org/download/release/v14.18.2/"><b>Node.js</b></a> needs to be installed, we recommend version 14 which we are using.</p>
+                    
+                    <p>&nbsp;</p>
+                    <p>On Windows, users need to install the <a target="_blank" href="https://visualstudio.microsoft.com/downloads/"><b>Microsoft Visual Studio Tools</b></a> (we’ve installed the 2019 community version, especially the C++ build tools) and also <a target="_blank" href="https://git-scm.com/downloads"><b>Git</b></a>, which needs to be on the system PATH as well.</p>
+                    
+                    <p>&nbsp;</p>
+                    <p>Then open a Terminal in the clone of the StatConverter directory, and type:</p>
+                    
+                    <div class="language-plaintext highlighter-rouge">
+                        <div class="highlight">
+                            <pre class="highlight"><code>npm install</code></pre>
+                        </div>
+                    </div>
+                    
+                    <p>&nbsp;</p>
+                    <p>After Node.js will install all the necessary modules, type:</p>
+
+                    <div class="language-plaintext highlighter-rouge">
+                        <div class="highlight">
+                            <pre class="highlight"><code>npm start</code></pre>
+                        </div>
+                    </div>
+
+                    <p>to start the application.</p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="./scripts/scripts.js"></script>
+    <script src="./scripts/prism.js"></script>
+
+</body>
+
+</html>

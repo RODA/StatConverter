@@ -78,14 +78,25 @@ body, html {
     height: 100%;
 }
 body {
-    font-family: "LM-Regular", sans-serif;
-    font-size: 1.1rem;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 1.2rem;
     margin: 0;
 }
 a {
     color: rgb(65, 131, 196);
     text-decoration: none;
 }
+
+h1 {
+    margin-bottom: 1rem;
+    font-size: 2em;
+}
+
+h2 {
+    margin-bottom: 0.5rem;
+    font-size: 1.4em;
+}
+
 .button{
     display: inline-block;
     font-weight: 400;
@@ -234,28 +245,19 @@ a {
     padding: 20px 15px 40px 15px
 }
 
+.roda-logo{
+    position: absolute;
+    left: calc(50% - 50px);
+    bottom: 20px;
+}
 
-@font-face {
-    font-family: 'LM-Regular';
-    src: url('./fonts/LM-regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
+.roda-logo img {
+    width: 70px;
 }
-@font-face {
-    font-family: 'LM-Regular';
-    src: url('./fonts/LM-bold.ttf') format('truetype');
-    font-weight: bold;
-    font-style: normal;
-}
-@font-face {
-    font-family: 'LM-Regular';
-    src: url('./fonts/LM-italic.ttf') format('truetype');
-    font-weight: 400;
-    font-style: italic;
-}
-@font-face {
-    font-family: 'LM-Regular';
-    src: url('./fonts/LM-bold-italic.ttf') format('truetype');
-    font-weight: bold;
-    font-style: italic;
+
+.github {
+    position: absolute;
+    right: 20px;
+    display: inline-block;
+    top: 20px;
 }
