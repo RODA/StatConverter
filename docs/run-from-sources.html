@@ -40,13 +40,10 @@
                     <p>For the advanced users (Linux, usually) StatConverter can also be started from its source files.</p>
 
                     <p>&nbsp;</p>
-                    <p>The first step is to create a clone of the <a target="_blank" href="https://github.com/RODA/StatConverter"><b>GitHub</b></a> repository.</p>
+                    <p>The first step is to create a clone of the <a target="_blank" href="https://github.com/RODA/StatConverter">GitHub</a> repository.</p>
                     
                     <p>&nbsp;</p>
-                    <p><a target="_blank" href="https://nodejs.org/download/release/v14.18.2/"><b>Node.js</b></a> needs to be installed, we recommend version 14 which we are using.</p>
-                    
-                    <p>&nbsp;</p>
-                    <p>On Windows, users need to install the <a target="_blank" href="https://visualstudio.microsoft.com/downloads/"><b>Microsoft Visual Studio Tools</b></a> (we’ve installed the 2019 community version, especially the C++ build tools) and also <a target="_blank" href="https://git-scm.com/downloads"><b>Git</b></a>, which needs to be on the system PATH as well.</p>
+                    <p><a target="_blank" href="https://nodejs.org/download/release/v14.18.2/">Node.js</a> needs to be installed, we recommend version 14 which we are using.</p>
                     
                     <p>&nbsp;</p>
                     <p>Then open a Terminal in the clone of the StatConverter directory, and type:</p>
@@ -59,14 +56,35 @@
                     
                     <p>&nbsp;</p>
                     <p>After Node.js will install all the necessary modules, type:</p>
-
+                    
                     <div class="language-plaintext highlighter-rouge">
                         <div class="highlight">
                             <pre class="highlight"><code>npm start</code></pre>
                         </div>
                     </div>
-
+                    
                     <p>to start the application.</p>
+                    
+                    
+                    <p>&nbsp;</p>
+                    <h2>Build your own binaries</h2>
+                    
+                    <p>&nbsp;</p>
+                    <p>On Windows, users need to install the <a target="_blank" href="https://visualstudio.microsoft.com/downloads/">Microsoft Visual Studio Tools</a> (we’ve installed the 2019 community version, especially the C++ build tools) and also <a target="_blank" href="https://git-scm.com/downloads">Git</a>, which needs to be on the system PATH as well.</p>
+                    
+                    <p>&nbsp;</p>
+                    <p>MacOS users need to install the <a href="">XCode Command Line Tools</a> (not the entire XCode, the CLT are sufficient)</p>
+                    
+                    <p>&nbsp;</p>
+                    <p>In the Terminal, this command will produce the binary:</p>
+
+
+                    <div class="language-plaintext highlighter-rouge">
+                        <div class="highlight">
+                            <pre class="highlight"><code>npm run dist</code></pre>
+                        </div>
+                    </div>
+
                 </section>
             </div>
         </div>
