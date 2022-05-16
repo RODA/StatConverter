@@ -121,28 +121,26 @@ app.whenReady().then(() => {
             })
             .then((response) => {
                 if (response) {
-                    dialog
-                        .showOpenDialog(mainWindow, {
-                            title: "R path",
-                            properties: ["openFile"],
-                        })
-                        .then((result) => {
+                    dialog.showOpenDialog(mainWindow, {
+                        title: "R path",
+                        properties: ["openFile"],
+                    })
+                    .then((result) => {
 
-                            if(result.canceled){
-                                app.quit();
-                            }
-                            
-                            R_path = result.filePaths[0];
+                        if(result.canceled){
+                            app.quit();
+                        }
+                        
+                        R_path = result.filePaths[0];
 
-                            if (R_path != "") {
-                                start_R(R_path);
-                            }
-                        });
+                        if (R_path != "") {
+                            start_R(R_path);
+                        }
+                    });
                 }
             });
         }
     }
-
 
 
 	if (R_path != "") {
@@ -155,39 +153,38 @@ app.whenReady().then(() => {
 		} else {
 			const info = helpers.fileFromInfo(args.inputType);
 
-			dialog
-				.showOpenDialog(mainWindow, {
-					title: "Select source file",
-					filters: [
-						{
-							name: info.fileTypeName,
-							extensions: info.ext,
-						},
-					],
-					properties: ["openFile"],
-				})
-				.then((result) => {
-					if (!result.canceled) {
-						inputOutput.fileFrom = result.filePaths[0];
+			dialog.showOpenDialog(mainWindow, {
+                title: "Select source file",
+                filters: [
+                    {
+                        name: info.fileTypeName,
+                        extensions: info.ext,
+                    },
+                ],
+                properties: ["openFile"],
+            })
+            .then((result) => {
+                if (!result.canceled) {
+                    inputOutput.fileFrom = result.filePaths[0];
 
-						const file = path.basename(inputOutput.fileFrom);
-						const ext = path.extname(file);
+                    const file = path.basename(inputOutput.fileFrom);
+                    const ext = path.extname(file);
 
-						inputOutput.inputType = helpers.getTypeFromExtension(ext);
-						inputOutput.fileFromName = path.basename(inputOutput.fileFrom, ext);
-						inputOutput.fileFromDir = path.dirname(inputOutput.fileFrom);
+                    inputOutput.inputType = helpers.getTypeFromExtension(ext);
+                    inputOutput.fileFromName = path.basename(inputOutput.fileFrom, ext);
+                    inputOutput.fileFromDir = path.dirname(inputOutput.fileFrom);
 
-						if (process.platform == "win32") {
-							inputOutput.fileFrom = inputOutput.fileFrom.replace(/\\/g, '/');
-							inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
-						}
+                    if (process.platform == "win32") {
+                        inputOutput.fileFrom = inputOutput.fileFrom.replace(/\\/g, '/');
+                        inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
+                    }
 
-						event.reply("selectFileFrom-reply", inputOutput);
-					}
-				})
-				.catch((err) => {
-					console.log(err);
-				});
+                    event.reply("selectFileFrom-reply", inputOutput);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
 		}
 	});
 
@@ -246,7 +243,7 @@ app.whenReady().then(() => {
 
 	ipcMain.on("sendCommand", (event, command) => {
 		mainWindow.webContents.send("startLoader");
-		Rprocess.stdin.write(command);
+        Rprocess.stdin.write(command);
 	});
 
 	ipcMain.on("gotoRODA", () => {
@@ -275,20 +272,21 @@ const start_R = function (R_path: string): void {
 
 	let command = "";
 
-    // make sure we use the R package library from R_Portable, otherwise
-    // a different version of the code depending on using a locally installed R
-    if (process.env.NODE_ENV == "production") {
-        command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
-    }
-    else {
-        command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
-    }
-
+    
 	if (process.platform === "win32") {
+        // make sure we use the R package library from R_Portable, otherwise
+        // a different version of the code depending on using a locally installed R
+        if (process.env.NODE_ENV == "production") {
+            command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
+        }
+        else {
+            command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
+        }
+        
         command = command.replace(/\\/g, '/'); // replace backslash with forward slash
+        Rprocess.stdin.write(command + '\n');
 	}
 
-	Rprocess.stdin.write(command + '\n');
     
 	if (process.env.NODE_ENV == 'production') {
 		command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
@@ -328,22 +326,22 @@ const start_R = function (R_path: string): void {
                 response = JSON.parse(longresponse);
                 
                 if (response.error && response.error[0] != "") {
-					// dialog.showErrorBox("R says:", response.error[0]);
-					dialog.showMessageBox(mainWindow, {
-						type: "error",
-						title: "R says error:",
-						message: response.error[0]
-					}).then(() => {
-						mainWindow.webContents.send("clearLoader");
-					})
+                    // dialog.showErrorBox("R says:", response.error[0]);
+                    dialog.showMessageBox(mainWindow, {
+                        type: "error",
+                        title: "R says error:",
+                        message: response.error[0]
+                    }).then(() => {
+                        mainWindow.webContents.send("clearLoader");
+                    })
                 }
                 else {
-					if (response.variables && Object.keys(response.variables).length > 0) {
-						mainWindow.webContents.send("sendCommand-reply", response);
-					}
-					mainWindow.webContents.send("clearLoader");
+                    if (response.variables && Object.keys(response.variables).length > 0) {
+                        mainWindow.webContents.send("sendCommand-reply", response);
+                    }
+                    mainWindow.webContents.send("clearLoader");
                 }
-				
+
                 longresponse = "";
                 break;
             }
