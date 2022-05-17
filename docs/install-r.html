@@ -39,7 +39,8 @@
                     <h2 id="r-on-the-system-path">R on the system PATH</h2>
 
                     <p>
-                        On MacOS and Linux, R is automatically added to the system PATH. On Windows, this must be done manually:
+                        On MacOS and Linux, R is automatically added to the system PATH.On Windows,
+                        this must be done manually:
                     </p>
 
 
@@ -57,26 +58,74 @@
                             <p>double-click on the "Path" variable to open it</p>
                         </li>
                         <li>
-                            <p>click on "New", then "Browse" and indicate the folder where R is installed, typically in C:/Program Files/R/R-4.2.0/bin
-                                (the actual version number depends on the moment when R is installed)</p>
+                            <p>
+                                click on "New", then "Browse" and indicate the folder where R is installed,
+                                typically in C:/Program Files/R/R-4.2.0/bin (the actual version number
+                                depends on the moment when R is installed)
+                            </p>
                         </li>
                     </ul>
 
                     <h2 id="r-on-the-system-path">Necessary R packages</h2>
 
-                    <p>StatConverter uses a couple of R packages that need to be installed. The following R command installs them:</p>
+                    <p>
+                        StatConverter uses a couple of R packages that need to be installed.
+                        The following R command installs them:
+                    </p>
 
-                    <div class="language-r highlighter-rouge">
-                        <div class="highlight">
-                            <pre class="highlight"><code><span class="n">install.packages</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="s2">"DDIwR"</span><span class="p">,</span><span class="w"> </span><span class="s2">"jsonlite"</span><span class="p">),</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w"></span></code></pre>
-                        </div>
-                    </div>
+<div>
+<pre class="code">
+install.packages(c("DDIwR", "jsonlite"), dependencies = TRUE)
+</pre>
+</div>
 
-                    <p>It is important to have these packages with all their dependencies, otherwise functionality might be lost.</p>
+                    <p>
+                        It is important to have these packages with all their dependencies,
+                        otherwise functionality might be lost.</p>
 
-                    <p>The actual package that does the heavy lifting is <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a> (DDI with R), which uses the package <a target="_blank" href="https://cran.r-project.org/web/packages/haven/index.html">haven</a> which in turn uses Evan Miller’s <a target="_blank" href="https://github.com/WizardMac/ReadStat">ReadStat</a> C library.</p>
+                    <p>
+                        The actual package that does the heavy lifting is
+                        <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a>
+                        (DDI with R), which uses the package
+                        <a target="_blank" href="https://cran.r-project.org/web/packages/haven/index.html">haven</a>
+                        which in turn uses Evan Miller's <a target="_blank" href="https://github.com/WizardMac/ReadStat">ReadStat</a>
+                        C library.
+                    </p>
 
+                    <p>&nbsp;</p>
+                    <h2 id="r-on-the-system-path">Updating the R packages</h2>
                     
+                    <p>
+                        If you have your own R, the necessary packages will change versions and future
+                        functionality of StatConverter might depend on future version of the R packages,
+                        especially <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a>,
+                        which itself uses a number of other packages, among which
+                        <a target="_blank" href="https://cran.r-project.org/web/packages/admisc/index.html">admisc</a>
+                        and <a target="_blank" href="https://cran.r-project.org/web/packages/declared/index.html">declared</a>.
+                    </p>
+                    <p>&nbsp;</p>
+                    <p>
+                        The official versions of the packages are located on
+                        <a target="_blank" href="https://cran.r-project.org/web/packages/available_packages_by_name.html">CRAN</a>,
+                        and they can be re-installed using the above command.
+                    </p>
+                    <p>&nbsp;</p>
+                    <p>
+                        The very latest development versions of the packages are located on GitHub. To install those,
+                        you need to instruct R on using an additional package management server:
+                    </p>
+                    
+<div>
+<pre class="code">
+options(repos = c("dusadrian.r-universe.dev", getOption("repos")))
+install.packages("DDIwR", dependencies = TRUE)
+</pre>
+</div>
+                    
+                    <p>&nbsp;</p>
+                    <p>For detailed instructions, please visit Adrian Dușa's <a target="_blank" href="https://dusadrian.r-universe.dev/ui#packages">R-universe</a> repository.</p>
+                    <p>&nbsp;</p>
+                    <p>&nbsp;</p>
 
 
                 </section>

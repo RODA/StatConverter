@@ -252,7 +252,7 @@ h2 {
 }
 
 .roda-logo img {
-    width: 70px;
+    width: 60px;
 }
 
 .github {
@@ -260,4 +260,9 @@ h2 {
     right: 20px;
     display: inline-block;
     top: 20px;
+}
+
+.code {
+    background-color: #dadada;
+    padding: 10px;
 }
