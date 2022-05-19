@@ -75,7 +75,7 @@
 
                     <p>
                         StatConverter uses a couple of R packages that need to be installed.
-                        The following command installs them:
+                        The following command does that:
                     </p>
 
 <div>
@@ -85,16 +85,17 @@ install.packages(c("DDIwR", "jsonlite"), dependencies = TRUE)
 </div>
 
                     <p>
-                        It is important to have these packages with all their dependencies,
-                        otherwise functionality might be lost.</p>
+                        It is important to have these packages installed with all their dependencies,
+                        otherwise functionality is affected.</p>
 
                     <p>
                         The actual package that does the heavy lifting is called
                         <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a>
                         (DDI with R), which uses the package
                         <a target="_blank" href="https://cran.r-project.org/web/packages/haven/index.html">haven</a>
-                        which in turn uses Evan Miller's <a target="_blank" href="https://github.com/WizardMac/ReadStat">ReadStat</a>
-                        C library.
+                        which in turn uses an excellent C library called
+                        <a target="_blank" href="https://github.com/WizardMac/ReadStat">ReadStat</a>. All of these are
+                        open source software, and get improved on a constant basis.
                     </p>
 
                     <p>&nbsp;</p>
