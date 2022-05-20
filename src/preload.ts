@@ -239,9 +239,18 @@ window.addEventListener('DOMContentLoaded', () => {
             const declared = document.getElementById('declaredTRUE') as HTMLInputElement;
             command += ', declared = ' + ((inputOutput.outputType == "r" && declared.checked) ? 'TRUE' : 'FALSE');
 
-            const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
-            if (stataVersion.value != '14') {
-                command += ', version = ' + stataVersion.value;
+            if (inputOutput.outputType == "stata") {
+                const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
+                if (stataVersion.value != '14') {
+                    command += ', version = ' + stataVersion.value;
+                }
+            }
+
+            if (inputOutput.outputType == "sas") {
+                const sasVersion = document.getElementById('sasVersion') as HTMLInputElement;
+                if (sasVersion.value != '8') {
+                    command += ', version = ' + sasVersion.value;
+                }
             }
 
             const agency = document.getElementById('agency') as HTMLInputElement;
