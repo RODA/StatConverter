@@ -97,7 +97,7 @@
 								<option value="none" selected>Select file type</option>
 								<option value="ddi">DDI Codebook</option>
 								<option value="excel">Excel</option>
-								<option value="sas">SAS</option>
+								<option value="sas">SAS Transport</option>
 								<option value="spss">SPSS</option>
 								<option value="stata">Stata</option>
 								<option value="r">R</option>
@@ -131,7 +131,7 @@
 								<option value="none" selected>Select file type</option>
 								<option value="ddi">DDI Codebook</option>
 								<option value="excel">Excel</option>
-								<option value="sas">SAS</option>
+								<option value="sas">SAS Transport</option>
 								<option value="spss">SPSS</option>
 								<option value="stata">Stata</option>
 								<option value="r">R</option>
@@ -295,6 +295,18 @@
 								</div>
 								<div class="row mb-2">
 									<div class="col-7">
+										<p>Output to SAS Transport version</p>
+									</div>
+									<div class="col-2">
+										<select class="form-select" id="sasVersion">
+											<option value="8" selected>8</option>
+											<option value="5">5</option>
+										</select>
+									</div>
+									<div class="col-2"></div>
+								</div>
+								<div class="row mb-2">
+									<div class="col-7">
 										<p>Convert character categories to numeric categories</p>
 									</div>
 									<div class="col-5 text-start">
@@ -340,7 +352,6 @@
 								</div>
 
 								<!-- horizontal rule separator -->
-								<br />
 								<hr />
 								<br />
 

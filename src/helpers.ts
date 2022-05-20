@@ -363,7 +363,7 @@ export const helpers = {
                 ext = '.xlsx';
                 break
             case 'sas':
-                ext = '.sas7bdat';
+                ext = '.xpt';
                 break
             case 'spss':
                 ext = '.sav';
@@ -388,7 +388,7 @@ export const helpers = {
             case '.xlsx':
                 type = 'excel';
                 break
-            case '.sas7bdat':
+            case '.xpt':
                 type = 'sas';
                 break
             case '.sav':
@@ -424,8 +424,8 @@ export const helpers = {
                 result.fileTypeName = 'Excel Files (only xlsx)';
                 break
             case 'sas':
-                result.ext.push('sas7bdat');
-                result.fileTypeName = 'SAS Files (sas7bdat)';
+                result.ext.push('xpt');
+                result.fileTypeName = 'SAS Transport Files (xpt)';
                 break
             case 'spss':
                 result.ext.push('sav');
