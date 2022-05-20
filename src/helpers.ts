@@ -417,28 +417,28 @@ export const helpers = {
         switch (inputType) {
             case 'ddi':
                 result.ext.push('xml');
-                result.fileTypeName = 'DDI Files (xml)';
+                result.fileTypeName = 'DDI Files';
                 break
             case 'excel':
                 result.ext.push('xlsx');
-                result.fileTypeName = 'Excel Files (only xlsx)';
+                result.fileTypeName = 'Excel Files';
                 break
             case 'sas':
                 result.ext.push('xpt');
-                result.fileTypeName = 'SAS Transport Files (xpt)';
+                result.fileTypeName = 'SAS Transport Files';
                 break
             case 'spss':
                 result.ext.push('sav');
                 result.ext.push('por');
-                result.fileTypeName = 'SPSS Files (sav, por)';
+                result.fileTypeName = 'SPSS Files';
                 break
             case 'stata':
                 result.ext.push('dta');
-                result.fileTypeName = 'Stata Files (dta)';
+                result.fileTypeName = 'Stata Files';
                 break
             case 'r':
                 result.ext.push('rds');
-                result.fileTypeName = 'R Files (rds, rda)';
+                result.fileTypeName = 'R Files';
                 break
             default:
                 result.ext.push('*');
