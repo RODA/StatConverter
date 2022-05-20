@@ -118,14 +118,14 @@ install.packages(c("DDIwR", "jsonlite"), dependencies = TRUE)
                     </p>
                     <p>&nbsp;</p>
                     <p>
-                        The very latest development versions of the packages are located on GitHub. To install those,
-                        you need to instruct R on using an additional package management server:
+                        For many packages, the very latest development versions are located on GitHub. To install those,
+                        you need to instruct R on using an additional package management server, for instance:
                     </p>
                     
 <div>
 <pre class="code">
 options(repos = c("dusadrian.r-universe.dev", getOption("repos")))
-install.packages("DDIwR", dependencies = TRUE)
+install.packages(c("admisc", "declared", "DDIwR"))
 </pre>
 </div>
                     
