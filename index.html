@@ -97,7 +97,8 @@
 								<option value="none" selected>Select file type</option>
 								<option value="ddi">DDI Codebook</option>
 								<option value="excel">Excel</option>
-								<option value="sas">SAS Transport</option>
+								<option value="sas">SAS</option>
+								<option value="xpt">SAS Transport</option>
 								<option value="spss">SPSS</option>
 								<option value="stata">Stata</option>
 								<option value="r">R</option>
@@ -131,7 +132,8 @@
 								<option value="none" selected>Select file type</option>
 								<option value="ddi">DDI Codebook</option>
 								<option value="excel">Excel</option>
-								<option value="sas">SAS Transport</option>
+								<option value="sas">SAS</option>
+								<option value="xpt">SAS Transport</option>
 								<option value="spss">SPSS</option>
 								<option value="stata">Stata</option>
 								<option value="r">R</option>
@@ -298,7 +300,7 @@
 										<p>Output to SAS Transport version</p>
 									</div>
 									<div class="col-2">
-										<select class="form-select" id="sasVersion">
+										<select class="form-select" id="xptVersion">
 											<option value="8" selected>8</option>
 											<option value="5">5</option>
 										</select>
@@ -405,7 +407,7 @@
 										<label for="monolang">Mono language</label>
 									</div>
 									<div class="col-1">
-										<p>ID no.</p>
+										<p>Study ID</p>
 									</div>
 									<div class="col-3">
 										<input type="input" class="rounded-0 form-control" id="IDNo" value="S0000" />
@@ -492,8 +494,8 @@
 			var changeOutputTypeOptions = function (inputTypeValue) {
 				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
 
-				let values = ["none", "ddi", "excel", "sas", "spss", "stata", "r"];
-				let texts = ["Select file type", "DDI Codebook", "Excel", "SAS", "SPSS", "Stata", "R"];
+				let values = ["none", "ddi", "excel", "sas", "xpt", "spss", "stata", "r"];
+				let texts = ["Select file type", "DDI Codebook", "Excel", "SAS", "XPT", "SPSS", "Stata", "R"];
 
 				for (i = outputType.options.length - 1; i >= 0; i--) {
 					outputType.options[i] = null;

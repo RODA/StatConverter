@@ -246,10 +246,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            if (inputOutput.outputType == "sas") {
-                const sasVersion = document.getElementById('sasVersion') as HTMLInputElement;
-                if (sasVersion.value != '8') {
-                    command += ', version = ' + sasVersion.value;
+            if (inputOutput.outputType == "xpt") {
+                const xptVersion = document.getElementById('xptVersion') as HTMLInputElement;
+                if (xptVersion.value != '8') {
+                    command += ', version = ' + xptVersion.value;
                 }
             }
 
