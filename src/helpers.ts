@@ -363,6 +363,9 @@ export const helpers = {
                 ext = '.xlsx';
                 break
             case 'sas':
+                ext = '.sas7bdat';
+                break
+            case 'xpt':
                 ext = '.xpt';
                 break
             case 'spss':
@@ -388,15 +391,18 @@ export const helpers = {
             case '.xlsx':
                 type = 'excel';
                 break
+            case '.sasb7dat':
+                type = 'sas';
+                break
             case '.xpt':
                 type = 'sas';
                 break
             case '.sav':
                 type = 'spss';
                 break
-                case '.por':
-                    type = 'spss';
-                    break
+            case '.por':
+                type = 'spss';
+                break
             case '.dta':
                 type = 'stata';
                 break
