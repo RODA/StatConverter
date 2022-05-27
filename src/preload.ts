@@ -15,6 +15,8 @@ const inputOutput: InputOutputType = {
     fileToName: '',
 };
 
+let filename = "";
+
 window.addEventListener('DOMContentLoaded', () => {
     // const replaceText = (selector: string, text: string) => {
     //     const element = document.getElementById(selector)
@@ -96,6 +98,11 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        const recodeFALSE = document.getElementById('recodeFALSE') as HTMLInputElement;
+        if (recodeFALSE.checked) {
+            command += ', recode = FALSE';
+        }
+
         command += ")\")\n";
 
         // ipcRenderer.send('sendCommand', 'require(DDIwR)');
@@ -174,14 +181,14 @@ window.addEventListener('DOMContentLoaded', () => {
         } else {
             let command = "RGUI_parseCommand(\"dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE";
 
+            const recodeFALSE = document.getElementById('recodeFALSE') as HTMLInputElement;
+            if (recodeFALSE.checked) {
+                command += ', recode = FALSE';
+            }
+
             const targetOS = document.getElementById('targetOS') as HTMLInputElement;
             if (targetOS.value != 'local') {
                 command += ", OS = '" + targetOS.value + "'";
-            }
-
-            const recode = document.getElementById('recodeFALSE') as HTMLInputElement;
-            if (recode.checked) {
-                command += ', recode = FALSE';
             }
 
             const chartonum = document.getElementById('chartonumFALSE') as HTMLInputElement;
@@ -239,6 +246,15 @@ window.addEventListener('DOMContentLoaded', () => {
             const declared = document.getElementById('declaredTRUE') as HTMLInputElement;
             command += ', declared = ' + ((inputOutput.outputType == "r" && declared.checked) ? 'TRUE' : 'FALSE');
 
+            // recode is by default TRUE, for instance from Stata to SPSS this is mandatory
+
+            // const from_extended = inputOutput.inputType == "stata" || inputOutput.inputType == "sas";
+            // const to_normal = inputOutput.outputType == "spss" || inputOutput.outputType == "ddi";
+            
+            if (recodeFALSE.checked) {
+                command += ', recode = FALSE';
+            }
+
             if (inputOutput.outputType == "stata") {
                 const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
                 if (stataVersion.value != '14') {
@@ -281,6 +297,10 @@ window.addEventListener('DOMContentLoaded', () => {
             const URI = document.getElementById('URI') as HTMLInputElement;
             if (URI.value != 'http://www.default.eu') {
                 command += ", URI = '" + URI.value + "'";
+            }
+
+            if (filename != "") {
+                command += ", filename = '" + filename + "'";
             }
 
             command += ")\")\n";
@@ -345,6 +365,11 @@ window.addEventListener('DOMContentLoaded', () => {
     // ================= Variables =====================
     ipcRenderer.on('sendCommand-reply', (event, response) => {
         variables = response.variables;
+        // console.log(response);
+        if (response.filename) {
+            filename = response.filename[0];
+            // console.log(filename);
+        }
         //load variable list
         const variablesList = document.getElementById('variables') as HTMLElement;
         const variablesListCases = document.getElementById('variablesCases') as HTMLElement;
