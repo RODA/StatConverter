@@ -36,17 +36,17 @@
         "lodash.clonedeep": "^4.5.0",
         "r-integration": "^2.3.0",
         "trim-newlines": ">=3.0.1",
-        "ws": "^8.6.0"
+        "ws": "^8.7.0"
     },
     "devDependencies": {
         "@types/lodash.clonedeep": "^4.5.7",
         "@typescript-eslint/eslint-plugin": "^4.23.0",
         "@typescript-eslint/parser": "^4.23.0",
-        "electron": "^18.2.0",
+        "electron": "^18.3.1",
         "electron-builder": "^23.0.3",
         "electron-rebuild": "^3.2.7",
         "eslint": "^7.26.0",
-        "typescript": "^4.6.4"
+        "typescript": "^4.7.2"
     },
     "build": {
         "appId": "StatConverter.tool",
