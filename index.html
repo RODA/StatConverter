@@ -7,9 +7,9 @@
 		<link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
 		<style>
 
-			/* body {
+			body {
 				font-size: 0.9rem;
-			} */
+			}
 
 			.btn:focus {
 				outline: none;
@@ -180,20 +180,20 @@
 
 				<!-- ========= Variables ========= -->
 				<div class="tab-pane fade" id="v-pills-variables" role="tabpanel" aria-labelledby="v-pills-variables-tab">
-					<div class="row align-items-center mt-3">
+					<div class="row align-items-start mt-3">
 						<div class="col-4 text-start">
-							<strong style="margin-left: 10px fsize">Search variables:</strong>
+							<strong style="margin-left: 10px;">Search variables:</strong>
 							<input type="text" class="form-control mb-2 rounded-0" id="varsearch" style="margin: 0 10px" />
 							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 100px); overflow-y: scroll; padding: 5px 0px"></div>
 						</div>
 						<div class="col-8">
-							<strong style="margin-left: 10px">Variable label</strong>
+							<strong>Variable label</strong>
 							<div id="variable-label" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 75px"></div>
-							<strong class="d-block mt-3" style="margin-left: 10px">Value labels</strong>
-							<div id="value-labels" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 282px; overflow-y: scroll"></div>
+							<strong class="d-block mt-3">Value labels</strong>
+							<div id="value-labels" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 156px; overflow-y: scroll"></div>
 							<div class="buttons mt-3 text-center">
-								<button id="select-all-variables" class="btn btn-secondary rounded-0">Select all</button>
-								<button id="deselect-all-variables" class="btn btn-secondary rounded-0">Deselect all</button>
+								<button id="select-all-variables" class="btn btn-sm btn-secondary rounded-0">Select all</button>
+								<button id="deselect-all-variables" class="btn btn-sm btn-secondary rounded-0">Deselect all</button>
 							</div>
 							<div class="mt-3">
 								<strong class="d-block text-left mb-3">Variables containing:</strong>
@@ -210,13 +210,13 @@
 									</div>
 									<div class="col-8">
 										<div class="mb-3">
-											<input type="text" class="form-control" id="filterInput" />
+											<input type="text" class="form-control form-control-sm" id="filterInput" />
 										</div>
 									</div>
 								</div>
 								<div class="buttons mt-3">
-									<button id="keep-variables" class="btn btn-secondary rounded-0">Keep</button>
-									<button id="drop-variables" class="btn btn-secondary rounded-0">Drop</button>
+									<button id="keep-variables" class="btn btn-sm btn-secondary rounded-0">Keep</button>
+									<button id="drop-variables" class="btn btn-sm btn-secondary rounded-0">Drop</button>
 								</div>
 							</div>
 						</div>
@@ -233,7 +233,7 @@
 						</div>
 						<div class="col-8">
 							<strong style="margin-left: 10px">How to subset cases</strong>
-							<div id="cases-selection-procedure" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 380px; padding: 10px; overflow-y: scroll">
+							<div id="cases-selection-procedure" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 295px; padding: 10px; overflow-y: scroll">
 								<p>
 									The formal language to select cases is <b>R</b>, however the actual selection symbols are universal, for instance:
 									<br />
@@ -270,7 +270,7 @@
 							</div>
 
 							<div class="mt-3">
-								<textarea name="select_cases" class="form-control" id="select_cases" cols="30" rows="7"></textarea>
+								<textarea name="select_cases" class="form-control" id="select_cases" cols="30" rows="4"></textarea>
 							</div>
 
 							<div class="mt-3">
@@ -285,13 +285,13 @@
 				
 				<!-- ========= Settings ========= -->
 				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
-					<div class="row mt-5"> <!-- px-4 -->
+					<div class="row mt-3"> <!-- px-4 -->
 						<div class="col-12">
-							<div class="ms-5">
-								<p class="mb-4"><strong>Settings:</strong></p>
-								<div class="row mb-2">
-									<div class="col-7">
-										<p>Output to Stata version</p>
+							<div class="ms-3">
+								<p class="mb-3"><strong>Settings:</strong></p>
+								<div class="row mb-3">
+									<div class="col-8">
+										<span>Output to Stata version</span>
 									</div>
 									<div class="col-2">
 										<select class="form-select form-select-sm" id="stataVersion">
@@ -302,11 +302,10 @@
 											<option value="10">10</option>
 										</select>
 									</div>
-									<div class="col-2"></div>
 								</div>
-								<div class="row mb-2">
-									<div class="col-7">
-										<p>Output to SAS Transport version</p>
+								<div class="row mb-3">
+									<div class="col-8">
+										<span>Output to SAS Transport version</span>
 									</div>
 									<div class="col-2">
 										<select class="form-select form-select-sm" id="xptVersion">
@@ -314,13 +313,12 @@
 											<option value="5">5</option>
 										</select>
 									</div>
-									<div class="col-2"></div>
 								</div>
-								<div class="row mb-2">
-									<div class="col-7">
-										<p>For Stata, convert character categories to numeric categories</p>
+								<div class="row mb-3">
+									<div class="col-8">
+										<span>For Stata, convert character categories to numeric categories</span>
 									</div>
-									<div class="col-5 text-start">
+									<div class="col-3 text-start">
 										<div class="form-check form-check-inline">
 											<input class="form-check-input" type="radio" name="chartonum" id="chartonumTRUE" value="yes" />
 											<label class="form-check-label" for="chartonumTRUE">Yes</label>
@@ -331,11 +329,11 @@
 										</div>
 									</div>
 								</div>
-								<div class="row mb-2">
-									<div class="col-7">
-										<p>Recode to and from extended missing values (.a - .z)</p>
+								<div class="row mb-3">
+									<div class="col-8">
+										<span>Recode to and from extended missing values (.a - .z)</span>
 									</div>
-									<div class="col-5 text-start">
+									<div class="col-3 text-start">
 										<div class="form-check form-check-inline">
 											<input class="form-check-input" type="radio" name="recode" id="recodeTRUE" value="yes" checked />
 											<label class="form-check-label" for="recodeTRUE">Yes</label>
@@ -346,11 +344,11 @@
 										</div>
 									</div>
 								</div>
-								<div class="row mb-2">
-									<div class="col-7">
-										<p>Make the R dataset &quot;<a id="declared" href="#">declared</a>&quot;</p>
+								<div class="row">
+									<div class="col-8">
+										<span>Make the R dataset &quot;<a id="declared" href="#">declared</a>&quot;</span>
 									</div>
-									<div class="col-5 text-start">
+									<div class="col-3 text-start">
 										<div class="form-check form-check-inline">
 											<input class="form-check-input" type="radio" name="declared" id="declaredTRUE" value="yes" checked />
 											<label class="form-check-label" for="declaredTRUE">Yes</label>
@@ -360,19 +358,17 @@
 											<label class="form-check-label" for="declaredFALSE">No</label>
 										</div>
 									</div>
-								</div>
+								</div>			
 
-								<!-- horizontal rule separator -->
-								<hr />
-								<br />
+                                <hr style="margin: 1.2rem 0;">
 
-								<p class="mb-4"><strong>DDI / XML specific:</strong></p>
+								<p class="mb-3"><strong>DDI / XML specific:</strong></p>
 
-								<div class="row mb-2">
-									<div class="col-7">
-										<p>Embed the CSV data into the DDI Codebook XML file</p>
+								<div class="row mb-3">
+									<div class="col-8">
+										<span>Embed the CSV data into the DDI Codebook XML file</span>
 									</div>
-									<div class="col-5 text-start">
+									<div class="col-3 text-start">
 										<div class="form-check form-check-inline">
 											<input class="form-check-input" type="radio" name="embed" id="embedTRUE" value="yes" checked />
 											<label class="form-check-label" for="embedTRUE">Yes</label>
@@ -383,9 +379,9 @@
 										</div>
 									</div>
 								</div>
-								<div class="row mb-2">
-									<div class="col-4">
-										<p>EOL for target operating system</p>
+								<div class="row mb-3">
+									<div class="col-3">
+										<span>EOL for target OS</span>
 									</div>
 									<div class="col-2">
 										<select class="form-select form-select-sm" id="targetOS">
@@ -395,49 +391,48 @@
 											<option value="windows">Windows</option>
 										</select>
 									</div>
-									<div class="col-1"></div>
-									<div class="col-1">
-										<p>Agency</p>
+
+									<div class="col-3 d-flex justify-content-end align-items-center">
+										<span>Agency</span>
 									</div>
-									<div class="col-3">
-										<input type="input" class="rounded-0 form-control" id="agency" value="default" />
+									<div class="col-4">
+										<input type="input" class="rounded-0 form-control form-control-sm" id="agency" value="default" />
 									</div>
-									<div class="col-1"></div>
 								</div>
-								<div class="row mb-2">
-									<div class="col-2">
-										<div class="settings">
-											<label for="xmlang">Language</label>
-											<input type="input" class="rounded-0 form-control" id="xmlang" value="en" />
-										</div>
+								<div class="row mb-3">
+                                    <div class="col-2 d-flex justify-content-start align-items-center">
+                                        <label for="xmlang">Language</label>
+                                    </div>
+                                    <div class="col-1">
+                                        <input type="input" style="width: 35px;" class="rounded-0 form-control form-control-sm" id="xmlang" value="en" />
 									</div>
-									<div class="col-5">
-										<input type="checkbox" id="monolang" />
-										<label for="monolang">Mono language</label>
+									<div class="col-3 d-flex justify-content-start align-items-center">
+                                        <div class="form-check" style="margin-bottom: 0px;min-height: 1rem;">
+                                            <input class="form-check-input" type="checkbox" id="monolang" />
+										    <label class="form-check-label" for="monolang">Mono language</label>
+                                        </div>
 									</div>
-									<div class="col-1">
-										<p>Study ID</p>
+									<div class="col-2 d-flex justify-content-end align-items-center">
+										<span>Study ID</span>
 									</div>
-									<div class="col-3">
-										<input type="input" class="rounded-0 form-control" id="IDNo" value="S0000" />
+									<div class="col-4">
+										<input type="input" class="rounded-0 form-control form-control-sm" id="IDNo" value="S0000" />
 									</div>
-									<div class="col-1"></div>
+	
 								</div>
-								<div class="row mb-2">
+								<div class="row mb-3">
 									<div class="col-3">
-										<p>Namespace prefix</p>
-									</div>
-									<div class="col-3">
-										<input type="input" class="rounded-0 form-control" id="xmlns" />
-									</div>
-									<div class="col-1"></div>
-									<div class="col-1">
-										<p>URL</p>
+										<span>Namespace prefix</span>
 									</div>
 									<div class="col-3">
-										<input type="input" class="rounded-0 form-control" id="URI" value="http://www.default.eu" />
+										<input type="input" class="rounded-0 form-control form-control-sm" id="xmlns" />
 									</div>
-									<div class="col-1"></div>
+									<div class="col-2 d-flex justify-content-end align-items-center">
+										<span>URL</span>
+									</div>
+									<div class="col-4">
+										<input type="input" class="rounded-0 form-control form-control-sm" id="URI" value="http://www.default.eu" />
+									</div>								
 								</div>
 							</div>
 						</div>
