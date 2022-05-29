@@ -47,12 +47,12 @@ const inputOutput: InputOutputType = {
 function createWindow() {
 	mainWindow = new BrowserWindow({
 		autoHideMenuBar: true,
-		width: 1024,
-		height: 700 + (process.platform == "win32" ? 10 : 0),
-		maxWidth: 1024,
-		maxHeight: 700,
-		minWidth: 1024,
-		minHeight: 700,
+		width: 800,
+		height: 550 + (process.platform == "win32" ? 10 : 0),
+		maxWidth: 800,
+		maxHeight: 550,
+		minWidth: 800,
+		minHeight: 550,
 		backgroundColor: "#fff",
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js"),
@@ -60,6 +60,7 @@ function createWindow() {
 	});
 
 	mainWindow.loadFile(path.join(__dirname, "../index.html"));
+    // mainWindow.webContents.setZoomFactor(2);
 
 	if (process.env.NODE_ENV === "production") {
 		// mainWindow.removeMenu();

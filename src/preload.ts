@@ -1,5 +1,4 @@
 import { ipcRenderer } from 'electron';
-import { cp } from 'original-fs';
 import * as path from 'path';
 import { helpers } from './helpers';
 import { InputOutputType } from './interfaces';

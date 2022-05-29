@@ -6,6 +6,11 @@
 		<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
 		<link href="./node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
 		<style>
+
+			/* body {
+				font-size: 0.9rem;
+			} */
+
 			.btn:focus {
 				outline: none;
 				box-shadow: none !important;
@@ -62,6 +67,10 @@
 				text-align:right;
 			}
 
+			.fsize {
+				font-size: 0.9rem;
+			}
+
 		</style>
 	</head>
 
@@ -73,12 +82,12 @@
 
 				<!-- ========= Convert ========= -->
 				<div class="tab-pane fade show active p-4" id="v-pills-convert" role="tabpanel" aria-labelledby="v-pills-convert-tab">
-					<div class="row align-items-center mt-5 mb-3">
+					<div class="row align-items-center mt-3 mb-3">
 						<div class="col-2 text-end">
-							<label for="inputType" class="col-form-label">Encoding</label>
+							<label for="inputType" class="col-form-label fsize">Encoding</label>
 						</div>
 						<div class="col-8">
-							<select class="form-select" id="fileEncoding">
+							<select class="form-select form-select-sm" id="fileEncoding">
 								<option value="utf8" selected>UTF-8</option>
 								<option value="latin1">Latin 1 (ISO-8859-1)</option>
 								<option value="windows-1252">Legacy Windows-1252</option>
@@ -90,10 +99,10 @@
 					</div>
 					<div class="row align-items-center mb-3">
 						<div class="col-2 text-end">
-							<label for="inputType" class="col-form-label">Input type</label>
+							<label for="inputType" class="col-form-label fsize">Input type</label>
 						</div>
 						<div class="col-8">
-							<select class="form-select" id="inputType">
+							<select class="form-select form-select-sm" id="inputType">
 								<option value="none" selected>Select file type</option>
 								<option value="ddi">DDI Codebook</option>
 								<option value="excel">Excel</option>
@@ -106,29 +115,29 @@
 						</div>
 						<div class="col-2"></div>
 					</div>
-					<div class="row align-items-center mb-5">
+					<div class="row align-items-center">
 						<div class="col-2 text-end">
-							<label for="fileFrom" class="col-form-label">Convert from</label>
+							<label for="fileFrom" class="col-form-label fsize" style="margin-left: -10px;">Convert from</label>
 						</div>
 						<div class="col-8">
-							<input type="input" readonly class="rounded-0 form-control" id="fileFrom" />
+							<input type="input" readonly class="rounded-0 form-control form-control-sm" id="fileFrom" />
 							<!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
 						</div>
 						<div class="col-2">
 							<span class="d-inline-block" tabindex="0" title="Select input type" id="fromTooltip">
-								<button class="btn btn-secondary rounded-0" disabled id="selectFileFrom">Browse</button>
+								<button class="btn btn-sm btn-secondary rounded-0" disabled id="selectFileFrom">Browse</button>
 							</span>
 						</div>
 					</div>
 
-					<hr />
+					<hr class="my-5"/>
 
-					<div class="row align-items-center mt-5 mb-3">
+					<div class="row align-items-center mb-3">
 						<div class="col-2 text-end">
-							<label for="outputType" class="col-form-label">Output type</label>
+							<label for="outputType" class="col-form-label fsize">Output type</label>
 						</div>
 						<div class="col-8">
-							<select class="form-select" id="outputType">
+							<select class="form-select form-select-sm" id="outputType">
 								<option value="none" selected>Select file type</option>
 								<option value="ddi">DDI Codebook</option>
 								<option value="excel">Excel</option>
@@ -141,28 +150,28 @@
 						</div>
 						<div class="col-2"></div>
 					</div>
-					<div class="row align-items-center mb-2">
+					<div class="row align-items-center">
 						<div class="col-2 text-end">
-							<label for="fileTo" class="col-form-label">Convert to</label>
+							<label for="fileTo" class="col-form-label fsize">Convert to</label>
 						</div>
 						<div class="col-8">
-							<input type="input" readonly class="rounded-0 form-control" id="fileTo" />
+							<input type="input" readonly class="rounded-0 form-control form-control-sm" id="fileTo" />
 							<!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
 						</div>
 						<div class="col-2">
 							<span class="d-inline-block" tabindex="0" title="Select output type" id="toTooltip">
-								<button class="btn btn-secondary rounded-0" disabled id="selectFileTo">Browse</button>
+								<button class="btn btn-sm btn-secondary rounded-0" disabled id="selectFileTo">Browse</button>
 							</span>
 						</div>
 					</div>
-					<br />
-					<hr />
 
-					<div class="row align-items-center mt-5">
+					<hr class="my-5"/>
+
+					<div class="row align-items-center">
 						<div class="col-2 text-end"></div>
 						<div class="col-8 text-center">
 							<span class="d-inline-block" tabindex="0" title="Complete information before conversion" id="startConvertTooltip">
-								<button class="btn btn-secondary rounded-0" disabled id="startConvert">Convert</button>
+								<button class="btn btn-sm btn-secondary rounded-0" disabled id="startConvert">Convert</button>
 							</span>
 						</div>
 						<div class="col-2"></div>
@@ -173,7 +182,7 @@
 				<div class="tab-pane fade" id="v-pills-variables" role="tabpanel" aria-labelledby="v-pills-variables-tab">
 					<div class="row align-items-center mt-3">
 						<div class="col-4 text-start">
-							<strong style="margin-left: 10px">Search variables:</strong>
+							<strong style="margin-left: 10px fsize">Search variables:</strong>
 							<input type="text" class="form-control mb-2 rounded-0" id="varsearch" style="margin: 0 10px" />
 							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 100px); overflow-y: scroll; padding: 5px 0px"></div>
 						</div>
@@ -285,7 +294,7 @@
 										<p>Output to Stata version</p>
 									</div>
 									<div class="col-2">
-										<select class="form-select" id="stataVersion">
+										<select class="form-select form-select-sm" id="stataVersion">
 											<option value="14" selected>14</option>
 											<option value="13">13</option>
 											<option value="12">12</option>
@@ -300,7 +309,7 @@
 										<p>Output to SAS Transport version</p>
 									</div>
 									<div class="col-2">
-										<select class="form-select" id="xptVersion">
+										<select class="form-select form-select-sm" id="xptVersion">
 											<option value="8" selected>8</option>
 											<option value="5">5</option>
 										</select>
@@ -379,7 +388,7 @@
 										<p>EOL for target operating system</p>
 									</div>
 									<div class="col-2">
-										<select class="form-select" id="targetOS">
+										<select class="form-select form-select-sm" id="targetOS">
 											<option value="local" selected>local</option>
 											<option value="macos">MacOS</option>
 											<option value="linux">Linux</option>
@@ -441,16 +450,16 @@
 			</div>
 
 			<div class="nav bg-secondary flex-column nav-pills ms-3 border-start pt-4" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="height: 100vh; width: 150px">
-				<button class="rounded-0 btn btn-secondary active" id="v-pills-convert-tab" data-bs-toggle="pill" data-bs-target="#v-pills-convert" type="button" role="tab" aria-controls="v-pills-convert" aria-selected="true">Convert</button>
-				<button class="rounded-0 btn btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
-				<button class="rounded-0 btn btn-secondary" id="v-pills-cases-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cases" type="button" role="tab" aria-controls="v-pills-cases" aria-selected="false">Cases</button>
-				<button class="rounded-0 btn btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
+				<button class="rounded-0 btn btn-sm btn-secondary active" id="v-pills-convert-tab" data-bs-toggle="pill" data-bs-target="#v-pills-convert" type="button" role="tab" aria-controls="v-pills-convert" aria-selected="true">Convert</button>
+				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
+				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-cases-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cases" type="button" role="tab" aria-controls="v-pills-cases" aria-selected="false">Cases</button>
+				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
 				<div class="text-center flex">
 					<div class="align-self-end pb-3">
 						<a id="gotoRODA" href="#"><img src="./src/assets/RODA.png" alt="RODA" style="max-width: 50px" /></a>
 					</div>
 				</div>
-				<div class="text-white text-center flex" style="font-size: 0.8rem">
+				<div class="text-white text-center flex" style="font-size: 0.7rem">
 					<div class="align-self-end pb-3">
 						<a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br />
 						version 1.0.5
