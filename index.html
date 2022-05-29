@@ -309,15 +309,15 @@
 								</div>
 								<div class="row mb-2">
 									<div class="col-7">
-										<p>Convert character categories to numeric categories</p>
+										<p>For Stata, convert character categories to numeric categories</p>
 									</div>
 									<div class="col-5 text-start">
 										<div class="form-check form-check-inline">
-											<input class="form-check-input" type="radio" name="chartonum" id="chartonumTRUE" value="yes" checked />
+											<input class="form-check-input" type="radio" name="chartonum" id="chartonumTRUE" value="yes" />
 											<label class="form-check-label" for="chartonumTRUE">Yes</label>
 										</div>
 										<div class="form-check form-check-inline">
-											<input class="form-check-input" type="radio" name="chartonum" id="chartonumFALSE" value="no" />
+											<input class="form-check-input" type="radio" name="chartonum" id="chartonumFALSE" value="no" checked />
 											<label class="form-check-label" for="chartonumFALSE">No</label>
 										</div>
 									</div>
@@ -453,7 +453,7 @@
 				<div class="text-white text-center flex" style="font-size: 0.8rem">
 					<div class="align-self-end pb-3">
 						<a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br />
-						version 1.0.2
+						version 1.0.5
 					</div>
 				</div>
 			</div>
@@ -495,7 +495,7 @@
 				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
 
 				let values = ["none", "ddi", "excel", "sas", "xpt", "spss", "stata", "r"];
-				let texts = ["Select file type", "DDI Codebook", "Excel", "SAS", "XPT", "SPSS", "Stata", "R"];
+				let texts = ["Select file type", "DDI Codebook", "Excel", "SAS", "SAS Transport", "SPSS", "Stata", "R"];
 
 				for (i = outputType.options.length - 1; i >= 0; i--) {
 					outputType.options[i] = null;

@@ -3,7 +3,7 @@ attach(NULL, name = "RGUI")
 env <- as.environment("RGUI")
 
 env$RGUI_dependencies <- function() {
-    packages <- c("admisc", "DDIwR", "jsonlite")
+    packages <- c("admisc", "DDIwR", "jsonlite", "httpuv")
     installed <- logical(length(packages))
     for (i in seq(length(packages))) {
         installed[i] <- requireNamespace(packages[i], quietly = TRUE)
@@ -22,6 +22,9 @@ env$RGUI_dependencies <- function() {
             paste(packages[!installed], collapse = ", ")
         )
     }
+    else {
+        cat("_dependencies_ok_\n")
+    }
 
     toreturn$variables = c();
 
@@ -33,6 +36,7 @@ env$RGUI_dependencies <- function() {
 }
 
 env$RGUI_parseCommand <- function(command) {
+    # cat(command, "\n")
     toreturn <- admisc::tryCatchWEM(
         eval(
             parse(text = command),
@@ -40,7 +44,6 @@ env$RGUI_parseCommand <- function(command) {
         )
     )
 
-    # cat(paste0(paste(unlist(toreturn), collapse = "\n", "\n")))
 
     if (length(toreturn) == 0) {
         toreturn <- list(error = "")
@@ -49,26 +52,16 @@ env$RGUI_parseCommand <- function(command) {
     if (is.null(toreturn$error)) {
         toreturn$error <- ""
     }
+    # cat(paste0(paste(unlist(toreturn), collapse = "\n", "\n")))
 
     objects <- ls(envir = .GlobalEnv)
+    # cat(paste(objects, collapse = "\n"), "\n")
 
-    if (length(objects) > 0 & grepl("n_max", command)) {
-        toreturn$variables <- admisc::tryCatchWEM(
-            RGUI_variables(),
-            capture = TRUE
-        )$value
-
-        # cat(paste(jsonlite::toJSON(list(start_vars = TRUE)), "\n", sep = ""))
-
-        # for (i in seq(length(toreturn$variables))) {
-        #     cat(paste(
-        #         jsonlite::toJSON(toreturn$variables[i]), "\n",
-        #         collapse = "", sep = ""
-        #     ))
-        # }
-
-        # cat(paste(jsonlite::toJSON(list(end_vars = TRUE)), "\n", sep = ""))
+    if (is.element("dataset", objects) & grepl("n_max", command)) {
+        toreturn$variables <- RGUI_variables()
     }
+
+    # print(toreturn)
     
 
     cat(paste(
@@ -104,12 +97,25 @@ env$RGUI_replaceTicks <- function(x) {
 env$RGUI_variables <- function() {
     return(lapply(.GlobalEnv[["dataset"]], function(x) {
         values <- attr(x, "labels", exact = TRUE)
+        tagged_na <- admisc::hasTag(values)
+
+        if (any(tagged_na)) {
+            values[tagged_na] <- paste0(".", admisc::getTag(values[tagged_na]))
+        }
         
         na_values <- declared::missing_values(x)
-        if (is.null(na_values)) {
-            na_range <- declared::missing_range(x)
-            if (!is.null(na_range)) {
-                na_values <- as.numeric(values[values >= na_range[1] & values <= na_range[2]])
+        if (declared::is.declared(x) || is.element("haven_labelled_spss", class(x))) {
+            if (is.null(na_values)) {
+                na_range <- declared::missing_range(x)
+                if (!is.null(na_range)) {
+                    na_values <- as.numeric(values[values >= na_range[1] & values <= na_range[2]])
+                }
+            }
+        }
+        else if (is.element("haven_labelled", class(x))) {
+            if (admisc::anyTagged(x)) {
+                tagged_na <- admisc::getTag(x)
+                na_values <- sort(unique(na.omit(tagged_na)))
             }
         }
 

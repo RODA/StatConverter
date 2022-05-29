@@ -1,4 +1,5 @@
 import { ipcRenderer } from 'electron';
+import { cp } from 'original-fs';
 import * as path from 'path';
 import { helpers } from './helpers';
 import { InputOutputType } from './interfaces';
@@ -14,8 +15,6 @@ const inputOutput: InputOutputType = {
     fileToDir: '',
     fileToName: '',
 };
-
-let filename = "";
 
 window.addEventListener('DOMContentLoaded', () => {
     // const replaceText = (selector: string, text: string) => {
@@ -179,21 +178,32 @@ window.addEventListener('DOMContentLoaded', () => {
         if (indices.length == 0 && !all_vars_selected) {
             ipcRenderer.send('showError', { message: 'At least one variable has to be selected.' });
         } else {
-            let command = "RGUI_parseCommand(\"dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE";
+            
 
-            const recodeFALSE = document.getElementById('recodeFALSE') as HTMLInputElement;
+
+            
+            let command = "RGUI_parseCommand(\"convert('" + inputOutput.fileFrom + "', to = '" + inputOutput.fileTo + "'";
+
+            const declaredTRUE = document.getElementById("declaredTRUE") as HTMLInputElement;
+            command += ", declared = " + ((inputOutput.outputType == "r" && declaredTRUE.checked) ? "TRUE" : "FALSE");
+
+
+            // recode is by default TRUE, for instance from Stata to SPSS this is mandatory
+            // const from_extended = inputOutput.inputType == "stata" || inputOutput.inputType == "sas";
+            // const to_normal = inputOutput.outputType == "spss" || inputOutput.outputType == "ddi";
+            const recodeFALSE = document.getElementById("recodeFALSE") as HTMLInputElement;
             if (recodeFALSE.checked) {
-                command += ', recode = FALSE';
+                command += ", recode = FALSE";
+            }
+
+            const chartonum = document.getElementById("chartonumTRUE") as HTMLInputElement;
+            if (chartonum.checked) {
+                command += ", chartonum = TRUE";
             }
 
             const targetOS = document.getElementById('targetOS') as HTMLInputElement;
             if (targetOS.value != 'local') {
                 command += ", OS = '" + targetOS.value + "'";
-            }
-
-            const chartonum = document.getElementById('chartonumFALSE') as HTMLInputElement;
-            if (chartonum.checked) {
-                command += ', chartonum = FALSE';
             }
 
             const fileEncoding = document.getElementById('fileEncoding') as HTMLInputElement;
@@ -206,71 +216,57 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            command += ")\")\n";
-
-            ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
+            const select_cases = document.getElementById('select_cases') as HTMLInputElement;
             
-            let dataset = "dataset";
-
-            const subset = document.getElementById('select_cases') as HTMLInputElement;
-            let select = '';
+            let select = "";
             if (indices.length > 0) {
-                select = (all_vars_selected ? '-' : '') + 'c(' + helpers.paste(indices, { sep: ',' }) + ')';
+                select = (all_vars_selected ? "-" : "") + "c(" + helpers.paste(indices, { sep: "," }) + ")";
             }
 
-            if (subset.value != '' || select != '') {
-                dataset = "subset(dataset";
-                if (subset.value != '') {
-                    dataset += ', subset = ' + subset.value;
+            
+            
+            let subset = "";
+            if (select_cases.value != "" || select != "") {
+                
+                if (select_cases.value != "") {
+                    subset += select_cases.value;
                 }
-
-                if (select != '') {
-                    dataset += ', select = ' + select;
-                }
-
-                dataset += ")";
-
+                
                 const keep = document.getElementById('keepSelectionCases') as HTMLInputElement;
                 if (!keep.checked) {
-                    subset.value = '';
+                    select_cases.value = "";
                 }
             }
 
-            command = "RGUI_parseCommand(\"convert(" + dataset + ", to = '" + inputOutput.fileTo + "'";
+            if (select != "") {
+                subset += (subset == "" ? "" : ", ") + "select = " + select;
+            }
+            
+            if (subset != "") {
+                command += ", subset = '" + subset + "'";
+            }
 
             const embed = document.getElementById('embedFALSE') as HTMLInputElement;
             if (embed.checked) {
-                command += ', embed = FALSE';
-            }
-
-            const declared = document.getElementById('declaredTRUE') as HTMLInputElement;
-            command += ', declared = ' + ((inputOutput.outputType == "r" && declared.checked) ? 'TRUE' : 'FALSE');
-
-            // recode is by default TRUE, for instance from Stata to SPSS this is mandatory
-
-            // const from_extended = inputOutput.inputType == "stata" || inputOutput.inputType == "sas";
-            // const to_normal = inputOutput.outputType == "spss" || inputOutput.outputType == "ddi";
-            
-            if (recodeFALSE.checked) {
-                command += ', recode = FALSE';
+                command += ", embed = FALSE";
             }
 
             if (inputOutput.outputType == "stata") {
                 const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
-                if (stataVersion.value != '14') {
-                    command += ', version = ' + stataVersion.value;
+                if (stataVersion.value != "14") {
+                    command += ", version = " + stataVersion.value;
                 }
             }
 
             if (inputOutput.outputType == "xpt") {
                 const xptVersion = document.getElementById('xptVersion') as HTMLInputElement;
-                if (xptVersion.value != '8') {
-                    command += ', version = ' + xptVersion.value;
+                if (xptVersion.value != "8") {
+                    command += ", version = " + xptVersion.value;
                 }
             }
 
             const agency = document.getElementById('agency') as HTMLInputElement;
-            if (agency.value != 'default') {
+            if (agency.value != "default") {
                 command += ", agency = '" + agency.value + "'";
             }
 
@@ -299,11 +295,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 command += ", URI = '" + URI.value + "'";
             }
 
-            if (filename != "") {
-                command += ", filename = '" + filename + "'";
-            }
-
             command += ")\")\n";
+
             ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
         }
     });
@@ -366,10 +359,6 @@ window.addEventListener('DOMContentLoaded', () => {
     ipcRenderer.on('sendCommand-reply', (event, response) => {
         variables = response.variables;
         // console.log(response);
-        if (response.filename) {
-            filename = response.filename[0];
-            // console.log(filename);
-        }
         //load variable list
         const variablesList = document.getElementById('variables') as HTMLElement;
         const variablesListCases = document.getElementById('variablesCases') as HTMLElement;

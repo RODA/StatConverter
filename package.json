@@ -1,6 +1,6 @@
 {
     "name": "statconverter",
-    "version": "1.0.2",
+    "version": "1.0.5",
     "description": "Convert statistical data using R",
     "main": "dist/main.js",
     "scripts": {
@@ -34,6 +34,7 @@
         "bootstrap": "^5.1.0",
         "electron-squirrel-startup": "^1.0.0",
         "lodash.clonedeep": "^4.5.0",
+        "r-integration": "^2.3.0",
         "trim-newlines": ">=3.0.1",
         "ws": "^8.6.0"
     },

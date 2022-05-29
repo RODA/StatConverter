@@ -243,6 +243,7 @@ app.whenReady().then(() => {
 
 	ipcMain.on("sendCommand", (event, command) => {
 		mainWindow.webContents.send("startLoader");
+        console.log(command);
         Rprocess.stdin.write(command);
 	});
 
@@ -254,6 +255,9 @@ app.whenReady().then(() => {
 		shell.openExternal("https://cran.r-project.org/web/packages/declared/index.html");
 	});
 });
+
+// let dependencies_ok = false;
+// let unmet_dependencies = "";
 
 const start_R = function (R_path: string): void {
 	
@@ -307,44 +311,60 @@ const start_R = function (R_path: string): void {
         
         const datasplit = data.toString().split(/\r?\n/);
         // console.log(datasplit);
-        for (let i = 0; i < datasplit.length; i++) {
-            if (datasplit[i].charAt(0) == "{") {
-                startlong = datasplit[i].slice(-1) != "}";
-                longresponse = datasplit[i];
-            }
-            else if (startlong) {
-                if (datasplit[i].slice(-1) == "}") {
-                    startlong = false;
-                }
 
-                longresponse += datasplit[i];
-            }
-
-            // console.log(startlong, longresponse);
-
-            if (!startlong && longresponse != "") {
-                response = JSON.parse(longresponse);
-                
-                if (response.error && response.error[0] != "") {
-                    // dialog.showErrorBox("R says:", response.error[0]);
-                    dialog.showMessageBox(mainWindow, {
-                        type: "error",
-                        title: "R says error:",
-                        message: response.error[0]
-                    }).then(() => {
-                        mainWindow.webContents.send("clearLoader");
-                    })
-                }
-                else {
-                    if (response.variables && Object.keys(response.variables).length > 0) {
-                        mainWindow.webContents.send("sendCommand-reply", response);
-                    }
-                    mainWindow.webContents.send("clearLoader");
-                }
-
-                longresponse = "";
-                break;
-            }
+        if (datasplit.includes("_dependencies_ok_")) {
+            // dependencies_ok = true;
         }
+
+        // if (dependencies_ok) {
+            for (let i = 0; i < datasplit.length; i++) {
+                if (datasplit[i].charAt(0) == "{") {
+                    startlong = datasplit[i].slice(-1) != "}";
+                    longresponse = datasplit[i];
+                }
+                else if (startlong) {
+                    if (datasplit[i].slice(-1) == "}") {
+                        startlong = false;
+                    }
+
+                    longresponse += datasplit[i];
+                }
+
+                // console.log(startlong, longresponse);
+
+                if (!startlong && longresponse != "") {
+                    response = JSON.parse(longresponse);
+                    
+                    if (response.error && response.error[0] != "") {
+                        // dialog.showErrorBox("R says:", response.error[0]);
+                        dialog.showMessageBox(mainWindow, {
+                            type: "error",
+                            title: "R says error:",
+                            message: response.error[0]
+                        }).then(() => {
+                            mainWindow.webContents.send("clearLoader");
+                        })
+                    }
+                    else {
+                        if (response.variables && Object.keys(response.variables).length > 0) {
+                            mainWindow.webContents.send("sendCommand-reply", response);
+                        }
+                        mainWindow.webContents.send("clearLoader");
+                    }
+
+                    longresponse = "";
+                    break;
+                }
+            }
+        // }
+        // else {
+        //     dialog.showMessageBox(mainWindow, {
+        //         type: "error",
+        //         title: "R says error:",
+        //         message: response.error[0]
+        //     }).then(() => {
+        //         mainWindow.webContents.send("clearLoader");
+        //     })
+        // }
 	});
 };
