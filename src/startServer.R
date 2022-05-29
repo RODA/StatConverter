@@ -3,7 +3,7 @@ attach(NULL, name = "RGUI")
 env <- as.environment("RGUI")
 
 env$RGUI_dependencies <- function() {
-    packages <- c("admisc", "DDIwR", "jsonlite", "httpuv")
+    packages <- c("admisc", "DDIwR", "jsonlite")
     installed <- logical(length(packages))
     for (i in seq(length(packages))) {
         installed[i] <- requireNamespace(packages[i], quietly = TRUE)
