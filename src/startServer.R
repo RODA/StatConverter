@@ -63,11 +63,12 @@ env$RGUI_parseCommand <- function(command) {
 
     # print(toreturn)
     
-
+    cat("RGUIstartJSON\n")
     cat(paste(
         jsonlite::toJSON(toreturn), "\n",
         collapse = "", sep = ""
     ))
+    cat("RGUIendJSON\n")
     
 }
 
