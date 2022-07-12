@@ -1,5 +1,5 @@
-process.env.NODE_ENV = "development";
-// process.env.NODE_ENV = 'production';
+// process.env.NODE_ENV = "development";
+process.env.NODE_ENV = 'production';
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
@@ -8,6 +8,7 @@ import * as commandExec from "child_process";
 import { InputOutputType } from "./interfaces";
 
 import { helpers } from "./helpers";
+// import {shellPathSync} from 'shell-path';
 
 let mainWindow: BrowserWindow;
 let Rprocess: commandExec.ChildProcessWithoutNullStreams;
@@ -103,21 +104,25 @@ app.whenReady().then(() => {
             //         encoding: "utf-8" as BufferEncoding,
             //     });
             // } else {
-                findR = commandExec.execSync("which R", {
-                    shell: "/bin/bash",
-                    cwd: process.cwd(),
-                    env: process.env,
-                    encoding: "utf-8" as BufferEncoding,
-                });
+                // findR = commandExec.execSync("which R", {
+                //     shell: "/bin/bash",
+                //     cwd: process.cwd(),
+                //     env: process.env,
+                //     encoding: "utf-8" as BufferEncoding,
+                // });
             // }
     
-            R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
+            // R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
+
+
+            R_path = "/usr/local/bin/R"
     
         } catch (error) {
             dialog.showMessageBox(mainWindow, {
                 type: "question",
                 title: "Select R path",
-                message: "Could not find R. Select the path to the binary?",
+                // message: "Could not find R. Select the path to the binary?",
+                message: String(error),
             })
             .then((response) => {
                 if (response) {
