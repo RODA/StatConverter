@@ -1,6 +1,8 @@
 // process.env.NODE_ENV = "development";
 process.env.NODE_ENV = 'production';
 
+const embeddedR = true;
+
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
 import * as commandExec from "child_process";
@@ -82,72 +84,115 @@ app.whenReady().then(() => {
 	});
 
     let R_path = "";
-
+    
     if (process.platform == 'win32') {
-		if (process.env.NODE_ENV == "production") {
-            R_path = path.join(__dirname, '../../R_Portable/bin/R.exe');
-		}
-		else {
-			R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
-		}
+        if (embeddedR) {
+            if (process.env.NODE_ENV == "production") {
+                R_path = path.join(__dirname, '../../R_Portable/bin/R.exe');
+            }
+            else {
+                R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
+            }
+        } else {
+            let findR;
+            
+            try {
+                findR = commandExec.execSync("where.exe R", {
+                    shell: "cmd.exe",
+                    cwd: process.cwd(),
+                    env: process.env,
+                    encoding: "utf-8" as BufferEncoding,
+                });
+        
+                R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
+        
+            } catch (error) {
+                dialog.showMessageBox(mainWindow, {
+                    type: "question",
+                    title: "Select R path",
+                    message: "Could not find R. Select the path to the binary?",
+                    // message: String(error),
+                })
+                .then((response) => {
+                    if (response) {
+                        dialog.showOpenDialog(mainWindow, {
+                            title: "R path",
+                            properties: ["openFile"],
+                        })
+                        .then((result) => {
+    
+                            if(result.canceled){
+                                app.quit();
+                            }
+                            
+                            R_path = result.filePaths[0];
+    
+                            if (R_path != "") {
+                                start_R(R_path);
+                            }
+                        });
+                    }
+                });
+            }
+        }
     }
-    else {
-        // check if R is installed
-        let findR;
-
-        try {
-            // if (process.platform === "win32") {
-            //     findR = commandExec.execSync("where.exe R", {
-            //         shell: "cmd.exe",
-            //         cwd: process.cwd(),
-            //         env: process.env,
-            //         encoding: "utf-8" as BufferEncoding,
-            //     });
-            // } else {
+    else { // macos
+        if (embeddedR) {
+            if (process.env.NODE_ENV == "production") {
+                R_path = path.join(__dirname, '../../R_Portable/bin/R');
+            }
+            else {
+                R_path = path.join(__dirname, '../R_Portable/bin/R');
+            }
+        }
+        else {
+            
+            // check if R is installed
+            // try {
+                
                 // findR = commandExec.execSync("which R", {
                 //     shell: "/bin/bash",
                 //     cwd: process.cwd(),
                 //     env: process.env,
                 //     encoding: "utf-8" as BufferEncoding,
                 // });
+                // R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
+
+                R_path = "/usr/local/bin/R";
+        
+        
+            // } catch (error) {
+            //     dialog.showMessageBox(mainWindow, {
+            //         type: "question",
+            //         title: "Select R path",
+            //         message: "Could not find R. Select the path to the binary?",
+            //         // message: String(error),
+            //     })
+            //     .then((response) => {
+            //         if (response) {
+            //             dialog.showOpenDialog(mainWindow, {
+            //                 title: "R path",
+            //                 properties: ["openFile"],
+            //             })
+            //             .then((result) => {
+    
+            //                 if(result.canceled){
+            //                     app.quit();
+            //                 }
+                            
+            //                 R_path = result.filePaths[0];
+    
+            //                 if (R_path != "") {
+            //                     start_R(R_path);
+            //                 }
+            //             });
+            //         }
+            //     });
             // }
-    
-            // R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
-
-
-            R_path = "/usr/local/bin/R"
-    
-        } catch (error) {
-            dialog.showMessageBox(mainWindow, {
-                type: "question",
-                title: "Select R path",
-                // message: "Could not find R. Select the path to the binary?",
-                message: String(error),
-            })
-            .then((response) => {
-                if (response) {
-                    dialog.showOpenDialog(mainWindow, {
-                        title: "R path",
-                        properties: ["openFile"],
-                    })
-                    .then((result) => {
-
-                        if(result.canceled){
-                            app.quit();
-                        }
-                        
-                        R_path = result.filePaths[0];
-
-                        if (R_path != "") {
-                            start_R(R_path);
-                        }
-                    });
-                }
-            });
         }
     }
 
-
+console.log(R_path);
 	if (R_path != "") {
 		start_R(R_path);
 	}
