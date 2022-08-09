@@ -1,7 +1,7 @@
-// process.env.NODE_ENV = "development";
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = "development";
+// process.env.NODE_ENV = 'production';
 
-const embeddedR = true;
+const embeddedR = false;
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
@@ -192,7 +192,7 @@ app.whenReady().then(() => {
         }
     }
 
-console.log(R_path);
+// console.log(R_path);
 	if (R_path != "") {
 		start_R(R_path);
 	}

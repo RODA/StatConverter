@@ -400,6 +400,9 @@ export const helpers = {
             case '.sav':
                 type = 'spss';
                 break
+            case '.zsav':
+                type = 'spss';
+                break
             case '.por':
                 type = 'spss';
                 break
@@ -435,6 +438,7 @@ export const helpers = {
                 break
             case 'spss':
                 result.ext.push('sav');
+                result.ext.push('zsav');
                 result.ext.push('por');
                 result.fileTypeName = 'SPSS Files';
                 break
