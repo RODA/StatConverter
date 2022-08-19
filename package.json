@@ -1,6 +1,6 @@
 {
     "name": "statconverter",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "description": "Convert statistical data using R",
     "main": "dist/main.js",
     "scripts": {
@@ -20,7 +20,9 @@
         "SAS",
         "SPSS",
         "Stata",
-        "R"
+        "R",
+        "Excel",
+        "DDI"
     ],
     "author": "RODA",
     "license": "MIT",
