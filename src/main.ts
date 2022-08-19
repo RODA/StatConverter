@@ -1,5 +1,5 @@
-process.env.NODE_ENV = "development";
-// process.env.NODE_ENV = 'production';
+// process.env.NODE_ENV = "development";
+process.env.NODE_ENV = 'production';
 
 const embeddedR = false;
 
@@ -103,7 +103,7 @@ app.whenReady().then(() => {
                     env: process.env,
                     encoding: "utf-8" as BufferEncoding,
                 });
-        
+
                 R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
         
             } catch (error) {
@@ -327,7 +327,7 @@ const start_R = function (R_path: string): void {
 	let command = "";
 
     
-	if (process.platform === "win32") {
+	if (process.platform === "win32" && embeddedR) {
         // make sure we use the R package library from R_Portable, otherwise
         // a different version of the code depending on using a locally installed R
         if (process.env.NODE_ENV == "production") {
@@ -365,6 +365,7 @@ const start_R = function (R_path: string): void {
         // console.log(datasplit);
 
         if (datasplit.includes("_dependencies_ok_")) {
+            console.log("dependencies ok");
             // dependencies_ok = true;
         }
 
