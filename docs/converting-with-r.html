@@ -16,9 +16,8 @@
     <div id="page" class="page open-menu">
         <div id="st-sidebar" class="sidebar">
             <a href="./index.html">About StatConverter</a>
-            <a href="./download-with-r.html">Download including R</a>
-            <a href="./download-without-r.html">Download without R</a>
-            <a href="./r-installation.html" class="active">R installation</a>
+            <a href="./download.html" class="active">Download</a>
+            <a href="./converting-with-r.html" class="active">Converting with R</a>
             <a href="./run-from-sources.html">Run / Build from sources</a>
             <a href="./change-log.html">Change log</a>
             <a class="roda-logo" href="http://www.roda.ro" target="_blank">
@@ -35,59 +34,15 @@
             </div>
             <div class="main-inner">
                 <section>
-                    <h1>R installation and necessary packages</h1>
+                    <h1>R and necessary packages</h1>
                     
-                    <h2 id="r-on-the-system-path">R on the system PATH</h2>
-
                     <p>
-                        On MacOS and Linux, R is automatically added to the system PATH. On Windows,
-                        this must be done manually:
+                        StatConverter is only a Graphical User Interface on top of
+                        an embedded R environment. This means the convertion can be achieved in
+                        the normal R console via command line, using the function convert().
                     </p>
 
-
-                    <ul>
-                        <li>
-                            <p>search for "Edit the system environment variables" in Control Panel</p>
-                        </li>
-                        <li>
-                            <p>click the "Advanced" tab</p>
-                        </li>
-                        <li>
-                            <p>click on the "Environment Variables…" button</p>
-                        </li>
-                        <li>
-                            <p>double-click on the "Path" variable to open it</p>
-                        </li>
-                        <li>
-                            <p>
-                                click on "New", then "Browse" and indicate the folder where R is installed,
-                                typically in:
-                            </p>
-                            <p>
-                                C:/Program Files/R/R-4.2.0/bin
-                            </p>
-                            <p>
-                                (the version number depends on the moment when R is installed)
-                            </p>
-                        </li>
-                    </ul>
-
-                    <h2 id="r-on-the-system-path">Necessary R packages</h2>
-
-                    <p>
-                        StatConverter uses a couple of R packages that need to be installed.
-                        The following command does that:
-                    </p>
-
-<div>
-<pre class="code">
-install.packages(c("DDIwR", "jsonlite"), dependencies = TRUE)
-</pre>
-</div>
-
-                    <p>
-                        It is important to have these packages installed with all their dependencies,
-                        otherwise functionality is affected.</p>
+                    <p>&nbsp;</p>
 
                     <p>
                         The actual package that does the heavy lifting is called
@@ -100,25 +55,31 @@ install.packages(c("DDIwR", "jsonlite"), dependencies = TRUE)
                     </p>
 
                     <p>&nbsp;</p>
-                    <h2 id="r-on-the-system-path">Updating R packages to the latest version</h2>
+                    <h2 id="r-on-the-system-path">Installing the R packages to the latest version</h2>
+                    <p>
+                        The official versions of these packages are located on
+                        <a target="_blank" href="https://cran.r-project.org/web/packages/available_packages_by_name.html">CRAN</a>,
+                        and they can be re-installed using the command:
+                    </p>
+                    
+<div>
+<pre class="code">
+install.packages("DDIwR", dependencies = TRUE)
+</pre>
+</div>
                     
                     <p>
-                        If you have your own R, the necessary packages will change versions and future
-                        functionality of StatConverter might depend on future version of the R packages,
+                        These packages will likely change versions and future
+                        functionality of will necessarily depend on updated version of the R packages,
                         especially <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a>
                         that relies on a number of other packages, among which
                         <a target="_blank" href="https://cran.r-project.org/web/packages/admisc/index.html">admisc</a>
                         and <a target="_blank" href="https://cran.r-project.org/web/packages/declared/index.html">declared</a>.
                     </p>
+
                     <p>&nbsp;</p>
                     <p>
-                        The official versions of the packages are located on
-                        <a target="_blank" href="https://cran.r-project.org/web/packages/available_packages_by_name.html">CRAN</a>,
-                        and they can be re-installed using the above command.
-                    </p>
-                    <p>&nbsp;</p>
-                    <p>
-                        For many packages, the very latest development versions are located on GitHub. To install those,
+                        The very latest development versions of these packages are located on GitHub. To install those,
                         you need to instruct R on using an additional package management server, for instance:
                     </p>
                     
