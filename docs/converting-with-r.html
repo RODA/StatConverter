@@ -37,9 +37,9 @@
                     <h1>R and necessary packages</h1>
                     
                     <p>
-                        StatConverter is only a Graphical User Interface on top of
+                        StatConverter is just a Graphical User Interface on top of
                         an embedded R environment. This means the convertion can be achieved in
-                        the normal R console via command line, using the function convert().
+                        the normal R console via command line, using the function <code>convert()</code>.
                     </p>
 
                     <p>&nbsp;</p>
@@ -59,7 +59,7 @@
                     <p>
                         The official versions of these packages are located on
                         <a target="_blank" href="https://cran.r-project.org/web/packages/available_packages_by_name.html">CRAN</a>,
-                        and they can be re-installed using the command:
+                        and they can be (re)installed using the command:
                     </p>
                     
 <div>
@@ -70,7 +70,7 @@ install.packages("DDIwR", dependencies = TRUE)
                     
                     <p>
                         These packages will likely change versions and future
-                        functionality of will necessarily depend on updated version of the R packages,
+                        functionality will necessarily depend on updated versions of the R packages,
                         especially <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a>
                         that relies on a number of other packages, among which
                         <a target="_blank" href="https://cran.r-project.org/web/packages/admisc/index.html">admisc</a>
@@ -80,7 +80,24 @@ install.packages("DDIwR", dependencies = TRUE)
                     <p>&nbsp;</p>
                     <p>
                         The very latest development versions of these packages are located on GitHub. To install those,
-                        you need to instruct R on using an additional package management server, for instance:
+                        package remotes has to be installed and then loaded:
+                    </p>
+                    
+<div>
+<pre class="code">
+library(remotes)
+install_github(c("dusadrian/admisc", "dusadrian/declared", "dusadrian/DDIwR"))
+</pre>
+</div>
+
+                    <p>&nbsp;</p>
+                    <p>
+                        Some of these packages, such as
+                        <a target="_blank" href="https://cran.r-project.org/web/packages/admisc/index.html">admisc</a>,
+                        contains C code that need compilation.
+                        Users who do not have the necessary build tools can install a precompiled binary
+                        version from a different package management server, incrementally updated for each
+                        pre-CRAN development version of the packages:
                     </p>
                     
 <div>
