@@ -141,7 +141,6 @@
 								<option value="none" selected>Select file type</option>
 								<option value="ddi">DDI Codebook</option>
 								<option value="excel">Excel</option>
-								<option value="sas">SAS</option>
 								<option value="xpt">SAS Transport</option>
 								<option value="spss">SPSS</option>
 								<option value="stata">Stata</option>
@@ -457,11 +456,13 @@
 				<div class="text-white text-center flex" style="font-size: 0.7rem">
 					<div class="align-self-end pb-3">
 						<a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br />
-						version 1.1.0
+						version 1.1.1
 					</div>
 				</div>
 			</div>
 		</div>
+
+		<!-- <svg id="svg" style="width:10000px; height: 10000px"></svg> -->
 
 		<!-- You can also require other files to run in this process -->
 		<!-- <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script> -->
@@ -498,8 +499,8 @@
 			var changeOutputTypeOptions = function (inputTypeValue) {
 				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
 
-				let values = ["none", "ddi", "excel", "sas", "xpt", "spss", "stata", "r"];
-				let texts = ["Select file type", "DDI Codebook", "Excel", "SAS", "SAS Transport", "SPSS", "Stata", "R"];
+				let values = ["none", "ddi", "excel", "xpt", "spss", "stata", "r"];
+				let texts = ["Select file type", "DDI Codebook", "Excel", "SAS Transport", "SPSS", "Stata", "R"];
 
 				for (i = outputType.options.length - 1; i >= 0; i--) {
 					outputType.options[i] = null;
