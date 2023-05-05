@@ -4,7 +4,7 @@ process.env.NODE_ENV = 'production';
 // if true, move back the R_Portable directory to:
 // StatConverter/dist (on Windows)
 // StatConverter root (on Macos)
-const embeddedR = false;
+const embeddedR = true;
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
@@ -28,6 +28,8 @@ let response: {error: string[], variables: {
         selected: [boolean];
     }
 }};
+
+// console.log(app.getVersion());
 
 app.on("window-all-closed", () => {
 	// if (RptyProcess) {
@@ -195,7 +197,7 @@ app.whenReady().then(() => {
         }
     }
 
-// console.log(R_path);
+    // console.log(R_path);
 	if (R_path != "") {
 		start_R(R_path);
 	}
@@ -344,7 +346,7 @@ const start_R = function (R_path: string): void {
         Rprocess.stdin.write(command + '\n');
 	}
 
-    
+    // console.log(__dirname);
 	if (process.env.NODE_ENV == 'production') {
 		command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
 	}

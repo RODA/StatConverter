@@ -1,4 +1,6 @@
-import cloneDeep from "lodash.clonedeep";
+// import cloneDeep from "lodash.clonedeep";
+import orderBy from "lodash/orderBy";
+// import * as _ from "lodash";
 import * as path from "path";
 
 import {
@@ -12,7 +14,8 @@ export const helpers = {
     // },
 
     isArray: function(obj: unknown): boolean {
-        return (obj instanceof Array);
+        // return (obj instanceof Array);
+        return Object.prototype.toString.call(obj) == "[object Array]";
     },
 
 
@@ -32,17 +35,49 @@ export const helpers = {
     },
 
 
-    isNumeric: function (x: number|string): boolean {
-        if (this.missing(x) || x === null || ("" + x).length == 0) {
-            return false;
-        }
-        
-        return (parseInt("" + x) - parseFloat("" + x) + 1) >= 0;
+    isString: function (x: unknown): boolean {
+        return Object.prototype.toString.call(x) === "[object String]"
     },
 
 
-    isInteger: function(x: number): boolean {
+    isNumeric: function (x: number | string): boolean {
+        if (this.missing(x) || x === null || ("" + x).length == 0) {
+            return false;
+        }
+
+        return (
+                Object.prototype.toString.call(x) === "[object Number]" &&
+                !isNaN(parseFloat("" + x)) &&
+                isFinite(this.asNumeric(x))
+            )
+    },
+
+
+    possibleNumeric: function(x: string|number): boolean {
+        if (this.isNumeric(x)) {
+            return true;
+        }
+
+        if (this.isNumeric(this.asNumeric(x))) {
+            return true;
+        }
+
+        return false;
+    },
+
+
+    isInteger: function (x: number): boolean {
         return parseFloat("" + x) == parseInt("" + x, 10);
+    },
+
+
+    asNumeric: function(x: string|number): number {
+        return parseFloat("" + x);
+    },
+
+
+    asInteger: function(x: string|number): number {
+        return parseInt("" + x);
     },
 
 
@@ -76,40 +111,20 @@ export const helpers = {
             }
         }
         
-        const sorted: Array<string|number> = cloneDeep(x);
-        const sortlen = sorted.length;
-        for (let i = 0, j; i < sortlen; i++) {
-            // allow sorting with various cases, e.g. "datasets" before "QCA"
-            const tmp1 = sorted[i];
-            let tmp2 = tmp1;
-
-            if (!this.isNumeric(tmp1)) {
-                tmp2 = (''+tmp2).toLowerCase();
-            }
-            
-            for (j = i - 1; j >= 0; j--) {
-                let tmp3 = sorted[j];
-                if (!this.isNumeric(tmp3)) {
-                    tmp3 = (''+tmp3).toLowerCase();
-                }
-
-                if (decreasing ? tmp3 < tmp2 : tmp3 > tmp2) {
-                    sorted[j + 1] = sorted[j];
-                }
-                else {
-                    break;
-                }
-            }
-            sorted[j + 1] = tmp1;
-        }
+        const sorted: Array<string|number> = orderBy(
+            x,
+            [],
+            decreasing ? ["desc"] : ["asc"]
+        );
+        
         
         if (emptylast) {
             // unlike R vectors (where all elements have to be of the same type)
             // array elements in Javascript can be different
-            x = this.rep("", sortlen);
+            x = this.rep("", x.length);
             let pos = 0;
 
-            for (let i = 0; i < sortlen; i++) {
+            for (let i = 0; i < x.length; i++) {
                 if (sorted[i] !== "") {
                     x[pos] = sorted[i];
                     pos++;
@@ -121,6 +136,7 @@ export const helpers = {
         
         return sorted;
     },
+
 
 
     round: function(x: number, decimals: number): number {
@@ -294,7 +310,7 @@ export const helpers = {
     // http://stackoverflow.com/questions/840781/easiest-way-to-find-duplicate-values-in-a-javascript-array
     duplicates: function(arr: Array<number|string>): Array<number|string> {
         const len = arr.length,
-            out = [],
+            out: Array<number|string> = [],
             counts: {
                 [key: string]: number,
             } = {};
@@ -307,7 +323,11 @@ export const helpers = {
         
         for (item in counts) {
             if (counts[item] > 1) {
-                out.push(item);
+                if (this.isNumeric(item)) {
+                    out.push(this.asNumeric(item));
+                } else {
+                    out.push(item);
+                }
             }
         }
         
@@ -324,34 +344,33 @@ export const helpers = {
         return x.reduce((prod, i) => prod * i);
     },
 
-
-	recode: function (
-        x: Array<number>, cut: Array<number>, onebased = false
-    ): Array<number> {
-        // x is an array of values
+	// recode: function (
+    //     x: Array<number>, cut: Array<number>, onebased = false
+    // ): Array<number> {
+    //     // x is an array of values
         
-        // cut is an array of cut values, i.e. [a, b, c] and values get
-        // recoded into the intervals (min, a), [a, b), [b, c) etc.
+    //     // cut is an array of cut values, i.e. [a, b, c] and values get
+    //     // recoded into the intervals (min, a), [a, b), [b, c) etc.
 
-        // onebased is a flag to get the numbers 1 based
-        // (instead of Javascript's 0 based system)
+    //     // onebased is a flag to get the numbers 1 based
+    //     // (instead of Javascript's 0 based system)
 
-        const copycut = cloneDeep(cut); // to avoid any reference assignments
-        copycut.push(this.min(x));
-        // uscut = unique and sorted cut
-        const uscut = this.sortArray(this.unique(copycut));
+    //     const copycut = cloneDeep(cut); // to avoid any reference assignments
+    //     copycut.push(this.min(x));
+    //     // uscut = unique and sorted cut
+    //     const uscut = this.sortArray(this.unique(copycut));
 		
-        const result = new Array<number>(x.length);
-        for (let i = 0; i < x.length; i++) {
-            for (let j = 0; j < uscut.length; j++) {
-                if (x[i] >= uscut[j]) {
-                    result[i] = j + (onebased ? 1 : 0);
-                }
-            }
-        }
+    //     const result = new Array<number>(x.length);
+    //     for (let i = 0; i < x.length; i++) {
+    //         for (let j = 0; j < uscut.length; j++) {
+    //             if (x[i] >= uscut[j]) {
+    //                 result[i] = j + (onebased ? 1 : 0);
+    //             }
+    //         }
+    //     }
 
-		return(result);
-    },
+	// 	return(result);
+    // },
 
     getExtensionFromType: function(type: string): string {
         let ext = '';
@@ -391,7 +410,7 @@ export const helpers = {
             case '.xlsx':
                 type = 'excel';
                 break
-            case '.sasb7dat':
+            case '.sas7bdat':
                 type = 'sas';
                 break
             case '.xpt':
