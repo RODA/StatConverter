@@ -4,3 +4,4 @@ dist/
 build/output/
 package-lock.json
 .DS_Store
+docs/images/Thumbs.db
