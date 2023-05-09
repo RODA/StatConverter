@@ -452,6 +452,10 @@ export const helpers = {
                 result.fileTypeName = 'Excel Files';
                 break
             case 'sas':
+                result.ext.push('sas7bdat');
+                result.fileTypeName = 'SAS Files';
+                break
+            case 'xpt':
                 result.ext.push('xpt');
                 result.fileTypeName = 'SAS Transport Files';
                 break
