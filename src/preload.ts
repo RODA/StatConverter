@@ -406,7 +406,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     const el = <HTMLInputElement>document.querySelector('.activeVariable input[type="checkbox"]');
                     // console.log(formCheck);
                     // console.log(variables[formCheck.id]);
-                    if (variables[el.id]) {
+                    if (variables[el.id] && variables[el.id].label[0]) {
                         (<HTMLDivElement>document.getElementById('variable-label')).innerHTML = variables[el.id].label[0];
                         const vals = <HTMLDivElement>document.getElementById('value-labels');
                         let valList = '';
