@@ -2,8 +2,7 @@
 process.env.NODE_ENV = 'production';
 
 // if true, move back the R_Portable directory to:
-// StatConverter/dist (on Windows)
-// StatConverter root (on Macos)
+// StatConverter root
 const embeddedR = true;
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
