@@ -3,7 +3,7 @@ attach(NULL, name = "RGUI")
 env <- as.environment("RGUI")
 
 env$RGUI_dependencies <- function() {
-    packages <- c("admisc", "DDIwR", "jsonlite")
+    packages <- c("admisc", "declared", "DDIwR", "jsonlite")
     installed <- logical(length(packages))
     for (i in seq(length(packages))) {
         installed[i] <- requireNamespace(packages[i], quietly = TRUE)
@@ -122,6 +122,8 @@ env$RGUI_variables <- function() {
 
         nms <- RGUI_replaceTicks(names(values))
         names(nms) <- values
+
+        # print(values)
 
         return(list(
             label = RGUI_replaceTicks(attr(x, "label", exact = TRUE)),
