@@ -31,61 +31,61 @@ let response: {error: string[], variables: {
 // console.log(app.getVersion());
 
 app.on("window-all-closed", () => {
-	// if (RptyProcess) {
-	// 	RptyProcess.kill();
-	// }
-	
-	app.quit();
+    // if (RptyProcess) {
+    //     RptyProcess.kill();
+    // }
+    
+    app.quit();
 });
 
 const inputOutput: InputOutputType = {
-	inputType: "",
-	fileFrom: "",
-	fileFromDir: "",
-	fileFromName: "",
+    inputType: "",
+    fileFrom: "",
+    fileFromDir: "",
+    fileFromName: "",
 
-	outputType: "",
-	fileTo: "",
-	fileToDir: "",
-	fileToName: "",
+    outputType: "",
+    fileTo: "",
+    fileToDir: "",
+    fileToName: "",
 };
 
 function createWindow() {
-	mainWindow = new BrowserWindow({
-		autoHideMenuBar: true,
-		width: 800,
-		height: 550 + (process.platform == "win32" ? 10 : 0),
-		maxWidth: 800,
-		maxHeight: 550,
-		minWidth: 800,
-		minHeight: 550,
-		backgroundColor: "#fff",
-		webPreferences: {
-			preload: path.join(__dirname, "preload.js"),
-		},
-	});
+    mainWindow = new BrowserWindow({
+        autoHideMenuBar: true,
+        width: 800,
+        height: 550 + (process.platform == "win32" ? 10 : 0),
+        maxWidth: 800,
+        maxHeight: 550,
+        minWidth: 800,
+        minHeight: 550,
+        backgroundColor: "#fff",
+        webPreferences: {
+            preload: path.join(__dirname, "preload.js"),
+        },
+    });
 
-	mainWindow.loadFile(path.join(__dirname, "../index.html"));
+    mainWindow.loadFile(path.join(__dirname, "../index.html"));
     // mainWindow.webContents.setZoomFactor(2);
 
-	if (process.env.NODE_ENV === "production") {
-		// mainWindow.removeMenu();
-	}
+    if (process.env.NODE_ENV === "production") {
+        // mainWindow.removeMenu();
+    }
 
-	if (process.env.NODE_ENV === "development") {
-		// Open the DevTools.
-		mainWindow.webContents.openDevTools();
-	}
+    if (process.env.NODE_ENV === "development") {
+        // Open the DevTools.
+        mainWindow.webContents.openDevTools();
+    }
 }
 
 app.whenReady().then(() => {
-	createWindow();
+    createWindow();
 
-	app.on("activate", () => {
-		if (BrowserWindow.getAllWindows().length === 0) {
-			createWindow();
-		}
-	});
+    app.on("activate", () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        }
+    });
 
     let R_path = "";
     
@@ -197,17 +197,17 @@ app.whenReady().then(() => {
     }
 
     // console.log(R_path);
-	if (R_path != "") {
-		start_R(R_path);
-	}
+    if (R_path != "") {
+        start_R(R_path);
+    }
 
-	ipcMain.on("selectFileFrom", (event, args) => {
-		if (args.inputType === "Select file type") {
-			dialog.showErrorBox("Error", "Select input type");
-		} else {
-			const info = helpers.fileFromInfo(args.inputType);
+    ipcMain.on("selectFileFrom", (event, args) => {
+        if (args.inputType === "Select file type") {
+            dialog.showErrorBox("Error", "Select input type");
+        } else {
+            const info = helpers.fileFromInfo(args.inputType);
 
-			dialog.showOpenDialog(mainWindow, {
+            dialog.showOpenDialog(mainWindow, {
                 title: "Select source file",
                 filters: [
                     {
@@ -239,99 +239,99 @@ app.whenReady().then(() => {
             .catch((err) => {
                 console.log(err);
             });
-		}
-	});
+        }
+    });
 
-	ipcMain.on("selectFileTo", (event, args) => {
-		if (args.outputType === "Select file type") {
-			dialog.showErrorBox("Error", "Select output type");
-		} else {
-			const ext = helpers.getExtensionFromType(args.outputType);
+    ipcMain.on("selectFileTo", (event, args) => {
+        if (args.outputType === "Select file type") {
+            dialog.showErrorBox("Error", "Select output type");
+        } else {
+            const ext = helpers.getExtensionFromType(args.outputType);
 
-			dialog
-				.showSaveDialog(mainWindow, {
-					title: "Select destination file",
-					// TODO:
-					// if this button is clicked before the input one,
-					// fileFromDir is empty
-					defaultPath: path.join(inputOutput.fileFromDir, inputOutput.fileFromName + ext),
-				})
-				.then((result) => {
-					if (!result.canceled) {
-						inputOutput.fileTo = "" + result.filePath;
+            dialog
+                .showSaveDialog(mainWindow, {
+                    title: "Select destination file",
+                    // TODO:
+                    // if this button is clicked before the input one,
+                    // fileFromDir is empty
+                    defaultPath: path.join(inputOutput.fileFromDir, inputOutput.fileFromName + ext),
+                })
+                .then((result) => {
+                    if (!result.canceled) {
+                        inputOutput.fileTo = "" + result.filePath;
 
-						const file = path.basename(inputOutput.fileTo);
-						const ext = path.extname(file);
+                        const file = path.basename(inputOutput.fileTo);
+                        const ext = path.extname(file);
 
-						inputOutput.outputType = helpers.getTypeFromExtension(ext);
-						inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
-						inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
+                        inputOutput.outputType = helpers.getTypeFromExtension(ext);
+                        inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
+                        inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
 
-						if (process.platform == "win32") {
-							inputOutput.fileTo = inputOutput.fileTo.replace(/\\/g, '/');
-							inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
-						}
+                        if (process.platform == "win32") {
+                            inputOutput.fileTo = inputOutput.fileTo.replace(/\\/g, '/');
+                            inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
+                        }
 
-						// console.log(inputOutput.fileTo);
-						event.reply("selectFileTo-reply", inputOutput);
-					}
-				})
-				.catch((err) => {
-					console.log(err);
-				});
-		}
-	});
+                        // console.log(inputOutput.fileTo);
+                        event.reply("selectFileTo-reply", inputOutput);
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    });
 
-	ipcMain.on("startConvert", (event, args) => {
-		console.log("-----");
-		console.log(args.inputOutput);
-		console.log("-----");
-	});
+    ipcMain.on("startConvert", (event, args) => {
+        console.log("-----");
+        console.log(args.inputOutput);
+        console.log("-----");
+    });
 
-	ipcMain.on("showError", (event, args) => {
-		dialog.showMessageBox(mainWindow, {
-			type: "error",
-			message: args.message,
-		});
-	});
+    ipcMain.on("showError", (event, args) => {
+        dialog.showMessageBox(mainWindow, {
+            type: "error",
+            message: args.message,
+        });
+    });
 
-	ipcMain.on("sendCommand", (event, command) => {
-		mainWindow.webContents.send("startLoader");
+    ipcMain.on("sendCommand", (event, command) => {
+        mainWindow.webContents.send("startLoader");
         // console.log(command);
         Rprocess.stdin.write(command);
-	});
+    });
 
-	ipcMain.on("gotoRODA", () => {
-		shell.openExternal("http://www.roda.ro");
-	});
+    ipcMain.on("gotoRODA", () => {
+        shell.openExternal("http://www.roda.ro");
+    });
 
-	ipcMain.on("declared", () => {
-		shell.openExternal("https://cran.r-project.org/web/packages/declared/index.html");
-	});
+    ipcMain.on("declared", () => {
+        shell.openExternal("https://cran.r-project.org/web/packages/declared/index.html");
+    });
 });
 
 // let dependencies_ok = false;
 // let unmet_dependencies = "";
 
 const start_R = function (R_path: string): void {
-	
-	const penv = process.env;
+    
+    const penv = process.env;
 
-	if (process.platform === "win32") {
-		if (penv.HOME && !(penv.HOME.includes("Documents"))) {
-			penv.HOME = penv.HOME + '\\Documents';
-		}
-	}
-	else {
-		penv.test = "test";
-	}
+    if (process.platform === "win32") {
+        if (penv.HOME && !(penv.HOME.includes("Documents"))) {
+            penv.HOME = penv.HOME + '\\Documents';
+        }
+    }
+    else {
+        penv.test = "test";
+    }
 
-	Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"]);
+    Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"]);
 
-	let command = "";
+    let command = "";
 
     
-	if (process.platform === "win32" && embeddedR) {
+    if (process.platform === "win32" && embeddedR) {
         // make sure we use the R package library from R_Portable, otherwise
         // a different version of the code depending on using a locally installed R
         if (process.env.NODE_ENV == "production") {
@@ -343,28 +343,28 @@ const start_R = function (R_path: string): void {
         
         command = command.replace(/\\/g, '/'); // replace backslash with forward slash
         Rprocess.stdin.write(command + '\n');
-	}
+    }
 
     // console.log(__dirname);
-	if (process.env.NODE_ENV == 'production') {
-		command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
-	}
-	else {
-		command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
-	}
-	
-	if (process.platform === "win32") {
-		command = command.replace(/\\/g, '/'); // replace backslash with forward slash
-	}
+    if (process.env.NODE_ENV == 'production') {
+        command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
+    }
+    else {
+        command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
+    }
+    
+    if (process.platform === "win32") {
+        command = command.replace(/\\/g, '/'); // replace backslash with forward slash
+    }
 
-	Rprocess.stdin.write(command + '\n');
+    Rprocess.stdin.write(command + '\n');
 
-	Rprocess.stdin.write('RGUI_dependencies()\n');
+    Rprocess.stdin.write('RGUI_dependencies()\n');
 
     let startJSON = false;
 
     Rprocess.stdout.on("data", (data: string) => {
-        
+
         const datasplit = data.toString().split(/\r?\n/);
         // console.log(datasplit);
 
@@ -383,7 +383,7 @@ const start_R = function (R_path: string): void {
                     if (datasplit[i] == "RGUIendJSON") {
                         startJSON = false;
                         response = JSON.parse(longresponse);
-                        
+
                         if (response.error && response.error[0] != "") {
                             // dialog.showErrorBox("R says:", response.error[0]);
                             dialog.showMessageBox(mainWindow, {
@@ -409,15 +409,5 @@ const start_R = function (R_path: string): void {
 
                 }
             }
-        // }
-        // else {
-        //     dialog.showMessageBox(mainWindow, {
-        //         type: "error",
-        //         title: "R says error:",
-        //         message: response.error[0]
-        //     }).then(() => {
-        //         mainWindow.webContents.send("clearLoader");
-        //     })
-        // }
-	});
+    });
 };
