@@ -83,18 +83,6 @@ env$RGUI_formatted <- FALSE
 env$RGUI_hashes <- list()
 env$RGUI_result <- c()
 
-
-env$RGUI_replaceTicks <- function(x) {
-    # weird A character sometimes from SPSS encoding a single tick quote
-    achar <- rawToChar(as.raw(c(195, 130)))
-    # forward and back ticks
-    irv <- c(194, 180, 96)
-    tick <- unlist(strsplit(rawToChar(as.raw(irv)), split = ""))
-    tick <- c(paste0(achar, "'"), paste0(achar, tick), tick)
-    x <- gsub(paste(tick, collapse = "|"), "'", x)
-    return(x)
-}
-
 env$RGUI_variables <- function() {
     return(lapply(.GlobalEnv[["dataset"]], function(x) {
         values <- attr(x, "labels", exact = TRUE)
@@ -120,13 +108,13 @@ env$RGUI_variables <- function() {
             }
         }
 
-        nms <- RGUI_replaceTicks(names(values))
+        nms <- names(values)
         names(nms) <- values
 
         # print(values)
 
         return(list(
-            label = RGUI_replaceTicks(attr(x, "label", exact = TRUE)),
+            label = attr(x, "label", exact = TRUE),
             values = as.list(nms),
             missing = as.character(na_values),
             selected = TRUE
