@@ -111,12 +111,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const outputTypeValue = outputType.options[outputType.selectedIndex].value;
 
+        // if (inputOutput.fileToDir == '') {
+            inputOutput.fileToDir = io.fileFromDir;
+        // }
+        
         if (outputTypeValue != 'none') {
             const ext = helpers.getExtensionFromType(outputTypeValue);
             const fileTo = <HTMLInputElement>document.getElementById('fileTo');
-            // if (inputOutput.fileToDir == '') {
-                inputOutput.fileToDir = io.fileFromDir;
-            // }
 
             fileTo.value = path.join(inputOutput.fileToDir, io.fileFromName + ext);
             inputOutput.outputType = outputTypeValue;
