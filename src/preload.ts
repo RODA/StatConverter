@@ -114,9 +114,9 @@ window.addEventListener('DOMContentLoaded', () => {
         if (outputTypeValue != 'none') {
             const ext = helpers.getExtensionFromType(outputTypeValue);
             const fileTo = <HTMLInputElement>document.getElementById('fileTo');
-            if (inputOutput.fileToDir == '') {
+            // if (inputOutput.fileToDir == '') {
                 inputOutput.fileToDir = io.fileFromDir;
-            }
+            // }
 
             fileTo.value = path.join(inputOutput.fileToDir, io.fileFromName + ext);
             inputOutput.outputType = outputTypeValue;
@@ -129,6 +129,9 @@ window.addEventListener('DOMContentLoaded', () => {
         if (message == 'Unsupported input type.') {
             inputType.selectedIndex = 0;
             ipcRenderer.send('showError', { message: message });
+        }
+        else {
+            fileTo.dispatchEvent(new Event('change'));
         }
     });
 
