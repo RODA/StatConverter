@@ -500,6 +500,10 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+ipcRenderer.on('consolog', (event, message: string) => {
+    console.log(message)
+});
+
 function removeActive() {
     document.querySelectorAll('#variables .form-check').forEach((item) => {
         item.classList.remove('activeVariable');

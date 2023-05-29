@@ -1,5 +1,11 @@
-// process.env.NODE_ENV = "development";
-process.env.NODE_ENV = 'production';
+// ./node_modules/.bin/electron-builder install-app-deps --arch arm64
+// ./node_modules/.bin/electron-builder install-app-deps --arch x64
+
+process.env.NODE_ENV = "development";
+// process.env.NODE_ENV = 'production';
+
+const production = process.env.NODE_ENV === 'production';
+const development = process.env.NODE_ENV === 'development';
 
 // if true, move back the R_Portable directory to:
 // StatConverter root
@@ -68,17 +74,19 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, "../index.html"));
     // mainWindow.webContents.setZoomFactor(2);
 
-    if (process.env.NODE_ENV === "production") {
+    if (production) {
         // mainWindow.removeMenu();
     }
 
-    if (process.env.NODE_ENV === "development") {
+    if (development) {
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     }
 }
 
 app.whenReady().then(() => {
+    app.commandLine.appendSwitch('lang', 'en-US.UTF-8');
+
     createWindow();
 
     app.on("activate", () => {
@@ -90,110 +98,24 @@ app.whenReady().then(() => {
     let R_path = "";
     
     if (process.platform == 'win32') {
-        if (embeddedR) {
-            if (process.env.NODE_ENV == "production") {
-                R_path = path.join(__dirname, '../../R_Portable/bin/R.exe');
-            }
-            else {
-                R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
-            }
-        } else {
-            let findR;
-            
-            try {
-                findR = commandExec.execSync("where.exe R", {
-                    shell: "cmd.exe",
-                    cwd: process.cwd(),
-                    env: process.env,
-                    encoding: "utf-8" as BufferEncoding,
-                });
-
-                R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
         
-            } catch (error) {
-                dialog.showMessageBox(mainWindow, {
-                    type: "question",
-                    title: "Select R path",
-                    message: "Could not find R. Select the path to the binary?",
-                    // message: String(error),
-                })
-                .then((response) => {
-                    if (response) {
-                        dialog.showOpenDialog(mainWindow, {
-                            title: "R path",
-                            properties: ["openFile"],
-                        })
-                        .then((result) => {
-    
-                            if(result.canceled){
-                                app.quit();
-                            }
-                            
-                            R_path = result.filePaths[0];
-    
-                            if (R_path != "") {
-                                start_R(R_path);
-                            }
-                        });
-                    }
-                });
-            }
-        }
-    }
-    else { // macos
-        if (embeddedR) {
-            if (process.env.NODE_ENV == "production") {
-                R_path = path.join(__dirname, '../../R_Portable/bin/R');
-            }
-            else {
-                R_path = path.join(__dirname, '../R_Portable/bin/R');
-            }
+        if (production) {
+            R_path = path.join(__dirname, '../../R_Portable/bin/R.exe');
         }
         else {
-            
-            // check if R is installed
-            // try {
-                
-                // findR = commandExec.execSync("which R", {
-                //     shell: "/bin/bash",
-                //     cwd: process.cwd(),
-                //     env: process.env,
-                //     encoding: "utf-8" as BufferEncoding,
-                // });
-                // R_path = findR.replace(/(\r\n|\n|\r)/gm, "");
-
-                R_path = "/usr/local/bin/R";
-        
-        
-            // } catch (error) {
-            //     dialog.showMessageBox(mainWindow, {
-            //         type: "question",
-            //         title: "Select R path",
-            //         message: "Could not find R. Select the path to the binary?",
-            //         // message: String(error),
-            //     })
-            //     .then((response) => {
-            //         if (response) {
-            //             dialog.showOpenDialog(mainWindow, {
-            //                 title: "R path",
-            //                 properties: ["openFile"],
-            //             })
-            //             .then((result) => {
-    
-            //                 if(result.canceled){
-            //                     app.quit();
-            //                 }
-                            
-            //                 R_path = result.filePaths[0];
-    
-            //                 if (R_path != "") {
-            //                     start_R(R_path);
-            //                 }
-            //             });
-            //         }
-            //     });
-            // }
+            R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
         }
+        
+    }
+    else { // macos
+        
+        if (production) {
+            R_path = path.join(__dirname, '../../R_Portable/bin/R');
+        }
+        else {
+            R_path = path.join(__dirname, '../R_Portable/bin/R');
+        }
+        
     }
 
     // console.log(R_path);
@@ -326,15 +248,21 @@ const start_R = function (R_path: string): void {
         penv.test = "test";
     }
 
-    Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"]);
+    
+    Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"], {
+        // stdio: ["pipe", "pipe", "inherit"]
+        // encoding: 'utf8'
+    });
 
+    Rprocess.stdout.setEncoding("utf-8");
+    
     let command = "";
 
     
     if (process.platform === "win32" && embeddedR) {
         // make sure we use the R package library from R_Portable, otherwise
         // a different version of the code depending on using a locally installed R
-        if (process.env.NODE_ENV == "production") {
+        if (production) {
             command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
         }
         else {
@@ -346,7 +274,7 @@ const start_R = function (R_path: string): void {
     }
 
     // console.log(__dirname);
-    if (process.env.NODE_ENV == 'production') {
+    if (production) {
         command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
     }
     else {
@@ -366,11 +294,16 @@ const start_R = function (R_path: string): void {
     Rprocess.stdout.on("data", (data: string) => {
 
         const datasplit = data.toString().split(/\r?\n/);
-        // console.log(datasplit);
+        console.log(datasplit);
 
         if (datasplit.includes("_dependencies_ok_")) {
+            mainWindow.webContents.send("consolog", "dependencies ok");
             console.log("dependencies ok");
             // dependencies_ok = true;
+        }
+
+        if (datasplit.includes("_server_started_")) {
+            mainWindow.webContents.send("consolog", "server started");
         }
 
         
@@ -383,6 +316,11 @@ const start_R = function (R_path: string): void {
                     if (datasplit[i] == "RGUIendJSON") {
                         startJSON = false;
                         response = JSON.parse(longresponse);
+                        
+                        dialog.showErrorBox(
+                            "Hai sa vedem:",
+                            longresponse // app.getLocale()
+                        );
 
                         if (response.error && response.error[0] != "") {
                             // dialog.showErrorBox("R says:", response.error[0]);
