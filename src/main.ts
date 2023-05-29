@@ -248,6 +248,7 @@ const start_R = function (R_path: string): void {
         penv.test = "test";
     }
 
+    mainWindow.webContents.send("consolog", "R path: " + R_path);
     
     Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"], {
         // stdio: ["pipe", "pipe", "inherit"]
@@ -259,19 +260,20 @@ const start_R = function (R_path: string): void {
     let command = "";
 
     
-    if (process.platform === "win32" && embeddedR) {
-        // make sure we use the R package library from R_Portable, otherwise
-        // a different version of the code depending on using a locally installed R
-        if (production) {
-            command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
-        }
-        else {
-            command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
-        }
-        
-        command = command.replace(/\\/g, '/'); // replace backslash with forward slash
-        Rprocess.stdin.write(command + '\n');
+    
+    // make sure we use the R package library from R_Portable, otherwise
+    // a different version of the code depending on using a locally installed R
+    if (production) {
+        command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
     }
+    else {
+        command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
+    }
+    
+    command = command.replace(/\\/g, '/'); // replace backslash with forward slash
+    mainWindow.webContents.send("consolog", command);
+    Rprocess.stdin.write(command + '\n');
+    
 
     // console.log(__dirname);
     if (production) {
@@ -294,7 +296,7 @@ const start_R = function (R_path: string): void {
     Rprocess.stdout.on("data", (data: string) => {
 
         const datasplit = data.toString().split(/\r?\n/);
-        console.log(datasplit);
+        // console.log(datasplit);
 
         if (datasplit.includes("_dependencies_ok_")) {
             mainWindow.webContents.send("consolog", "dependencies ok");
@@ -317,10 +319,7 @@ const start_R = function (R_path: string): void {
                         startJSON = false;
                         response = JSON.parse(longresponse);
                         
-                        dialog.showErrorBox(
-                            "Hai sa vedem:",
-                            longresponse // app.getLocale()
-                        );
+                        mainWindow.webContents.send("consolog", longresponse);
 
                         if (response.error && response.error[0] != "") {
                             // dialog.showErrorBox("R says:", response.error[0]);
