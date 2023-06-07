@@ -1,15 +1,14 @@
 // ./node_modules/.bin/electron-builder install-app-deps --arch arm64
 // ./node_modules/.bin/electron-builder install-app-deps --arch x64
 
-process.env.NODE_ENV = "development";
-// process.env.NODE_ENV = 'production';
+// process.env.NODE_ENV = "development";
+process.env.NODE_ENV = 'production';
 
 const production = process.env.NODE_ENV === 'production';
 const development = process.env.NODE_ENV === 'development';
 
 // if true, move back the R_Portable directory to:
 // StatConverter root
-const embeddedR = true;
 
 import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
@@ -95,33 +94,22 @@ app.whenReady().then(() => {
         }
     });
 
+    mainWindow.webContents.send("consolog", "__dirname: " + __dirname);
     let R_path = "";
     
-    if (process.platform == 'win32') {
-        
-        if (production) {
-            R_path = path.join(__dirname, '../../R_Portable/bin/R.exe');
-        }
-        else {
-            R_path = path.join(__dirname, '../R_Portable/bin/R.exe');
-        }
-        
+    if (production) {
+        R_path = path.join(__dirname, '../../R_Portable/bin/R');
     }
-    else { // macos
-        
-        if (production) {
-            R_path = path.join(__dirname, '../../R_Portable/bin/R');
-        }
-        else {
-            R_path = path.join(__dirname, '../R_Portable/bin/R');
-        }
-        
+    else {
+        R_path = path.join(__dirname, '../R_Portable/bin/R');
     }
 
-    // console.log(R_path);
-    if (R_path != "") {
-        start_R(R_path);
+    if (process.platform == 'win32') {
+        R_path += ".exe";
     }
+
+    
+    start_R(R_path);
 
     ipcMain.on("selectFileFrom", (event, args) => {
         if (args.inputType === "Select file type") {
@@ -248,6 +236,8 @@ const start_R = function (R_path: string): void {
         penv.test = "test";
     }
 
+
+
     mainWindow.webContents.send("consolog", "R path: " + R_path);
     
     Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"], {
@@ -257,44 +247,30 @@ const start_R = function (R_path: string): void {
 
     Rprocess.stdout.setEncoding("utf-8");
     
-    let command = "";
 
-    
-    
-    // make sure we use the R package library from R_Portable, otherwise
-    // a different version of the code depending on using a locally installed R
-    if (production) {
-        command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
-    }
-    else {
-        command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
-    }
-    
-    command = command.replace(/\\/g, '/'); // replace backslash with forward slash
-    mainWindow.webContents.send("consolog", command);
-    Rprocess.stdin.write(command + '\n');
-    
-
+    let startServerCommand = "";
     // console.log(__dirname);
     if (production) {
-        command = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
+        startServerCommand = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
     }
     else {
-        command = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
+        startServerCommand = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
     }
     
-    if (process.platform === "win32") {
-        command = command.replace(/\\/g, '/'); // replace backslash with forward slash
-    }
+    startServerCommand = startServerCommand.replace(/\\/g, '/'); // replace backslash with forward slash
 
-    Rprocess.stdin.write(command + '\n');
+    mainWindow.webContents.send("consolog", "Starting server...");
+    mainWindow.webContents.send("consolog", startServerCommand);
+    Rprocess.stdin.write(startServerCommand + '\n');
 
-    Rprocess.stdin.write('RGUI_dependencies()\n');
+
+    
 
     let startJSON = false;
 
     Rprocess.stdout.on("data", (data: string) => {
 
+        // mainWindow.webContents.send("consolog", data.toString());
         const datasplit = data.toString().split(/\r?\n/);
         // console.log(datasplit);
 
@@ -305,7 +281,24 @@ const start_R = function (R_path: string): void {
         }
 
         if (datasplit.includes("_server_started_")) {
-            mainWindow.webContents.send("consolog", "server started");
+            let command = "";
+    
+            // make sure we use the R package library from R_Portable, otherwise
+            // a different version of the code depending on using a locally installed R
+            if (production) {
+                command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
+            }
+            else {
+                command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
+            }
+            
+            command = command.replace(/\\/g, '/'); // replace backslash with forward slash
+            mainWindow.webContents.send("consolog", command);
+            Rprocess.stdin.write(command + '\n');
+
+
+            mainWindow.webContents.send("consolog", "Checking dependencies...");
+            Rprocess.stdin.write('RGUI_dependencies()\n');
         }
 
         

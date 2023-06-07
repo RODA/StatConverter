@@ -124,4 +124,4 @@ env$RGUI_variables <- function() {
 
 rm(env)
 
-cat("_server_started_")
+cat("_server_started_\n")
