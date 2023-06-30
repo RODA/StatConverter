@@ -501,4 +501,17 @@ export const helpers = {
         return("ok");
 
     },
+
+    replaceUnicode: function(x: Array<string>): Array<string> {
+        for (let i = 0; i < x.length; i++) {
+            x[i] = x[i].replace(
+                /<U\+([A-Fa-f0-9]{4})>/g,
+                function(match: string, hex: string): string {
+                    const codepoint = parseInt(hex, 16);
+                    return String.fromCharCode(codepoint);
+                }
+            );
+        }
+        return(x);
+    }
 }

@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron';
 import * as path from 'path';
 import { helpers } from './helpers';
-import { InputOutputType } from './interfaces';
+import { InputOutputType, variablesType } from './interfaces';
 
 const inputOutput: InputOutputType = {
     inputType: '',
@@ -411,12 +411,12 @@ window.addEventListener('DOMContentLoaded', () => {
                     // console.log(formCheck);
                     // console.log(variables[formCheck.id]);
                     if (variables[el.id] && variables[el.id].label[0]) {
-                        (<HTMLDivElement>document.getElementById('variable-label')).innerHTML = variables[el.id].label[0];
+                        (<HTMLDivElement>document.getElementById('variable-label')).innerHTML = helpers.replaceUnicode(variables[el.id].label)[0];
                         const vals = <HTMLDivElement>document.getElementById('value-labels');
                         let valList = '';
                         if (Object.keys(variables[el.id].values).length > 0) {
                             for (const key in variables[el.id].values) {
-                                valList += '<div class="ms-2">' + key + ' : ' + variables[el.id].values[key] + '</div>';
+                                valList += '<div class="ms-2">' + key + ' : ' + helpers.replaceUnicode(variables[el.id].values[key]) + '</div>';
                             }
                         }
                         vals.innerHTML = valList;
@@ -509,8 +509,6 @@ function removeActive() {
         item.classList.remove('activeVariable');
     });
 }
-
-type variablesType = { [key: string]: { label: [string]; values: { [key: string]: [string] }; missing: [string]; selected: [boolean] } };
 
 function filterVar(variables: variablesType, f1: string, f2: string, make: boolean) {
     if (f2 == '') {
