@@ -6,6 +6,7 @@ process.env.NODE_ENV = 'production';
 
 const production = process.env.NODE_ENV === 'production';
 const development = process.env.NODE_ENV === 'development';
+const Windows = process.platform == 'win32';
 
 // if true, move back the R_Portable directory to:
 // StatConverter root
@@ -59,7 +60,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         autoHideMenuBar: true,
         width: 800,
-        height: 550 + (process.platform == "win32" ? 10 : 0),
+        height: 550 + (Windows ? 10 : 0),
         maxWidth: 800,
         maxHeight: 550,
         minWidth: 800,
@@ -95,16 +96,16 @@ app.whenReady().then(() => {
     });
 
     mainWindow.webContents.send("consolog", "__dirname: " + __dirname);
-    let R_path = "";
+    let R_path = Windows ? "" : "export LC_ALL='en_US.UTF-8'; ";
     
     if (production) {
-        R_path = path.join(__dirname, '../../R_Portable/bin/R');
+        R_path += path.join(__dirname, '../../R_Portable/bin/R');
     }
     else {
-        R_path = path.join(__dirname, '../R_Portable/bin/R');
+        R_path += path.join(__dirname, '../R_Portable/bin/R');
     }
 
-    if (process.platform == 'win32') {
+    if (Windows) {
         R_path += ".exe";
     }
 
@@ -138,7 +139,7 @@ app.whenReady().then(() => {
                     inputOutput.fileFromName = path.basename(inputOutput.fileFrom, ext);
                     inputOutput.fileFromDir = path.dirname(inputOutput.fileFrom);
 
-                    if (process.platform == "win32") {
+                    if (Windows) {
                         inputOutput.fileFrom = inputOutput.fileFrom.replace(/\\/g, '/');
                         inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
                     }
@@ -177,7 +178,7 @@ app.whenReady().then(() => {
                         inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
                         inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
 
-                        if (process.platform == "win32") {
+                        if (Windows) {
                             inputOutput.fileTo = inputOutput.fileTo.replace(/\\/g, '/');
                             inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
                         }
@@ -227,7 +228,7 @@ const start_R = function (R_path: string): void {
     
     const penv = process.env;
 
-    if (process.platform === "win32") {
+    if (Windows) {
         if (penv.HOME && !(penv.HOME.includes("Documents"))) {
             penv.HOME = penv.HOME + '\\Documents';
         }
@@ -236,16 +237,9 @@ const start_R = function (R_path: string): void {
         penv.test = "test";
     }
 
-
-
     mainWindow.webContents.send("consolog", "R path: " + R_path);
     
-    Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"], {
-        // stdio: ["pipe", "pipe", "inherit"]
-        // encoding: 'utf8'
-    });
-
-    Rprocess.stdout.setEncoding("utf-8");
+    Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"]);
     
 
     let startServerCommand = "";
@@ -263,7 +257,7 @@ const start_R = function (R_path: string): void {
     mainWindow.webContents.send("consolog", startServerCommand);
     Rprocess.stdin.write(startServerCommand + '\n');
 
-
+    
     
 
     let startJSON = false;
