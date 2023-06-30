@@ -14,3 +14,14 @@ export interface FileFromInfoType {
     ext: string[];
     fileTypeName: string;
 }
+
+export interface variablesType {
+    [key: string]: {
+        label: [string];
+        values: {
+            [key: string]: [string]
+        };
+        missing: [string];
+        selected: [boolean];
+    }
+}
