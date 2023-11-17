@@ -5,8 +5,8 @@
     <title>StatConverter - Run from sources</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
-    <link rel="preconnect" href="https://fonts.googleapis.com"> 
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="./styles.css" rel="stylesheet">
     <link href="./scripts/prism.css" rel="stylesheet">
@@ -35,7 +35,6 @@
             <div class="main-inner">
                 <section>
                     <h1>Running StatConverter from sources</h1>
-                    
 
                     <p>
                         For the advanced users (Linux, usually) StatConverter can also be started from its source files.
@@ -46,21 +45,21 @@
                         The first step is to create a clone of the
                         <a target="_blank" href="https://github.com/RODA/StatConverter">GitHub</a> repository
                     </p>
-                    
+
                     <p>&nbsp;</p>
                     <p>
                         <a target="_blank" href="https://nodejs.org/download/release/v14.18.2/">Node.js</a> needs
                         to be installed, we recommend version 18 which we are using.</p>
-                    
+
                     <p>&nbsp;</p>
                     <p>Then open a Terminal in the clone of the StatConverter directory, and type:</p>
-                    
+
 <div>
 <pre class="code">
 npm install
 </pre>
 </div>
-                    
+
                     <p>&nbsp;</p>
                     <p>After Node.js will install all the necessary modules, type:</p>
 
@@ -69,13 +68,13 @@ npm install
 npm start
 </pre>
 </div>
-                    
+
                     <p>to start the application.</p>
-                    
-                    
+
+
                     <p>&nbsp;</p>
                     <h2>Build your own binaries</h2>
-                    
+
                     <p>&nbsp;</p>
                     <p>
                         On Windows, users need to install the
@@ -84,14 +83,14 @@ npm start
                         <a target="_blank" href="https://git-scm.com/downloads">Git</a>, which also needs to be on the
                         system PATH.
                     </p>
-                    
+
                     <p>&nbsp;</p>
                     <p>
                         MacOS users need to install the
                         <a href="https://mac.install.guide/commandlinetools/index.html">XCode Command Line Tools</a>
                         (not the entire XCode, the CLT are sufficient)
                     </p>
-                    
+
                     <p>&nbsp;</p>
                     <p>In the Terminal, this command will produce the binary:</p>
 
@@ -101,6 +100,13 @@ npm start
 npm run dist
 </pre>
 </div>
+
+                    <p>&nbsp;</p>
+                    <p>
+                        This application expects a portable version of R, which is not provided in the GitHub repository
+                        for the simple reason it is platform dependent. It needs to be located in a directory called
+                        "R_Portable".
+                    </p>
 
                 </section>
             </div>
