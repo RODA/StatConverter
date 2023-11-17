@@ -62,14 +62,28 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     } = {};
 
-    const inputType = <HTMLSelectElement>document.getElementById('inputType');
+    const inputType = <HTMLSelectElement>document.getElementById('inputType'); // as HTMLSelectElement;
     const fileEncoding = <HTMLSelectElement>document.getElementById('fileEncoding');
     const outputType = <HTMLSelectElement>document.getElementById('outputType');
-    const fileFrom = <HTMLInputElement>document.getElementById('fileFrom');
+    const fileFrom = <HTMLInputElement>document.getElementById('fileFrom'); // as HTMLInputElement;
     const fileTo = <HTMLInputElement>document.getElementById('fileTo');
     const selectFileFrom = <HTMLInputElement>document.getElementById('selectFileFrom');
     const selectFileTo = <HTMLInputElement>document.getElementById('selectFileTo');
     const startConvert = <HTMLInputElement>document.getElementById('startConvert');
+    const embedFALSE = <HTMLInputElement>document.getElementById('embedFALSE');
+    // const embedTRUE = <HTMLInputElement>document.getElementById('embedTRUE');
+    // const serializeTRUE = <HTMLInputElement>document.getElementById('serializeTRUE');
+    // const serializeFALSE = <HTMLInputElement>document.getElementById('serializeFALSE');
+
+    // embedTRUE.addEventListener('click', function () {
+    //     serializeTRUE.disabled = false;
+    //     serializeFALSE.disabled = false;
+    // });
+
+    // embedFALSE.addEventListener('click', function () {
+    //     serializeTRUE.disabled = true;
+    //     serializeFALSE.disabled = true;
+    // });
 
     selectFileFrom.addEventListener('click', function () {
         const loader = document.getElementById('loader') as HTMLDivElement;
@@ -114,7 +128,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // if (inputOutput.fileToDir == '') {
             inputOutput.fileToDir = io.fileFromDir;
         // }
-        
+
         if (outputTypeValue != 'none') {
             const ext = helpers.getExtensionFromType(outputTypeValue);
             const fileTo = <HTMLInputElement>document.getElementById('fileTo');
@@ -181,10 +195,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (indices.length == 0 && !all_vars_selected) {
             ipcRenderer.send('showError', { message: 'At least one variable has to be selected.' });
         } else {
-            
 
-
-            
             let command = "RGUI_parseCommand(\"convert('" + inputOutput.fileFrom + "', to = '" + inputOutput.fileTo + "'";
 
             const declaredTRUE = document.getElementById("declaredTRUE") as HTMLInputElement;
@@ -220,21 +231,21 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             const select_cases = document.getElementById('select_cases') as HTMLInputElement;
-            
+
             let select = "";
             if (indices.length > 0) {
                 select = (all_vars_selected ? "-" : "") + "c(" + helpers.paste(indices, { sep: "," }) + ")";
             }
 
-            
-            
+
+
             let subset = "";
             if (select_cases.value != "" || select != "") {
-                
+
                 if (select_cases.value != "") {
                     subset += select_cases.value;
                 }
-                
+
                 const keep = document.getElementById('keepSelectionCases') as HTMLInputElement;
                 if (!keep.checked) {
                     select_cases.value = "";
@@ -244,15 +255,18 @@ window.addEventListener('DOMContentLoaded', () => {
             if (select != "") {
                 subset += (subset == "" ? "" : ", ") + "select = " + select;
             }
-            
+
             if (subset != "") {
                 command += ", subset = '" + subset + "'";
             }
 
-            const embed = document.getElementById('embedFALSE') as HTMLInputElement;
-            if (embed.checked) {
+            if (embedFALSE.checked) {
                 command += ", embed = FALSE";
             }
+
+            // if (embedTRUE.checked && serializeTRUE.checked) {
+            //     command += ", serialize = TRUE";
+            // }
 
             if (inputOutput.outputType == "stata") {
                 const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
@@ -269,32 +283,27 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             const agency = document.getElementById('agency') as HTMLInputElement;
-            if (agency.value != "default") {
+            if (agency.value != "") {
                 command += ", agency = '" + agency.value + "'";
             }
 
             const xmlang = document.getElementById('xmlang') as HTMLInputElement;
-            if (xmlang.value != 'en') {
+            if (xmlang.value != "") {
                 command += ", xmlang = '" + xmlang.value + "'";
             }
 
-            const xmlns = document.getElementById('xmlns') as HTMLInputElement;
-            if (xmlns.value != '') {
-                command += ", xmlns = '" + xmlns.value + "'";
+            const monolang = document.getElementById('monolang') as HTMLInputElement;
+            if (!monolang.checked) {
+                command += ", monolang = FALSE"
             }
 
-            const monolang = document.getElementById('monolang') as HTMLInputElement;
-            if (monolang.checked) {
-                command += ", monolang = TRUE"
-            }
-            
             const IDNo = document.getElementById('IDNo') as HTMLInputElement;
-            if (IDNo.value != 'S0000') {
+            if (IDNo.value != "") {
                 command += ", IDNo = '" + IDNo.value + "'";
             }
-            
+
             const URI = document.getElementById('URI') as HTMLInputElement;
-            if (URI.value != 'http://www.default.eu') {
+            if (URI.value != "") {
                 command += ", URI = '" + URI.value + "'";
             }
 
@@ -318,7 +327,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             command += ")\")\n";
             ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
-            
+
         }
     });
 
@@ -331,7 +340,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     outputType.addEventListener('change', function () {
-        
+
         const outputTypeValue = outputType.options[outputType.selectedIndex].value;
         inputOutput.outputType = outputTypeValue;
         const ext = helpers.getExtensionFromType(outputTypeValue);
@@ -371,7 +380,7 @@ window.addEventListener('DOMContentLoaded', () => {
         variablesListCases.innerHTML = '';
         varlabel.innerHTML = '';
         vallabels.innerHTML = '';
-        
+
         all_vars_selected = true;
 
         for (const key in variables) {
@@ -606,7 +615,7 @@ function insertAtPosition(areaId: string, text: string) {
     }
 
     // console.log('aici');
-    
+
 
     // console.log('gasit');
     // console.log(text);

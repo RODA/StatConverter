@@ -58,17 +58,22 @@
 			}
 
 
-      div.settings {
+			div.settings {
 					display: grid;
 					grid-template-columns: max-content 50px;
 					grid-gap:5px;
 			}
+
 			div.settings label {
 				text-align:right;
 			}
 
 			.fsize {
 				font-size: 0.9rem;
+			}
+
+			.form-control::placeholder {
+				color: #D3D3D3;
 			}
 
 		</style>
@@ -281,7 +286,7 @@
 						</div>
 					</div>
 				</div>
-				
+
 				<!-- ========= Settings ========= -->
 				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
 					<div class="row mt-3"> <!-- px-4 -->
@@ -289,7 +294,7 @@
 							<div class="ms-4">
 								<p class="mb-3"><strong>Settings:</strong></p>
 								<div class="row mb-3">
-									<div class="col-8">
+									<div class="col-3">
 										<span>Output to Stata version</span>
 									</div>
 									<div class="col-2">
@@ -301,9 +306,9 @@
 											<option value="10">10</option>
 										</select>
 									</div>
-								</div>
-								<div class="row mb-3">
-									<div class="col-8">
+									<div class="col-1">
+									</div>
+									<div class="col-3">
 										<span>Output to SAS Transport version</span>
 									</div>
 									<div class="col-2">
@@ -356,7 +361,7 @@
 											<label class="form-check-label" for="declaredFALSE">No</label>
 										</div>
 									</div>
-								</div>			
+								</div>
 
                                 <hr style="margin: 1.2rem 0;">
 
@@ -364,7 +369,7 @@
 
 								<div class="row mb-3">
 									<div class="col-8">
-										<span>Embed the CSV data into the DDI Codebook XML file</span>
+										<span>Embed the data into the DDI Codebook XML file</span>
 									</div>
 									<div class="col-3 text-start">
 										<div class="form-check form-check-inline">
@@ -394,43 +399,37 @@
 										<span>Agency</span>
 									</div>
 									<div class="col-4">
-										<input type="input" class="rounded-0 form-control form-control-sm" id="agency" value="default" />
+										<input type="input" class="rounded-0 form-control form-control-sm" id="agency" placeholder="default" />
 									</div>
 								</div>
 								<div class="row mb-3">
-                                    <div class="col-2 d-flex justify-content-start align-items-center">
+                                    <div class="col-3 d-flex justify-content-start align-items-center">
                                         <label for="xmlang">Language</label>
                                     </div>
-                                    <div class="col-1">
+                                    <div class="col-2">
                                         <input type="input" style="width: 35px;" class="rounded-0 form-control form-control-sm" id="xmlang" value="en" />
 									</div>
-									<div class="col-3 d-flex justify-content-start align-items-center">
-                                        <div class="form-check" style="margin-bottom: 0px;min-height: 1rem;">
-                                            <input class="form-check-input" type="checkbox" id="monolang" />
-										    <label class="form-check-label" for="monolang">Mono language</label>
-                                        </div>
-									</div>
-									<div class="col-2 d-flex justify-content-end align-items-center">
+									<div class="col-3 d-flex justify-content-end align-items-center">
 										<span>Study ID</span>
 									</div>
 									<div class="col-4">
-										<input type="input" class="rounded-0 form-control form-control-sm" id="IDNo" value="S0000" />
+										<input type="input" class="rounded-0 form-control form-control-sm" id="IDNo" placeholder="S0000" />
 									</div>
-	
+
 								</div>
-								<div class="row mb-3">
-									<div class="col-3">
-										<span>Namespace prefix</span>
+								<div class="row">
+									<div class="col-5">
+										<div class="form-check" style="margin-bottom: 0px;min-height: 1rem;">
+											<input class="form-check-input" type="checkbox" id="monolang" checked/>
+											<label class="form-check-label" for="monolang">Mono language</label>
+										</div>
 									</div>
-									<div class="col-3">
-										<input type="input" class="rounded-0 form-control form-control-sm" id="xmlns" />
-									</div>
-									<div class="col-2 d-flex justify-content-end align-items-center">
-										<span>URL</span>
+									<div class="col-3 d-flex justify-content-end align-items-center">
+										<span>Holdings URL</span>
 									</div>
 									<div class="col-4">
-										<input type="input" class="rounded-0 form-control form-control-sm" id="URI" value="http://www.default.eu" />
-									</div>								
+										<input type="input" class="rounded-0 form-control form-control-sm" id="URI" placeholder="http://www.default.eu" />
+									</div>
 								</div>
 							</div>
 						</div>
@@ -455,7 +454,7 @@
 				<div class="text-white text-center flex" style="font-size: 0.7rem">
 					<div class="align-self-end pb-3">
 						<a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br />
-						version 1.1.4
+						version 1.1.5
 					</div>
 				</div>
 			</div>

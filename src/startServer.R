@@ -1,5 +1,5 @@
 
-attach(NULL, name = "RGUI") 
+attach(NULL, name = "RGUI")
 env <- as.environment("RGUI")
 
 env$RGUI_dependencies <- function() {
@@ -48,7 +48,7 @@ env$RGUI_parseCommand <- function(command) {
     if (length(toreturn) == 0) {
         toreturn <- list(error = "")
     }
-    
+
     if (is.null(toreturn$error)) {
         toreturn$error <- ""
     }
@@ -62,14 +62,14 @@ env$RGUI_parseCommand <- function(command) {
     }
 
     # print(toreturn)
-    
+
     cat("RGUIstartJSON\n")
     cat(paste(
         jsonlite::toJSON(toreturn), "\n",
         collapse = "", sep = ""
     ))
     cat("RGUIendJSON\n")
-    
+
 }
 
 env$RGUI_ChangeLog <- function(x) {
@@ -91,7 +91,7 @@ env$RGUI_variables <- function() {
         if (any(tagged_na)) {
             values[tagged_na] <- paste0(".", admisc::getTag(values[tagged_na]))
         }
-        
+
         na_values <- declared::missing_values(x)
         if (declared::is.declared(x) || is.element("haven_labelled_spss", class(x))) {
             if (is.null(na_values)) {

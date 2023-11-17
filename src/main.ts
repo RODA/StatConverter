@@ -40,7 +40,7 @@ app.on("window-all-closed", () => {
     // if (RptyProcess) {
     //     RptyProcess.kill();
     // }
-    
+
     app.quit();
 });
 
@@ -95,9 +95,8 @@ app.whenReady().then(() => {
         }
     });
 
-    mainWindow.webContents.send("consolog", "__dirname: " + __dirname);
     let R_path = "";
-    
+
     if (production) {
         R_path += path.join(__dirname, '../../R_Portable/bin/R');
     }
@@ -108,7 +107,7 @@ app.whenReady().then(() => {
         R_path += ".exe";
     }
 
-    
+
     start_R(R_path);
 
     ipcMain.on("selectFileFrom", (event, args) => {
@@ -224,7 +223,7 @@ app.whenReady().then(() => {
 // let unmet_dependencies = "";
 
 const start_R = function (R_path: string): void {
-    
+
     const penv = process.env;
 
     if (OS_Windows) {
@@ -236,15 +235,15 @@ const start_R = function (R_path: string): void {
         penv.test = "test";
     }
 
-    mainWindow.webContents.send("consolog", "R path: " + R_path);
-    
+    // mainWindow.webContents.send("consolog", "R path: " + R_path);
+
     // export LC_ALL='en_US.UTF-8'; "
     Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"], {
         env: {
           LANG: 'en_US.UTF-8' // Set the desired UTF-8 locale
         }
     });
-    
+
 
     let startServerCommand = "";
     // console.log(__dirname);
@@ -254,33 +253,33 @@ const start_R = function (R_path: string): void {
     else {
         startServerCommand = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
     }
-    
+
     startServerCommand = startServerCommand.replace(/\\/g, '/'); // replace backslash with forward slash
 
-    mainWindow.webContents.send("consolog", "Starting server...");
-    mainWindow.webContents.send("consolog", startServerCommand);
+    // mainWindow.webContents.send("consolog", "Attempting to start the R server...");
+    // mainWindow.webContents.send("consolog", startServerCommand);
     Rprocess.stdin.write(startServerCommand + '\n');
 
-    
-    
+
+
 
     let startJSON = false;
 
     Rprocess.stdout.on("data", (data: string) => {
 
-        // mainWindow.webContents.send("consolog", data.toString());
+        // mainWindow.webContents.send("consolog", "raspuns: " + data.toString());
         const datasplit = data.toString().split(/\r?\n/);
         // console.log(datasplit);
 
         if (datasplit.includes("_dependencies_ok_")) {
-            mainWindow.webContents.send("consolog", "dependencies ok");
-            console.log("dependencies ok");
+            // mainWindow.webContents.send("consolog", "dependencies ok");
+            // console.log("dependencies ok");
             // dependencies_ok = true;
         }
 
         if (datasplit.includes("_server_started_")) {
             let command = "";
-    
+
             // make sure we use the R package library from R_Portable, otherwise
             // a different version of the code depending on using a locally installed R
             if (production) {
@@ -289,17 +288,16 @@ const start_R = function (R_path: string): void {
             else {
                 command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
             }
-            
+
             command = command.replace(/\\/g, '/'); // replace backslash with forward slash
-            mainWindow.webContents.send("consolog", command);
+            // mainWindow.webContents.send("consolog", command);
             Rprocess.stdin.write(command + '\n');
 
-
-            mainWindow.webContents.send("consolog", "Checking dependencies...");
-            Rprocess.stdin.write('RGUI_dependencies()\n');
+            // mainWindow.webContents.send("consolog", "Checking dependencies...");
+            Rprocess.stdin.write('RGUI_dependencies()\n\n');
         }
 
-        
+
         // if (dependencies_ok) {
             for (let i = 0; i < datasplit.length; i++) {
                 if (!startJSON) {
@@ -309,8 +307,8 @@ const start_R = function (R_path: string): void {
                     if (datasplit[i] == "RGUIendJSON") {
                         startJSON = false;
                         response = JSON.parse(longresponse);
-                        
-                        mainWindow.webContents.send("consolog", longresponse);
+
+                        // mainWindow.webContents.send("consolog", longresponse);
 
                         if (response.error && response.error[0] != "") {
                             // dialog.showErrorBox("R says:", response.error[0]);
