@@ -271,11 +271,9 @@ const start_R = function (R_path: string): void {
         const datasplit = data.toString().split(/\r?\n/);
         // console.log(datasplit);
 
-        if (datasplit.includes("_dependencies_ok_")) {
-            // mainWindow.webContents.send("consolog", "dependencies ok");
-            // console.log("dependencies ok");
-            // dependencies_ok = true;
-        }
+        // if (datasplit.includes("_dependencies_ok_")) {
+        //     mainWindow.webContents.send("consolog", "dependencies ok");
+        // }
 
         if (datasplit.includes("_server_started_")) {
             let command = "";
@@ -298,42 +296,40 @@ const start_R = function (R_path: string): void {
         }
 
 
-        // if (dependencies_ok) {
-            for (let i = 0; i < datasplit.length; i++) {
-                if (!startJSON) {
-                    startJSON = datasplit[i] == "RGUIstartJSON";
-                }
-                else {
-                    if (datasplit[i] == "RGUIendJSON") {
-                        startJSON = false;
-                        response = JSON.parse(longresponse);
+        for (let i = 0; i < datasplit.length; i++) {
+            if (!startJSON) {
+                startJSON = datasplit[i] == "RGUIstartJSON";
+            }
+            else {
+                if (datasplit[i] == "RGUIendJSON") {
+                    startJSON = false;
+                    response = JSON.parse(longresponse);
 
-                        // mainWindow.webContents.send("consolog", longresponse);
+                    // mainWindow.webContents.send("consolog", longresponse);
 
-                        if (response.error && response.error[0] != "") {
-                            // dialog.showErrorBox("R says:", response.error[0]);
-                            dialog.showMessageBox(mainWindow, {
-                                type: "error",
-                                title: "R says error:",
-                                message: response.error[0]
-                            }).then(() => {
-                                mainWindow.webContents.send("clearLoader");
-                            })
-                        }
-                        else {
-                            if (response.variables && Object.keys(response.variables).length > 0) {
-                                mainWindow.webContents.send("sendCommand-reply", response);
-                            }
+                    if (response.error && response.error[0] != "") {
+                        // dialog.showErrorBox("R says:", response.error[0]);
+                        dialog.showMessageBox(mainWindow, {
+                            type: "error",
+                            title: "Error:",
+                            message: "R says: " + response.error[0]
+                        }).then(() => {
                             mainWindow.webContents.send("clearLoader");
+                        })
+                    }
+                    else {
+                        if (response.variables && Object.keys(response.variables).length > 0) {
+                            mainWindow.webContents.send("sendCommand-reply", response);
                         }
-
-                        longresponse = "";
-                        break;
+                        mainWindow.webContents.send("clearLoader");
                     }
 
-                    longresponse += datasplit[i];
-
+                    longresponse = "";
+                    break;
                 }
+
+                longresponse += datasplit[i];
             }
+        }
     });
 };

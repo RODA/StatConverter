@@ -2,42 +2,96 @@
 attach(NULL, name = "RGUI")
 env <- as.environment("RGUI")
 
+env$RGUI_tryCatchWEM <- function(expr, capture = FALSE) {
+    #' modified version of http://stackoverflow.com/questions/4948361/how-do-i-save-warnings-and-errors-as-output-from-a-function
+    
+    toreturn <- list()
+    output <- withVisible(withCallingHandlers(
+        tryCatch(expr, error = function(e) {
+            toreturn$error <<- e$message
+            NULL
+        }),
+        warning = function(w) {
+            toreturn$warning <<- c(toreturn$warning, w$message)
+            invokeRestart("muffleWarning")
+        },
+        message = function(m) {
+            toreturn$message <<- paste(toreturn$message, m$message, sep = "")
+            invokeRestart("muffleMessage")
+        }
+    ))
+    
+    if (capture && output$visible && !is.null(output$value)) {
+        toreturn$output <- capture.output(output$value)
+        toreturn$value <- output$value
+    }
+    
+    if (length(toreturn) > 0) {
+        return(toreturn)
+    }
+}
+
 env$RGUI_dependencies <- function() {
-    packages <- c("admisc", "declared", "DDIwR", "jsonlite")
+    packages <- c("jsonlite", "admisc", "declared", "DDIwR")
     installed <- logical(length(packages))
+
     for (i in seq(length(packages))) {
-        installed[i] <- requireNamespace(packages[i], quietly = TRUE)
+        toreturn <- RGUI_tryCatchWEM(loadNamespace(packages[i]))
+        installed[i] <- is.null(toreturn$error)
+
+        # cat(paste(packages[i], "installed:", ifelse(installed[i], TRUE, FALSE), "\n"))
         if (installed[i]) {
-            library(packages[i], character.only = TRUE)
+            toreturn <- RGUI_tryCatchWEM(
+                library(packages[i], character.only = TRUE)
+            )
+        }
+        else {
+            error <- unlist(strsplit(toreturn$error, split = "R_Portable"))
+            if (grepl("unable to load shared object ", error[1])) {
+                path <- gsub("unable to load shared object '", "", error[1])
+                toreturn$error <- gsub(path, "", toreturn$error)
+            }
+            
+            break;
         }
     }
+    
 
-    toreturn <- list(
-        error = ""
-    )
-
-    if (sum(installed) < length(packages)) {
-        toreturn$error <- paste(
-            "Unable to load packages:",
-            paste(packages[!installed], collapse = ", ")
+    if (is.null(toreturn)) {
+        toreturn <- list(
+            error = ""
         )
-    }
-    else {
-        cat("_dependencies_ok_\n")
+        
+        if (sum(installed) < length(packages)) {
+            toreturn$error <- paste(
+                "Unable to load packages:",
+                paste(packages[!installed], collapse = ", ")
+            )
+        }
+        else {
+            cat("_dependencies_ok_\n")
+        }
     }
 
     toreturn$variables = c();
 
-    cat(paste(
-        jsonlite::toJSON(toreturn), "\n",
-        collapse = "", sep = ""
-    ))
+    cat("RGUIstartJSON\n")
+    if (installed[1]) {
+        cat(paste(
+            jsonlite::toJSON(toreturn), "\n",
+            collapse = "", sep = ""
+        ))
+    }
+    else {
+        cat("{\"error\":[\"Unable to load package jsonlite.\"]}\n")
+    }
+    cat("RGUIendJSON\n")
 
 }
 
 env$RGUI_parseCommand <- function(command) {
     # cat(command, "\n")
-    toreturn <- admisc::tryCatchWEM(
+    toreturn <- RGUI_tryCatchWEM(
         eval(
             parse(text = command),
             envir = .GlobalEnv
