@@ -3,8 +3,7 @@ attach(NULL, name = "RGUI")
 env <- as.environment("RGUI")
 
 env$RGUI_tryCatchWEM <- function(expr, capture = FALSE) {
-    #' modified version of http://stackoverflow.com/questions/4948361/how-do-i-save-warnings-and-errors-as-output-from-a-function
-    
+    # this HAS to stay here, in case package admisc cannot be loaded...
     toreturn <- list()
     output <- withVisible(withCallingHandlers(
         tryCatch(expr, error = function(e) {
