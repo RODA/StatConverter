@@ -1,8 +1,8 @@
 // ./node_modules/.bin/electron-builder install-app-deps --arch arm64
 // ./node_modules/.bin/electron-builder install-app-deps --arch x64
 
-// process.env.NODE_ENV = "development";
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = "development";
+// process.env.NODE_ENV = 'production';
 
 const production = process.env.NODE_ENV === 'production';
 const development = process.env.NODE_ENV === 'development';
@@ -99,13 +99,19 @@ app.whenReady().then(() => {
 
     if (production) {
         R_path += path.join(__dirname, '../../R_Portable/bin/R');
+        if (OS_Windows) {
+            R_path += ".exe";
+        }
     }
     else {
-        R_path += path.join(__dirname, '../R_Portable/bin/R');
+        if (OS_Windows) {
+            R_path += path.join(__dirname, '../R_Portable/bin/R.exe');
+        }
+        else {
+            R_path += path.join(__dirname, '../R_Portable_development/bin/R');
+        }
     }
-    if (OS_Windows) {
-        R_path += ".exe";
-    }
+    
 
 
     start_R(R_path);
