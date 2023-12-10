@@ -1,8 +1,8 @@
 // ./node_modules/.bin/electron-builder install-app-deps --arch arm64
 // ./node_modules/.bin/electron-builder install-app-deps --arch x64
 
-process.env.NODE_ENV = "development";
-// process.env.NODE_ENV = 'production';
+// process.env.NODE_ENV = "development";
+process.env.NODE_ENV = 'production';
 
 const production = process.env.NODE_ENV === 'production';
 const development = process.env.NODE_ENV === 'development';
