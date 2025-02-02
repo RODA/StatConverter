@@ -41,6 +41,16 @@
         ]
       },
       "icon": "build/StatConverter.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "arch": [
+        "x64",
+        "arm64"
+      ],
+      "icon": "build/StatConverter.png",
+      "category": "Utility",
+      "maintainer": "Adrian Dusa <dusa.adrian@gmail.com>"
     }
   },
   "devDependencies": {
