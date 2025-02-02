@@ -1,101 +1,72 @@
 {
-    "name": "StatConverter",
-    "version": "1.1.9",
-    "description": "Convert statistical data using R",
-    "main": "dist/main.js",
-    "scripts": {
-        "build": "tsc",
-        "watch": "tsc -w",
-        "lint": "eslint -c .eslintrc --ext .ts ./src",
-        "start": "npm run build && electron ./dist/main.js",
-        "dist": "npm run build && electron-builder",
-        "pack": "npm run build && electron-builder --dir"
+  "name": "statconverter",
+  "version": "1.2.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "eslint -c .eslintrc --ext .ts ./src",
+    "start": "npm run build && electron ./dist/main.js",
+    "dist": "npm run build && electron-builder"
+  },
+  "author": "RODA",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/RODA/StatConverter/issues"
+  },
+  "homepage": "https://github.com/RODA/StatConverter#readme",
+  "build": {
+    "appId": "StatConverter.tool",
+    "productName": "StatConverter",
+    "directories": {
+      "output": "build/output"
     },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/RODA/StatConverter.git"
+    "win": {
+      "icon": "build/StatConverter.ico",
+      "legalTrademarks": "MIT Licence",
+      "target": {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
     },
-    "keywords": [
-        "convert",
-        "SAS",
-        "SPSS",
-        "Stata",
-        "R",
-        "Excel",
-        "DDI"
-    ],
-    "author": "RODA",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/RODA/StatConverter/issues"
-    },
-    "homepage": "https://github.com/RODA/StatConverter#readme",
-    "dependencies": {
-        "@electron/asar": "^3.2.1",
-        "@electron/get": "^2.0.2",
-        "@electron/universal": "^1.3.3",
-        "@popperjs/core": "^2.11.6",
-        "@types/bluebird": "^3.5.37",
-        "@types/jsdom": "^20.0.1",
-        "@types/ws": "^8.5.3",
-        "app-builder-lib": "^24.0.0-alpha.2",
-        "asar": "^3.2.0",
-        "bootstrap": "^5.2.2",
-        "dmg-builder": "^24.0.0-alpha.2",
-        "electron-squirrel-startup": "^1.0.0",
-        "imports-loader": "^4.0.1",
-        "lodash.clonedeep": "^4.5.0",
-        "minimatch": "^5.1.0",
-        "r-integration": "^2.4.0",
-        "trim-newlines": ">=4.0.2",
-        "ws": "^8.10.0"
-    },
-    "devDependencies": {
-        "@types/lodash.clonedeep": "^4.5.7",
-        "@typescript-eslint/eslint-plugin": "^5.41.0",
-        "@typescript-eslint/parser": "^5.41.0",
-        "electron": "^18.3.15",
-        "electron-builder": "^23.6.0",
-        "electron-rebuild": "^3.2.9",
-        "eslint": "^8.26.0",
-        "path": "^0.12.7",
-        "typescript": "^4.8.4"
-    },
-    "build": {
-        "appId": "StatConverter.tool",
-        "productName": "StatConverter",
-        "directories": {
-            "output": "build/output"
-        },
-        "extraResources": [
-            {
-                "from": "R_Portable",
-                "to": "R_Portable"
-            },
-            {
-                "from": "src/startServer.R",
-                "to": "startServer.R"
-            }
-        ],
-        "win": {
-            "icon": "build/StatConverter.ico",
-            "legalTrademarks": "MIT Licence",
-            "target": {
-                "target": "nsis",
-                "arch": [
-                    "x64"
-                ]
-            }
-        },
-        "mac": {
-            "category": "public.app-category.productivity",
-            "target": {
-                "target": "dmg",
-                "arch": [
-                    "x64"
-                ]
-            },
-            "icon": "build/StatConverter.icns"
-        }
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": {
+        "target": "dmg",
+        "arch": [
+          "arm64"
+        ]
+      },
+      "icon": "build/StatConverter.icns"
     }
+  },
+  "devDependencies": {
+    "@types/electron": "^1.4.38",
+    "@types/emscripten": "^1.39.13",
+    "@types/lodash": "^4.17.15",
+    "@types/serviceworker": "^0.0.118",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "electron": "^34.0.2",
+    "electron-builder": "^26.0.1",
+    "eslint": "^9.18.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
+    "bootstrap": "^5.3.3",
+    "lodash": "^4.17.21",
+    "tippy.js": "^6.3.7",
+    "uuid": "^11.0.5",
+    "webr": "^0.4.2"
+  },
+  "postinstall": "electron-builder install-app-deps"
 }

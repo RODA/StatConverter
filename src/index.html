@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8" />
+        <title>StatConverter</title>
+        <meta charset="UTF-8" />
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+		<link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+		<style>
+
+			body {
+				font-size: 0.9rem;
+			}
+
+			.btn:focus {
+				outline: none;
+				box-shadow: none !important;
+			}
+			.activeVariable {
+				background-color: #ccc;
+			}
+			.caseVar:hover {
+				background-color: #ccc;
+			}
+			.loader {
+				font-size: 3rem;
+				font-weight: 700;
+				color: #ffffff;
+				position: fixed;
+				z-index: 1050;
+				left: calc(50% - 145px);
+				top: calc(50% - 70px);
+				text-align: center;
+			}
+
+			.cover {
+				top: 0;
+				display: block;
+				position: fixed;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0, 0, 0, 0.7);
+				z-index: 1040;
+			}
+
+			@keyframes spin {
+				0% {
+					transform: rotate(0deg);
+				}
+
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+
+			.stop-scrolling {
+				height: 100%;
+				overflow: hidden;
+			}
+
+
+			div.settings {
+					display: grid;
+					grid-template-columns: max-content 50px;
+					grid-gap:5px;
+			}
+
+			div.settings label {
+				text-align:right;
+			}
+
+			.fsize {
+				font-size: 0.9rem;
+			}
+
+			.form-control::placeholder {
+				color: #D3D3D3;
+			}
+
+		</style>
+    </head>
+
+	<body style="background: white">
+		<div class="loader d-none" id="loader">Processing....</div>
+		<div class="cover d-none" id="cover"></div>
+		<div class="d-flex align-items-start">
+			<div class="tab-content" id="v-pills-tabContent" style="width: 858px">
+
+				<!-- ========= Convert ========= -->
+				<div class="tab-pane fade show active p-4" id="v-pills-convert" role="tabpanel" aria-labelledby="v-pills-convert-tab">
+					<div class="row align-items-center mt-3 mb-3">
+						<div class="col-2 text-end">
+							<label for="inputType" class="col-form-label fsize">Encoding</label>
+						</div>
+						<div class="col-8">
+							<select class="form-select form-select-sm" id="fileEncoding">
+								<option value="utf8" selected>UTF-8</option>
+								<option value="latin1">Latin 1 (ISO-8859-1)</option>
+								<option value="windows-1252">Legacy Windows-1252</option>
+								<option value="bytes">Multi-byte</option>
+								<option value="default">As specified in the file</option>
+							</select>
+						</div>
+						<div class="col-2"></div>
+					</div>
+					<div class="row align-items-center mb-3">
+						<div class="col-2 text-end">
+							<label for="inputType" class="col-form-label fsize">Input type</label>
+						</div>
+						<div class="col-8">
+							<select class="form-select form-select-sm" id="inputType">
+								<option value="none" selected>Select file type</option>
+								<option value="ddi">DDI Codebook</option>
+								<option value="excel">Excel</option>
+								<option value="sas">SAS</option>
+								<option value="xpt">SAS Transport</option>
+								<option value="spss">SPSS</option>
+								<option value="stata">Stata</option>
+								<option value="r">R</option>
+							</select>
+						</div>
+						<div class="col-2"></div>
+					</div>
+					<div class="row align-items-center">
+						<div class="col-2 text-end">
+							<label for="fileFrom" class="col-form-label fsize" style="margin-left: -10px;">Convert from</label>
+						</div>
+						<div class="col-8">
+							<input type="input" readonly class="rounded-0 form-control form-control-sm" id="fileFrom" />
+							<!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
+						</div>
+						<div class="col-2">
+							<span class="d-inline-block" tabindex="0" title="Select input type" id="fromTooltip">
+								<button class="btn btn-sm btn-secondary rounded-0" disabled id="selectFileFrom">Browse</button>
+							</span>
+						</div>
+					</div>
+
+					<hr class="my-5"/>
+
+					<div class="row align-items-center mb-3">
+						<div class="col-2 text-end">
+							<label for="outputType" class="col-form-label fsize">Output type</label>
+						</div>
+						<div class="col-8">
+							<select class="form-select form-select-sm" id="outputType">
+								<option value="none" selected>Select file type</option>
+								<option value="ddi">DDI Codebook</option>
+								<option value="excel">Excel</option>
+								<option value="xpt">SAS Transport</option>
+								<option value="spss">SPSS</option>
+								<option value="stata">Stata</option>
+								<option value="r">R</option>
+							</select>
+						</div>
+						<div class="col-2"></div>
+					</div>
+					<div class="row align-items-center">
+						<div class="col-2 text-end">
+							<label for="fileTo" class="col-form-label fsize">Convert to</label>
+						</div>
+						<div class="col-8">
+							<input type="input" readonly class="rounded-0 form-control form-control-sm" id="fileTo" />
+							<!-- <input type="password" id="inputPassword6" class="form-control" aria-describedby="passwordHelpInline"> -->
+						</div>
+						<div class="col-2">
+							<span class="d-inline-block" tabindex="0" title="Select output type" id="toTooltip">
+								<button class="btn btn-sm btn-secondary rounded-0" disabled id="selectFileTo">Browse</button>
+							</span>
+						</div>
+					</div>
+
+					<hr class="my-5"/>
+
+					<div class="row align-items-center">
+						<div class="col-2 text-end"></div>
+						<div class="col-8 text-center">
+							<span class="d-inline-block" tabindex="0" title="Complete information before conversion" id="startConvertTooltip">
+								<button class="btn btn-sm btn-secondary rounded-0" disabled id="startConvert">Convert</button>
+							</span>
+						</div>
+						<div class="col-2"></div>
+					</div>
+				</div>
+
+				<!-- ========= Variables ========= -->
+				<div class="tab-pane fade" id="v-pills-variables" role="tabpanel" aria-labelledby="v-pills-variables-tab">
+					<div class="row align-items-start mt-3">
+						<div class="col-4 text-start">
+							<strong style="margin-left: 10px;">Search variables:</strong>
+							<input type="text" class="form-control mb-2 rounded-0" id="varsearch" style="margin: 0 10px" />
+							<div id="variables" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 100px); overflow-y: scroll; padding: 5px 0px"></div>
+						</div>
+						<div class="col-8">
+							<strong>Variable label</strong>
+							<div id="variable-label" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 75px"></div>
+							<strong class="d-block mt-3">Value labels</strong>
+							<div id="value-labels" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 156px; overflow-y: scroll"></div>
+							<div class="buttons mt-3 text-center">
+								<button id="select-all-variables" class="btn btn-sm btn-secondary rounded-0">Select all</button>
+								<button id="deselect-all-variables" class="btn btn-sm btn-secondary rounded-0">Deselect all</button>
+							</div>
+							<div class="mt-3">
+								<strong class="d-block text-left mb-3">Variables containing:</strong>
+								<div class="row">
+									<div class="col-4">
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="filterRadio" id="filter1" value="1" checked />
+											<label class="form-check-label" for="filter1"> text </label>
+										</div>
+										<div class="form-check">
+											<input class="form-check-input" type="radio" name="filterRadio" id="filter2" value="2" />
+											<label class="form-check-label" for="filter2"> pattern </label>
+										</div>
+									</div>
+									<div class="col-8">
+										<div class="mb-3">
+											<input type="text" class="form-control form-control-sm" id="filterInput" />
+										</div>
+									</div>
+								</div>
+								<div class="buttons mt-3">
+									<button id="keep-variables" class="btn btn-sm btn-secondary rounded-0">Keep</button>
+									<button id="drop-variables" class="btn btn-sm btn-secondary rounded-0">Drop</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- ========= Cases ========= -->
+				<div class="tab-pane fade" id="v-pills-cases" role="tabpanel" aria-labelledby="v-pills-cases-tab">
+					<div class="row mt-3">
+						<div class="col-4 text-start">
+							<strong style="margin-left: 10px">Search variables:</strong>
+							<input type="text" class="form-control mb-2 rounded-0" id="varSearchCases" style="margin: 0 10px" />
+							<div id="variablesCases" style="box-sizing: border-box; border: 1px solid #ccc; margin: 0px 10px; width: 100%; height: calc(100vh - 100px); overflow-y: scroll; padding: 5px 0px"></div>
+						</div>
+						<div class="col-8">
+							<strong style="margin-left: 10px">How to subset cases</strong>
+							<div id="cases-selection-procedure" style="box-sizing: border-box; border: 1px solid #ccc; width: 100%; height: 295px; padding: 10px; overflow-y: scroll">
+								<p>
+									The formal language to select cases is <b>R</b>, however the actual selection symbols are universal, for instance:
+									<br />
+									Less than: <b><span style="font-family: Courier;">&lt;</span></b>
+									<br />
+									Less than or equal to: <b><span style="font-family: Courier;">&lt;=</span></b>
+									<br />
+									Not equal to: <b><span style="font-family: Courier;">!=</span></b>
+									<br />
+									Equal to: <b><span style="font-family: Courier;">==</span></b> (double equal sign), etc.
+									<br />
+									<br />
+									The input data is generically called "dataset", and the result of the expression should be a logical vector. Examples:<br />
+									- all cases where age is less than 35:<br /><b><span style="font-family: Courier;">age < 35</span></b><br />
+									- all cases where age is at least 30, out of the first 100 cases:<br /><b><span style="font-family: Courier;">age >= 30 & seq(nrow(dataset)) <= 100</span></b>
+									<br />
+									<br />
+									Values from character categorical variables (or R factors) should be quoted, for example all cases from region "REG1":<br />
+									<b><span style="font-family: Courier;">region == "REG1"</span></b>
+									<br />
+									<br />
+									Do notice that R is a case sensitive language, and that applies to both string values and variable names, where
+									<b>age</b> and <b>Age</b> refer to two different variables, and <span style="font-family: Courier;">"reg1"</span> is not the same thing with <span style="font-family: Courier;">"REG1"</span>.
+									<br />
+									<br />
+									Base R functions are naturally applicable to search for certain patterns within strings, for instance select all cases where the variable <b>regname</b> (region name) contains the word "west":
+									<br />
+									<b><span style="font-family: Courier;">grepl("west", regname)</span></b>
+									<br />
+									<br />
+									Regular expressions can be used within the function <b><span style="font-family: Courier;">grepl()</span></b>, and they can optionally be compatible with Perl expressions.
+								</p>
+								<p></p>
+							</div>
+
+							<div class="mt-3">
+								<textarea name="select_cases" class="form-control" id="select_cases" cols="30" rows="4"></textarea>
+							</div>
+
+							<div class="mt-3">
+								<div class="form-check">
+									<input class="form-check-input" type="checkbox" value="" id="keepSelectionCases" checked />
+									<label class="form-check-label" for="keepSelectionCases"> Keep selection between conversions </label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- ========= Settings ========= -->
+				<div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+					<div class="row mt-3"> <!-- px-4 -->
+						<div class="col-12">
+							<div class="ms-4">
+								<p class="mb-3"><strong>Settings:</strong></p>
+								<div class="row mb-3">
+									<div class="col-3">
+										<span>Output to Stata version</span>
+									</div>
+									<div class="col-2">
+										<select class="form-select form-select-sm" id="stataVersion">
+											<option value="14" selected>14</option>
+											<option value="13">13</option>
+											<option value="12">12</option>
+											<option value="11">11</option>
+											<option value="10">10</option>
+										</select>
+									</div>
+									<div class="col-1">
+									</div>
+									<div class="col-3">
+										<span>Output to SAS Transport version</span>
+									</div>
+									<div class="col-2">
+										<select class="form-select form-select-sm" id="xptVersion">
+											<option value="5" selected>5</option>
+										</select>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-8">
+										<span>For Stata, convert character categories to numeric categories</span>
+									</div>
+									<div class="col-3 text-start">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="chartonum" id="chartonumTRUE" value="yes" />
+											<label class="form-check-label" for="chartonumTRUE">Yes</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="chartonum" id="chartonumFALSE" value="no" checked />
+											<label class="form-check-label" for="chartonumFALSE">No</label>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-8">
+										<span>Recode to and from extended missing values (.a - .z)</span>
+									</div>
+									<div class="col-3 text-start">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="recode" id="recodeTRUE" value="yes" checked />
+											<label class="form-check-label" for="recodeTRUE">Yes</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="recode" id="recodeFALSE" value="no" />
+											<label class="form-check-label" for="recodeFALSE">No</label>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-8">
+										<span>Make the R dataset &quot;<a id="declared" href="#">declared</a>&quot;</span>
+									</div>
+									<div class="col-3 text-start">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="declared" id="declaredTRUE" value="yes" checked />
+											<label class="form-check-label" for="declaredTRUE">Yes</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="declared" id="declaredFALSE" value="no" />
+											<label class="form-check-label" for="declaredFALSE">No</label>
+										</div>
+									</div>
+								</div>
+
+                                <hr style="margin: 1.2rem 0;">
+
+								<p class="mb-3"><strong>DDI / XML specific:</strong></p>
+
+								<div class="row mb-3">
+									<div class="col-8">
+										<span>Embed the data into the DDI Codebook XML file</span>
+									</div>
+									<div class="col-3 text-start">
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="embed" id="embedTRUE" value="yes" checked />
+											<label class="form-check-label" for="embedTRUE">Yes</label>
+										</div>
+										<div class="form-check form-check-inline">
+											<input class="form-check-input" type="radio" name="embed" id="embedFALSE" value="no" />
+											<label class="form-check-label" for="embedFALSE">No</label>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-3">
+									<div class="col-3">
+										<span>EOL for target OS</span>
+									</div>
+									<div class="col-2">
+										<select class="form-select form-select-sm" id="targetOS">
+											<option value="local" selected>local</option>
+											<option value="macos">MacOS</option>
+											<option value="linux">Linux</option>
+											<option value="windows">Windows</option>
+										</select>
+									</div>
+
+									<div class="col-3 d-flex justify-content-end align-items-center">
+										<span>Agency</span>
+									</div>
+									<div class="col-4">
+										<input type="input" class="rounded-0 form-control form-control-sm" id="agency" placeholder="default" />
+									</div>
+								</div>
+								<div class="row mb-3">
+                                    <div class="col-3 d-flex justify-content-start align-items-center">
+                                        <label for="xmlang">Language</label>
+                                    </div>
+                                    <div class="col-2">
+                                        <input type="input" style="width: 35px;" class="rounded-0 form-control form-control-sm" id="xmlang" value="en" />
+									</div>
+									<div class="col-3 d-flex justify-content-end align-items-center">
+										<span>Study ID</span>
+									</div>
+									<div class="col-4">
+										<input type="input" class="rounded-0 form-control form-control-sm" id="IDNo" placeholder="S0000" />
+									</div>
+
+								</div>
+								<div class="row">
+									<div class="col-5">
+										<div class="form-check" style="margin-bottom: 0px;min-height: 1rem;">
+											<input class="form-check-input" type="checkbox" id="monolang" checked/>
+											<label class="form-check-label" for="monolang">Mono language</label>
+										</div>
+									</div>
+									<div class="col-3 d-flex justify-content-end align-items-center">
+										<span>Holdings URL</span>
+									</div>
+									<div class="col-4">
+										<input type="input" class="rounded-0 form-control form-control-sm" id="URI" placeholder="http://www.default.eu" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- vertical separator -->
+						<!-- <div class="col-1">
+							<div style="width: 50%; display: inline-block; height: 100%; margin: 0 auto; border-right: 1px solid #ccc"></div>
+						</div> -->
+					</div>
+				</div>
+			</div>
+
+			<div class="nav bg-secondary flex-column nav-pills ms-3 border-start pt-4" id="v-pills-tab" role="tablist" aria-orientation="vertical" style="height: 100vh; width: 150px">
+				<button class="rounded-0 btn btn-sm btn-secondary active" id="v-pills-convert-tab" data-bs-toggle="pill" data-bs-target="#v-pills-convert" type="button" role="tab" aria-controls="v-pills-convert" aria-selected="true">Convert</button>
+				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
+				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-cases-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cases" type="button" role="tab" aria-controls="v-pills-cases" aria-selected="false">Cases</button>
+				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
+				<div class="text-center flex">
+					<div class="align-self-end pb-3">
+						<a id="gotoRODA" href="#"><img src="./assets/RODA.png" alt="RODA" style="max-width: 50px" /></a>
+					</div>
+				</div>
+				<div class="text-white text-center flex" style="font-size: 0.7rem">
+					<div class="align-self-end pb-3">
+						<!-- <a href="#" class="text-white" id="checkForUpdates">Check for Updates</a><br /> -->
+						version 1.1.9
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+		<script>
+
+			const inputType = document.getElementById("inputType");
+			const fileFrom = document.getElementById("fileFrom");
+			const selectFileFrom = document.getElementById("selectFileFrom");
+			const outputType = document.getElementById("outputType");
+			const fileTo = document.getElementById("fileTo");
+			const selectFileTo = document.getElementById("selectFileTo");
+			const startConvert = document.getElementById("startConvert");
+
+			var changeOutputTypeOptions = function (inputTypeValue) {
+				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+
+				let values = ["none", "ddi", "excel", "xpt", "spss", "stata", "r"];
+				let texts = ["Select file type", "DDI Codebook", "Excel", "SAS Transport", "SPSS", "Stata", "R"];
+
+				for (i = outputType.options.length - 1; i >= 0; i--) {
+					outputType.options[i] = null;
+				}
+
+				for (let i = 0; i < values.length; i++) {
+					if (values[i] != inputTypeValue || inputTypeValue == "none") {
+						let option = document.createElement("option");
+						option.setAttribute("value", values[i]);
+						option.text = texts[i];
+
+						if (values[i] == outputTypeValue) {
+							option.selected = true;
+						}
+
+						outputType.append(option);
+					}
+				}
+
+				outputType.dispatchEvent(new Event("change"));
+			};
+
+			inputType.addEventListener("change", () => {
+				fileFrom.value = "";
+				const inputTypeValue = inputType.options[inputType.selectedIndex].value;
+				if (inputTypeValue != "none") {
+					selectFileFrom.disabled = false;
+					fromTooltip.disable();
+				} else {
+					selectFileFrom.disabled = true;
+					fromTooltip.enable();
+				}
+
+				changeOutputTypeOptions(inputTypeValue);
+			});
+
+			outputType.addEventListener("change", () => {
+				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+				if (outputTypeValue != "none") {
+					selectFileTo.disabled = false;
+					toTooltip.disable();
+				} else {
+					selectFileTo.disabled = true;
+					toTooltip.enable();
+					startConvert.disabled = true;
+					startConvert.classList.remove("btn-success");
+					startConvert.classList.add("btn-secondary");
+					scTooltip.enable();
+				}
+			});
+
+			fileTo.addEventListener("change", () => {
+				const inputTypeValue = inputType.options[inputType.selectedIndex].value;
+				const outputTypeValue = outputType.options[outputType.selectedIndex].value;
+				if (inputTypeValue != "none" && outputTypeValue != "none" && fileFrom.value != "" && fileTo.value != "") {
+					startConvert.disabled = false;
+					startConvert.classList.remove("btn-secondary");
+					startConvert.classList.add("btn-success");
+					scTooltip.disable();
+				} else {
+					startConvert.disabled = true;
+					startConvert.classList.remove("btn-success");
+					startConvert.classList.add("btn-secondary");
+					scTooltip.enable();
+				}
+			});
+
+			var fromTooltip = new bootstrap.Tooltip(document.getElementById("fromTooltip"), {
+				boundary: document.body, // or document.querySelector('#boundary')
+			});
+
+			var toTooltip = new bootstrap.Tooltip(document.getElementById("toTooltip"), {
+				boundary: document.body, // or document.querySelector('#boundary')
+			});
+
+			var scTooltip = new bootstrap.Tooltip(document.getElementById("startConvertTooltip"), {
+				boundary: document.body, // or document.querySelector('#boundary')
+			});
+
+
+		</script>
+	</body>
+
+</html>

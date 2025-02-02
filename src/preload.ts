@@ -1,18 +1,21 @@
 import { ipcRenderer } from 'electron';
 import * as path from 'path';
-import { helpers } from './helpers';
-import { InputOutputType, variablesType } from './interfaces';
+import { util } from './library/helpers';
+import * as interfaces from './library/interfaces';
 
-const inputOutput: InputOutputType = {
+
+const inputOutput: interfaces.InputOutputType = {
     inputType: '',
     fileFrom: '',
     fileFromDir: '',
     fileFromName: '',
+    fileFromExt: '',
 
     outputType: '',
     fileTo: '',
     fileToDir: '',
     fileToName: '',
+    fileToExt: ''
 };
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -26,11 +29,11 @@ window.addEventListener('DOMContentLoaded', () => {
     // }
 
     document.getElementById('declared')?.addEventListener('click', () => {
-        ipcRenderer.send('declared');
+        ipcRenderer.send('declared', {});
     });
 
     document.getElementById('gotoRODA')?.addEventListener('click', () => {
-        ipcRenderer.send('gotoRODA');
+        ipcRenderer.send('gotoRODA', {});
     });
 
     ipcRenderer.on('startLoader', () => {
@@ -51,29 +54,20 @@ window.addEventListener('DOMContentLoaded', () => {
     // ipcRenderer.send('sendCommand', 'require(DDIwR)');
 
     let all_vars_selected = true;
-    let variables: {
-        [key: string]: {
-            label: [string];
-            values: {
-                [key: string]: [string];
-            };
-            missing: [string];
-            selected: [boolean];
-        }
-    } = {};
+    const variables: interfaces.VariablesType = {};
 
-    const inputType = <HTMLSelectElement>document.getElementById('inputType'); // as HTMLSelectElement;
-    const fileEncoding = <HTMLSelectElement>document.getElementById('fileEncoding');
-    const outputType = <HTMLSelectElement>document.getElementById('outputType');
-    const fileFrom = <HTMLInputElement>document.getElementById('fileFrom'); // as HTMLInputElement;
-    const fileTo = <HTMLInputElement>document.getElementById('fileTo');
-    const selectFileFrom = <HTMLInputElement>document.getElementById('selectFileFrom');
-    const selectFileTo = <HTMLInputElement>document.getElementById('selectFileTo');
-    const startConvert = <HTMLInputElement>document.getElementById('startConvert');
-    const embedFALSE = <HTMLInputElement>document.getElementById('embedFALSE');
-    // const embedTRUE = <HTMLInputElement>document.getElementById('embedTRUE');
-    // const serializeTRUE = <HTMLInputElement>document.getElementById('serializeTRUE');
-    // const serializeFALSE = <HTMLInputElement>document.getElementById('serializeFALSE');
+    const inputType = util.selectElement('inputType');
+    const fileEncoding = util.selectElement('fileEncoding');
+    const outputType = util.selectElement('outputType');
+    const fileFrom = util.htmlElement('fileFrom'); // as HTMLInputElement;
+    const fileTo = util.htmlElement('fileTo');
+    const selectFileFrom = util.htmlElement('selectFileFrom');
+    const selectFileTo = util.htmlElement('selectFileTo');
+    const startConvert = util.htmlElement('startConvert');
+    const embedFALSE = util.htmlElement('embedFALSE');
+    // const embedTRUE = util.htmlElement('embedTRUE');
+    // const serializeTRUE = util.htmlElement('serializeTRUE');
+    // const serializeFALSE = util.htmlElement('serializeFALSE');
 
     // embedTRUE.addEventListener('click', function () {
     //     serializeTRUE.disabled = false;
@@ -86,12 +80,14 @@ window.addEventListener('DOMContentLoaded', () => {
     // });
 
     selectFileFrom.addEventListener('click', function () {
-        const loader = document.getElementById('loader') as HTMLDivElement;
+        const loader = util.htmlElement('loader');
         loader.innerHTML = "Reading...";
-        const inputType = <HTMLSelectElement>document.getElementById('inputType');
+        const inputType = util.selectElement('inputType');
         const inputTypeValue = inputType.options[inputType.selectedIndex].value;
 
-        ipcRenderer.send('selectFileFrom', { inputType: inputTypeValue });
+        ipcRenderer.send(
+            'selectFileFrom', { inputType: inputTypeValue }
+        )
     });
 
     ipcRenderer.on('selectFileFrom-reply', (event, io) => {
@@ -99,8 +95,9 @@ window.addEventListener('DOMContentLoaded', () => {
         inputOutput.fileFrom = io.fileFrom;
         inputOutput.fileFromDir = io.fileFromDir;
         inputOutput.fileFromName = io.fileFromName;
+        inputOutput.fileFromExt = io.fileFromExt;
 
-        let command = "RGUI_parseCommand(\"dataset <- convert('" + io.fileFrom + "', declared = FALSE, n_max = 10";
+        let command = "dataset <- convert('/host/dataset" + io.fileFromExt + "', declared = FALSE, n_max = 10";
         if (fileEncoding.value != 'utf8') {
             if (fileEncoding.value == "default") {
                 command += ", encoding = NULL";
@@ -110,14 +107,13 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const recodeFALSE = document.getElementById('recodeFALSE') as HTMLInputElement;
+        const recodeFALSE = util.htmlElement('recodeFALSE');
         if (recodeFALSE.checked) {
             command += ', recode = FALSE';
         }
 
-        command += ")\")\n";
+        command += ")";
 
-        // ipcRenderer.send('sendCommand', 'require(DDIwR)');
         console.log(command);
         ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
 
@@ -130,8 +126,8 @@ window.addEventListener('DOMContentLoaded', () => {
         // }
 
         if (outputTypeValue != 'none') {
-            const ext = helpers.getExtensionFromType(outputTypeValue);
-            const fileTo = <HTMLInputElement>document.getElementById('fileTo');
+            const ext = util.getExtensionFromType(outputTypeValue);
+            const fileTo = util.htmlElement('fileTo');
 
             fileTo.value = path.join(inputOutput.fileToDir, io.fileFromName + ext);
             inputOutput.outputType = outputTypeValue;
@@ -139,7 +135,7 @@ window.addEventListener('DOMContentLoaded', () => {
             inputOutput.fileToName = io.fileFromName;
         }
 
-        const message = helpers.validate(inputOutput);
+        const message = util.validate(inputOutput);
 
         if (message == 'Unsupported input type.') {
             inputType.selectedIndex = 0;
@@ -160,10 +156,11 @@ window.addEventListener('DOMContentLoaded', () => {
         inputOutput.fileTo = io.fileTo;
         inputOutput.fileToDir = io.fileToDir;
         inputOutput.fileToName = io.fileToName;
+        inputOutput.fileToExt = io.fileToExt;
 
         fileTo.value = io.fileTo;
 
-        const message = helpers.validate(inputOutput);
+        const message = util.validate(inputOutput);
 
         if (message == 'Unsupported output type.') {
             outputType.selectedIndex = 0;
@@ -195,32 +192,32 @@ window.addEventListener('DOMContentLoaded', () => {
         if (indices.length == 0 && !all_vars_selected) {
             ipcRenderer.send('showError', { message: 'At least one variable has to be selected.' });
         } else {
+            let command = "convert('/host/dataset" + inputOutput.fileFromExt + "', to = '/host/" + inputOutput.fileToName + inputOutput.fileToExt + "'";
+            // let command = "convert('" + inputOutput.fileFrom + "', to = '" + inputOutput.fileTo + "'";
 
-            let command = "RGUI_parseCommand(\"convert('" + inputOutput.fileFrom + "', to = '" + inputOutput.fileTo + "'";
-
-            const declaredTRUE = document.getElementById("declaredTRUE") as HTMLInputElement;
+            const declaredTRUE = util.htmlElement("declaredTRUE");
             command += ", declared = " + ((inputOutput.outputType == "r" && declaredTRUE.checked) ? "TRUE" : "FALSE");
 
 
             // recode is by default TRUE, for instance from Stata to SPSS this is mandatory
             // const from_extended = inputOutput.inputType == "stata" || inputOutput.inputType == "sas";
             // const to_normal = inputOutput.outputType == "spss" || inputOutput.outputType == "ddi";
-            const recodeFALSE = document.getElementById("recodeFALSE") as HTMLInputElement;
+            const recodeFALSE = util.htmlElement("recodeFALSE");
             if (recodeFALSE.checked) {
                 command += ", recode = FALSE";
             }
 
-            const chartonum = document.getElementById("chartonumTRUE") as HTMLInputElement;
+            const chartonum = util.htmlElement("chartonumTRUE");
             if (chartonum.checked) {
                 command += ", chartonum = TRUE";
             }
 
-            const targetOS = document.getElementById('targetOS') as HTMLInputElement;
+            const targetOS = util.htmlElement('targetOS');
             if (targetOS.value != 'local') {
                 command += ", OS = '" + targetOS.value + "'";
             }
 
-            const fileEncoding = document.getElementById('fileEncoding') as HTMLInputElement;
+            const fileEncoding = util.htmlElement('fileEncoding');
             if (fileEncoding.value != 'utf8') {
                 if (fileEncoding.value == "default") {
                     command += ", encoding = NULL";
@@ -230,11 +227,11 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            const select_cases = document.getElementById('select_cases') as HTMLInputElement;
+            const select_cases = util.htmlElement('select_cases');
 
             let select = "";
             if (indices.length > 0) {
-                select = (all_vars_selected ? "-" : "") + "c(" + helpers.paste(indices, { sep: "," }) + ")";
+                select = (all_vars_selected ? "-" : "") + "c(" + util.paste(indices, { sep: "," }) + ")";
             }
 
 
@@ -246,7 +243,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     subset += select_cases.value;
                 }
 
-                const keep = document.getElementById('keepSelectionCases') as HTMLInputElement;
+                const keep = util.htmlElement('keepSelectionCases');
                 if (!keep.checked) {
                     select_cases.value = "";
                 }
@@ -269,53 +266,56 @@ window.addEventListener('DOMContentLoaded', () => {
             // }
 
             if (inputOutput.outputType == "stata") {
-                const stataVersion = document.getElementById('stataVersion') as HTMLInputElement;
+                const stataVersion = util.htmlElement('stataVersion');
                 if (stataVersion.value != "14") {
                     command += ", version = " + stataVersion.value;
                 }
             }
 
             if (inputOutput.outputType == "xpt") {
-                const xptVersion = document.getElementById('xptVersion') as HTMLInputElement;
+                const xptVersion = util.htmlElement('xptVersion');
                 if (xptVersion.value != "8") {
                     command += ", version = " + xptVersion.value;
                 }
             }
 
-            const agency = document.getElementById('agency') as HTMLInputElement;
+            const agency = util.htmlElement('agency');
             if (agency.value != "") {
                 command += ", agency = '" + agency.value + "'";
             }
 
-            const xmlang = document.getElementById('xmlang') as HTMLInputElement;
+            const xmlang = util.htmlElement('xmlang');
             if (xmlang.value != "") {
                 command += ", xmlang = '" + xmlang.value + "'";
             }
 
-            const monolang = document.getElementById('monolang') as HTMLInputElement;
+            const monolang = util.htmlElement('monolang');
             if (!monolang.checked) {
                 command += ", monolang = FALSE"
             }
 
-            const IDNo = document.getElementById('IDNo') as HTMLInputElement;
+            const IDNo = util.htmlElement('IDNo');
             if (IDNo.value != "") {
                 command += ", IDNo = '" + IDNo.value + "'";
             }
 
-            const URI = document.getElementById('URI') as HTMLInputElement;
+            const URI = util.htmlElement('URI');
             if (URI.value != "") {
                 command += ", URI = '" + URI.value + "'";
             }
 
-            command += ")\")\n";
+            command += ")";
 
-            ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
+            ipcRenderer.send('startConvert', {
+                command: command.replace(/\\/g, '/'),
+                embed: !embedFALSE.checked
+            });
         }
     });
 
     fileEncoding.addEventListener('change', function () {
         if (inputOutput.fileFrom != '') {
-            let command = "RGUI_parseCommand(\"dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE, n_max = 10";
+            let command = "dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE, n_max = 10";
             if (fileEncoding.value != 'utf8') {
                 if (fileEncoding.value == "default") {
                     command += ", encoding = NULL";
@@ -325,9 +325,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            command += ")\")\n";
+            command += ")";
             ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
-
         }
     });
 
@@ -343,7 +342,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const outputTypeValue = outputType.options[outputType.selectedIndex].value;
         inputOutput.outputType = outputTypeValue;
-        const ext = helpers.getExtensionFromType(outputTypeValue);
+        const ext = util.getExtensionFromType(outputTypeValue);
+        inputOutput.fileToExt = ext;
+
+        ipcRenderer.send('outputType', { extension: ext });
 
         if (inputOutput.fileToDir == '' && inputOutput.fileFromDir != '') {
             inputOutput.fileToDir = inputOutput.fileFromDir;
@@ -368,14 +370,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // =================================================
     // ================= Variables =====================
-    ipcRenderer.on('sendCommand-reply', (event, response) => {
-        variables = response.variables;
-        // console.log(response);
+    ipcRenderer.on('sendCommand-reply', (event, variables) => {
+        // console.log(variables);
         //load variable list
-        const variablesList = document.getElementById('variables') as HTMLElement;
-        const variablesListCases = document.getElementById('variablesCases') as HTMLElement;
-        const varlabel = document.getElementById('variable-label') as HTMLElement;
-        const vallabels = document.getElementById('value-labels') as HTMLElement;
+        const variablesList = util.htmlElement('variables');
+        const variablesListCases = util.htmlElement('variablesCases');
+        const varlabel = util.htmlElement('variable-label');
+        const vallabels = util.htmlElement('value-labels');
         variablesList.innerHTML = '';
         variablesListCases.innerHTML = '';
         varlabel.innerHTML = '';
@@ -406,26 +407,23 @@ window.addEventListener('DOMContentLoaded', () => {
             variablesList?.appendChild(formCheck);
 
             formCheck.addEventListener('click', () => {
-                // console.log(formCheck.classList.contains('activeVariable'));
 
                 if (formCheck.classList.contains('activeVariable')) {
                     removeActive();
-                    (<HTMLDivElement>document.getElementById('variable-label')).innerHTML = '';
-                    (<HTMLDivElement>document.getElementById('value-labels')).innerHTML = '';
+                    (util.htmlElement('variable-label')).innerHTML = '';
+                    (util.htmlElement('value-labels')).innerHTML = '';
                 } else {
                     removeActive();
                     formCheck.classList.add('activeVariable');
 
                     const el = <HTMLInputElement>document.querySelector('.activeVariable input[type="checkbox"]');
-                    // console.log(formCheck);
-                    // console.log(variables[formCheck.id]);
                     if (variables[el.id] && variables[el.id].label[0]) {
-                        (<HTMLDivElement>document.getElementById('variable-label')).innerHTML = helpers.replaceUnicode(variables[el.id].label)[0];
-                        const vals = <HTMLDivElement>document.getElementById('value-labels');
+                        (util.htmlElement('variable-label')).innerHTML = util.replaceUnicode(variables[el.id].label)[0];
+                        const vals = util.htmlElement('value-labels');
                         let valList = '';
                         if (Object.keys(variables[el.id].values).length > 0) {
                             for (const key in variables[el.id].values) {
-                                valList += '<div class="ms-2">' + key + ' : ' + helpers.replaceUnicode(variables[el.id].values[key]) + '</div>';
+                                valList += '<div class="ms-2">' + key + ' : ' + util.replaceUnicode(variables[el.id].values[key]) + '</div>';
                             }
                         }
                         vals.innerHTML = valList;
@@ -456,14 +454,14 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         // Search for variables
-        (<HTMLInputElement>document.getElementById('varsearch')).addEventListener('keyup', debounce(varSearchF.bind(this, variables), 750));
+        (util.htmlElement('varsearch')).addEventListener('keyup', debounce(varSearchF.bind(this, variables), 750));
 
         // Search for variables in cases
-        (<HTMLInputElement>document.getElementById('varSearchCases')).addEventListener('keyup', debounce(varSearchCasesF.bind(this, variables), 750));
+        (util.htmlElement('varSearchCases')).addEventListener('keyup', debounce(varSearchCasesF.bind(this, variables), 750));
 
         document.getElementById('select-all-variables')?.addEventListener('click', () => {
             Object.keys(variables).forEach((item) => {
-                (<HTMLInputElement>document.getElementById(item)).checked = true;
+                (util.htmlElement(item)).checked = true;
                 variables[item].selected[0] = true;
             });
             all_vars_selected = true;
@@ -471,7 +469,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('deselect-all-variables')?.addEventListener('click', () => {
             Object.keys(variables).forEach((item) => {
-                (<HTMLInputElement>document.getElementById(item)).checked = false;
+                (util.htmlElement(item)).checked = false;
                 variables[item].selected[0] = false;
             });
             all_vars_selected = false;
@@ -485,10 +483,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            const f2 = (<HTMLInputElement>document.getElementById('filterInput')).value;
+            const f2 = (util.htmlElement('filterInput')).value;
 
-            // console.log(f1);
-            // console.log(f2);
             filterVar(variables, f1, f2, true);
         });
 
@@ -500,18 +496,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            const f2 = (<HTMLInputElement>document.getElementById('filterInput')).value;
+            const f2 = (util.htmlElement('filterInput')).value;
 
-            // console.log(f1);
-            // console.log(f2);
             filterVar(variables, f1, f2, false);
         });
     });
 });
 
-ipcRenderer.on('consolog', (event, message: string) => {
-    console.log(message)
-});
 
 function removeActive() {
     document.querySelectorAll('#variables .form-check').forEach((item) => {
@@ -519,7 +510,7 @@ function removeActive() {
     });
 }
 
-function filterVar(variables: variablesType, f1: string, f2: string, make: boolean) {
+function filterVar(variables: interfaces.VariablesType, f1: string, f2: string, make: boolean) {
     if (f2 == '') {
         alert('Text or pattern should be specified.');
     } else {
@@ -527,7 +518,7 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
         if (f1 == '1') {
             for (const key in variables) {
                 if (key.indexOf(f2) != -1) {
-                    (<HTMLInputElement>document.getElementById(key)).checked = make;
+                    (util.htmlElement(key)).checked = make;
                     variables[key].selected[0] = make;
                 }
             }
@@ -541,7 +532,7 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
                     const searchFor = f2.slice(-f2.length + 1);
                     for (const key in variables) {
                         if (key.slice(-searchFor.length) == searchFor) {
-                            (<HTMLInputElement>document.getElementById(key)).checked = make;
+                            (util.htmlElement(key)).checked = make;
                             variables[key].selected[0] = make;
                         }
                     }
@@ -552,7 +543,7 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
                     // console.log(searchFor);
                     for (const key in variables) {
                         if (key.slice(0, searchFor.length) == searchFor) {
-                            (<HTMLInputElement>document.getElementById(key)).checked = make;
+                            (util.htmlElement(key)).checked = make;
                             variables[key].selected[0] = make;
                         }
                     }
@@ -562,35 +553,36 @@ function filterVar(variables: variablesType, f1: string, f2: string, make: boole
     }
 }
 
-function varSearchF(variables: variablesType): void {
-    const value = (<HTMLInputElement>document.getElementById('varsearch')).value;
+function varSearchF(variables: interfaces.VariablesType): void {
+    const value = (util.htmlElement('varsearch')).value;
     if (value != '') {
         for (const key in variables) {
             if (key.indexOf(value) == -1) {
-                (<HTMLInputElement>document.getElementById('div-' + key)).style.display = 'none';
+                (util.htmlElement('div-' + key)).style.display = 'none';
             } else {
-                (<HTMLInputElement>document.getElementById('div-' + key)).style.display = 'block';
+                (util.htmlElement('div-' + key)).style.display = 'block';
             }
         }
     } else {
         for (const key in variables) {
-            (<HTMLInputElement>document.getElementById('div-' + key)).style.display = 'block';
+            (util.htmlElement('div-' + key)).style.display = 'block';
         }
     }
 }
-function varSearchCasesF(variables: variablesType): void {
-    const value = (<HTMLInputElement>document.getElementById('varSearchCases')).value;
+
+function varSearchCasesF(variables: interfaces.VariablesType): void {
+    const value = (util.htmlElement('varSearchCases')).value;
     if (value != '') {
         for (const key in variables) {
             if (key.indexOf(value) == -1) {
-                (<HTMLInputElement>document.getElementById('case-' + key)).style.display = 'none';
+                (util.htmlElement('case-' + key)).style.display = 'none';
             } else {
-                (<HTMLInputElement>document.getElementById('case-' + key)).style.display = 'block';
+                (util.htmlElement('case-' + key)).style.display = 'block';
             }
         }
     } else {
         for (const key in variables) {
-            (<HTMLInputElement>document.getElementById('case-' + key)).style.display = 'block';
+            (util.htmlElement('case-' + key)).style.display = 'block';
         }
     }
 }
@@ -602,23 +594,15 @@ function debounce(callback: () => void, delay: number) {
         timeout = setTimeout(callback, delay);
     };
 }
+
 // insert element at the position
 // https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
 function insertAtPosition(areaId: string, text: string) {
     const txtarea = <HTMLTextAreaElement>document.getElementById(areaId);
 
-    // console.log(areaId);
-    // console.log(text);
-
     if (!txtarea) {
         return;
     }
-
-    // console.log('aici');
-
-
-    // console.log('gasit');
-    // console.log(text);
 
     const scrollPos = txtarea.scrollTop;
     let strPos = 0;
@@ -635,3 +619,8 @@ function insertAtPosition(areaId: string, text: string) {
 
     txtarea.scrollTop = scrollPos;
 }
+
+
+ipcRenderer.on('consolog', (event, message: string) => {
+    console.log(message);
+});

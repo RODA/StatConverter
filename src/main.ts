@@ -1,63 +1,84 @@
+
+// https://r-wasm.github.io/rwasm/articles/mount-fs-image.html
+// https://docs.r-wasm.org/webr/latest/
+
 // ./node_modules/.bin/electron-builder install-app-deps --arch arm64
 // ./node_modules/.bin/electron-builder install-app-deps --arch x64
 
-// process.env.NODE_ENV = "development";
-process.env.NODE_ENV = 'production';
+
+// Setting ENVIROMENT
+process.env.NODE_ENV = 'development';
+// process.env.NODE_ENV = 'production';
 
 const production = process.env.NODE_ENV === 'production';
 const development = process.env.NODE_ENV === 'development';
 const OS_Windows = process.platform == 'win32';
 
-// if true, move back the R_Portable directory to:
-// StatConverter root
-
-import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, shell, Menu } from "electron";
 import * as path from "path";
-import * as commandExec from "child_process";
+import * as fs from "fs";
+import * as webr from "webr";
+import * as interfaces from './library/interfaces';
+import { util } from "./library/helpers";
 
-import { InputOutputType } from "./interfaces";
 
-import { helpers } from "./helpers";
-// import {shellPathSync} from 'shell-path';
-
+const webR = new webr.WebR({ interactive: false });
 let mainWindow: BrowserWindow;
-let Rprocess: commandExec.ChildProcessWithoutNullStreams;
-let longresponse = "";
-let response: {error: string[], variables: {
-    [key: string]: {
-        label: [string];
-        values: {
-            [key: string]: [string];
-        };
-        missing: [string];
-        selected: [boolean];
-    }
-}};
+const root = production ? "../../" : "../";
 
-// console.log(app.getVersion());
+async function initWebR() {
+    await webR.init();
 
-app.on("window-all-closed", () => {
-    // if (RptyProcess) {
-    //     RptyProcess.kill();
-    // }
+    // mount a virtual filesystem containing contributed R packages
+    const data =  new Blob([
+        fs.readFileSync(
+            path.join(__dirname, '../src/library/R/library.data')
+        )
+    ]);
 
-    app.quit();
-});
+    const metadata = JSON.parse(
+        fs.readFileSync(
+            path.join(__dirname, '../src/library/R/library.js.metadata'),
+            'utf-8'
+        )
+    );
 
-const inputOutput: InputOutputType = {
-    inputType: "",
-    fileFrom: "",
-    fileFromDir: "",
-    fileFromName: "",
+    const options = {
+        packages: [{
+            blob: data,
+            metadata: metadata,
+        }]
+    };
 
-    outputType: "",
-    fileTo: "",
-    fileToDir: "",
-    fileToName: "",
-};
+    await webR.FS.mkdir('/my-library');
+    await webR.FS.mount(
+        "WORKERFS",
+        options,
+        '/my-library'
+    );
 
+    // mount a directory from the host filesystem, to save various objects
+    await webR.FS.mkdir("/host");
+    await webR.FS.mount(
+        "NODEFS",
+        { root: path.join(__dirname, root) },
+        "/host"
+    );
+
+    await webR.evalR(`.libPaths(c(.libPaths(), "/my-library"))`);
+    await webR.evalR(`library(DDIwR)`);
+}
+
+// Create the main browser window
 function createWindow() {
+    // Create the browser window.
     mainWindow = new BrowserWindow({
+        title: 'StatConverter',
+        webPreferences: {
+            preload: path.join(__dirname, "preload.js"),
+            contextIsolation: true,
+            sandbox: false
+        },
         autoHideMenuBar: true,
         width: 800,
         height: 550 + (OS_Windows ? 10 : 0),
@@ -66,276 +87,309 @@ function createWindow() {
         minWidth: 800,
         minHeight: 550,
         backgroundColor: "#fff",
-        webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-        },
+        center: true
     });
 
-    mainWindow.loadFile(path.join(__dirname, "../index.html"));
-    // mainWindow.webContents.setZoomFactor(2);
+    mainWindow.loadFile(path.join(__dirname, "../src/index.html"));
 
-    if (production) {
-        // mainWindow.removeMenu();
-    }
-
+    // Open the DevTools.
     if (development) {
-        // Open the DevTools.
         mainWindow.webContents.openDevTools();
+    } else {
+        // Remove the default menu
+        Menu.setApplicationMenu(null);
     }
+
 }
 
-app.whenReady().then(() => {
-    app.commandLine.appendSwitch('lang', 'en-US.UTF-8');
+app.whenReady().then(async () => {
 
     createWindow();
 
-    app.on("activate", () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    });
-
-    let R_path = "";
-
-    if (production) {
-        R_path += path.join(__dirname, '../../R_Portable/bin/R');
-        if (OS_Windows) {
-            R_path += ".exe";
-        }
+    try {
+        await initWebR();
+    } catch (error) {
+        console.error("Error during initialization:", error);
     }
-    else {
-        if (OS_Windows) {
-            R_path += path.join(__dirname, '../R_Portable/bin/R.exe');
-        }
-        else {
-            R_path += path.join(__dirname, '../R_Portable_development/bin/R');
-        }
+});
+
+
+app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
     }
-    
+});
 
-
-    start_R(R_path);
-
-    ipcMain.on("selectFileFrom", (event, args) => {
-        if (args.inputType === "Select file type") {
-            dialog.showErrorBox("Error", "Select input type");
-        } else {
-            const info = helpers.fileFromInfo(args.inputType);
-
-            dialog.showOpenDialog(mainWindow, {
-                title: "Select source file",
-                filters: [
-                    {
-                        name: info.fileTypeName,
-                        extensions: info.ext,
-                    },
-                ],
-                properties: ["openFile"],
-            })
-            .then((result) => {
-                if (!result.canceled) {
-                    inputOutput.fileFrom = result.filePaths[0];
-
-                    const file = path.basename(inputOutput.fileFrom);
-                    const ext = path.extname(file);
-
-                    inputOutput.inputType = helpers.getTypeFromExtension(ext);
-                    inputOutput.fileFromName = path.basename(inputOutput.fileFrom, ext);
-                    inputOutput.fileFromDir = path.dirname(inputOutput.fileFrom);
-
-                    if (OS_Windows) {
-                        inputOutput.fileFrom = inputOutput.fileFrom.replace(/\\/g, '/');
-                        inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
-                    }
-
-                    event.reply("selectFileFrom-reply", inputOutput);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-        }
-    });
-
-    ipcMain.on("selectFileTo", (event, args) => {
-        if (args.outputType === "Select file type") {
-            dialog.showErrorBox("Error", "Select output type");
-        } else {
-            const ext = helpers.getExtensionFromType(args.outputType);
-
-            dialog
-                .showSaveDialog(mainWindow, {
-                    title: "Select destination file",
-                    // TODO:
-                    // if this button is clicked before the input one,
-                    // fileFromDir is empty
-                    defaultPath: path.join(inputOutput.fileFromDir, inputOutput.fileFromName + ext),
-                })
-                .then((result) => {
-                    if (!result.canceled) {
-                        inputOutput.fileTo = "" + result.filePath;
-
-                        const file = path.basename(inputOutput.fileTo);
-                        const ext = path.extname(file);
-
-                        inputOutput.outputType = helpers.getTypeFromExtension(ext);
-                        inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
-                        inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
-
-                        if (OS_Windows) {
-                            inputOutput.fileTo = inputOutput.fileTo.replace(/\\/g, '/');
-                            inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
-                        }
-
-                        // console.log(inputOutput.fileTo);
-                        event.reply("selectFileTo-reply", inputOutput);
-                    }
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        }
-    });
-
-    ipcMain.on("startConvert", (event, args) => {
-        console.log("-----");
-        console.log(args.inputOutput);
-        console.log("-----");
-    });
-
-    ipcMain.on("showError", (event, args) => {
-        dialog.showMessageBox(mainWindow, {
-            type: "error",
-            message: args.message,
+app.on("before-quit", () => {
+    if (inputOutput.fileFromExt !== "") {
+        deleteFile(
+            path.join(__dirname, root, 'dataset' + inputOutput.fileFromExt)
+        ).then((result) => {
+            if (!result.success) {
+                dialog.showErrorBox("Error", result.error as string);
+            }
         });
-    });
+    }
+});
 
-    ipcMain.on("sendCommand", (event, command) => {
-        mainWindow.webContents.send("startLoader");
-        // console.log(command);
-        Rprocess.stdin.write(command);
-    });
+app.on("window-all-closed", () => {
+    app.quit();
+});
 
-    ipcMain.on("gotoRODA", () => {
-        shell.openExternal("http://www.roda.ro");
-    });
 
-    ipcMain.on("declared", () => {
-        shell.openExternal("https://cran.r-project.org/web/packages/declared/index.html");
+ipcMain.on('showDialogMessage', (event, args) => {
+    dialog.showMessageBox(mainWindow, {
+        type: args.type,
+        title: args.title,
+        message: args.message,
+    })
+});
+
+
+
+
+ipcMain.on("gotoRODA", () => {
+    shell.openExternal("http://www.roda.ro");
+});
+
+ipcMain.on("declared", () => {
+    shell.openExternal("https://cran.r-project.org/web/packages/declared/index.html");
+});
+
+
+ipcMain.on("selectFileFrom", async (event, args) => {
+    if (args.inputType === "Select file type") {
+        dialog.showErrorBox("Error", "Select input type");
+    } else {
+        const info = util.fileFromInfo(args.inputType);
+
+        dialog.showOpenDialog(mainWindow, {
+            title: "Select source file",
+            filters: [
+                {
+                    name: info.fileTypeName,
+                    extensions: info.ext,
+                },
+            ],
+            properties: ["openFile"],
+        }).then((result) => {
+            if (!result.canceled) {
+                inputOutput.fileFrom = result.filePaths[0];
+
+                const file = path.basename(inputOutput.fileFrom);
+                const ext = path.extname(file);
+
+                inputOutput.inputType = util.getTypeFromExtension(ext);
+                inputOutput.fileFromName = path.basename(inputOutput.fileFrom, ext);
+                inputOutput.fileFromDir = path.dirname(inputOutput.fileFrom);
+
+                if (inputOutput.fileFromExt !== "" && inputOutput.fileFromExt !== ext) {
+                    deleteFile(
+                        path.join(__dirname, root, 'dataset' + inputOutput.fileFromExt)
+                    ).then((result) => {
+                        if (!result.success) {
+                            dialog.showErrorBox("Error", result.error as string);
+                        }
+                    });
+                }
+
+                inputOutput.fileFromExt = ext;
+
+                if (OS_Windows) {
+                    inputOutput.fileFrom = inputOutput.fileFrom.replace(/\\/g, '/');
+                    inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
+                }
+
+
+                copyFile(
+                    inputOutput.fileFrom,
+                    path.join(__dirname, root, 'dataset' + ext)
+                ).then((result) => {
+                    if (!result.success) {
+                        dialog.showErrorBox("Error", result.error as string);
+                    } else {
+                        event.reply("selectFileFrom-reply", inputOutput);
+                    }
+
+                });
+            }
+        });
+
+    }
+});
+
+ipcMain.on("inputType", (event, args) => {
+    inputOutput.fileFromExt = args.extension;
+})
+
+ipcMain.on("outputType", (event, args) => {
+    inputOutput.fileToExt = args.extension;
+})
+
+ipcMain.on("selectFileTo", (event, args) => {
+    if (args.outputType === "Select file type") {
+        dialog.showErrorBox("Error", "Select output type");
+    } else {
+        const ext = util.getExtensionFromType(args.outputType);
+
+        dialog.showSaveDialog(mainWindow, {
+            title: "Select destination file",
+            // TODO:
+            // if this button is clicked before the input one,
+            // fileFromDir is empty
+            defaultPath: path.join(inputOutput.fileFromDir, inputOutput.fileFromName + ext),
+        })
+        .then((result) => {
+            if (!result.canceled) {
+                inputOutput.fileTo = "" + result.filePath;
+
+                const file = path.basename(inputOutput.fileTo);
+                const ext = path.extname(file);
+
+                inputOutput.outputType = util.getTypeFromExtension(ext);
+                inputOutput.fileToName = path.basename(inputOutput.fileTo, ext);
+                inputOutput.fileToDir = path.dirname(inputOutput.fileTo);
+                inputOutput.fileToExt = ext;
+
+                if (OS_Windows) {
+                    inputOutput.fileTo = inputOutput.fileTo.replace(/\\/g, '/');
+                    inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
+                }
+
+                event.reply("selectFileTo-reply", inputOutput);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    }
+});
+
+
+
+ipcMain.on("showError", (event, args) => {
+    dialog.showMessageBox(mainWindow, {
+        type: "error",
+        message: args.message,
     });
 });
 
-// let dependencies_ok = false;
-// let unmet_dependencies = "";
-
-const start_R = function (R_path: string): void {
-
-    const penv = process.env;
-
-    if (OS_Windows) {
-        if (penv.HOME && !(penv.HOME.includes("Documents"))) {
-            penv.HOME = penv.HOME + '\\Documents';
-        }
-    }
-    else {
-        penv.test = "test";
-    }
-
-    // mainWindow.webContents.send("consolog", "R path: " + R_path);
-
-    // export LC_ALL='en_US.UTF-8'; "
-    Rprocess = commandExec.spawn(R_path, ["-q", "--no-save"], {
-        env: {
-          LANG: 'en_US.UTF-8' // Set the desired UTF-8 locale
-        }
-    });
 
 
-    let startServerCommand = "";
-    // console.log(__dirname);
-    if (production) {
-        startServerCommand = 'source("' + path.join(__dirname, "../../") + 'startServer.R")';
-    }
-    else {
-        startServerCommand = 'source("' + path.join(__dirname, "../src/") + 'startServer.R")';
-    }
+ipcMain.on("gotoRODA", () => {
+    shell.openExternal("http://www.roda.ro");
+});
 
-    startServerCommand = startServerCommand.replace(/\\/g, '/'); // replace backslash with forward slash
-
-    // mainWindow.webContents.send("consolog", "Attempting to start the R server...");
-    // mainWindow.webContents.send("consolog", startServerCommand);
-    Rprocess.stdin.write(startServerCommand + '\n');
+ipcMain.on("declared", () => {
+    shell.openExternal("https://cran.r-project.org/web/packages/declared/index.html");
+});
 
 
-
-
-    let startJSON = false;
-
-    Rprocess.stdout.on("data", (data: string) => {
-
-        // mainWindow.webContents.send("consolog", "raspuns: " + data.toString());
-        const datasplit = data.toString().split(/\r?\n/);
-        // console.log(datasplit);
-
-        // if (datasplit.includes("_dependencies_ok_")) {
-        //     mainWindow.webContents.send("consolog", "dependencies ok");
-        // }
-
-        if (datasplit.includes("_server_started_")) {
-            let command = "";
-
-            // make sure we use the R package library from R_Portable, otherwise
-            // a different version of the code depending on using a locally installed R
-            if (production) {
-                command = ".libPaths('" + path.join(__dirname, "../../R_Portable/library") + "')";
+// Handle the command request
+ipcMain.on("sendCommand", async (event, command) => {
+    mainWindow.webContents.send("startLoader");
+    try {
+        await webR.evalR(command);
+        const result = await webR.evalR(`as.character(jsonlite::toJSON(lapply(
+            collectRMetadata(dataset),
+            function(x) {
+                values <- names(x$labels)
+                names(values) <- x$labels
+                x$values <- as.list(values)
+                return(x)
             }
-            else {
-                command = ".libPaths('" + path.join(__dirname, "../R_Portable/library") + "')";
-            }
+        )))`);
 
-            command = command.replace(/\\/g, '/'); // replace backslash with forward slash
-            // mainWindow.webContents.send("consolog", command);
-            Rprocess.stdin.write(command + '\n');
+        if (!webr.isRCharacter(result)) throw new Error('Not a character!');
 
-            // mainWindow.webContents.send("consolog", "Checking dependencies...");
-            Rprocess.stdin.write('RGUI_dependencies()\n\n');
-        }
+        const response = await result.toString();
+        // mainWindow.webContents.send("consolog", JSON.parse(response[0] as string));
+        webR.destroy(result);
 
+        event.reply("sendCommand-reply", JSON.parse(response));
+        // return { success: true , variables: variables };
+    } catch (error) {
+        dialog.showMessageBox(mainWindow, {
+            type: "error",
+            message: (error instanceof Error) ? error.message : String(error),
+        });
+        // return { success: false, error: (error instanceof Error) ? error.message : String(error) };
+    }
+    mainWindow.webContents.send("clearLoader");
+});
 
-        for (let i = 0; i < datasplit.length; i++) {
-            if (!startJSON) {
-                startJSON = datasplit[i] == "RGUIstartJSON";
-            }
-            else {
-                if (datasplit[i] == "RGUIendJSON") {
-                    startJSON = false;
-                    response = JSON.parse(longresponse);
+// Handle the command request
+ipcMain.on("startConvert", async (event, args) => {
+    const command = args.command;
+    const embed = args.embed;
+    mainWindow.webContents.send("startLoader");
+    try {
+        await webR.evalR(command);
 
-                    // mainWindow.webContents.send("consolog", longresponse);
-
-                    if (response.error && response.error[0] != "") {
-                        // dialog.showErrorBox("R says:", response.error[0]);
-                        dialog.showMessageBox(mainWindow, {
-                            type: "error",
-                            title: "Error:",
-                            message: "R says: " + response.error[0]
-                        }).then(() => {
-                            mainWindow.webContents.send("clearLoader");
-                        })
-                    }
-                    else {
-                        if (response.variables && Object.keys(response.variables).length > 0) {
-                            mainWindow.webContents.send("sendCommand-reply", response);
-                        }
-                        mainWindow.webContents.send("clearLoader");
-                    }
-
-                    longresponse = "";
-                    break;
+        moveFile(
+            path.join(__dirname, root, inputOutput.fileFromName + inputOutput.fileToExt),
+            path.join(inputOutput.fileFromDir, inputOutput.fileFromName + inputOutput.fileToExt)
+        ).then((result) => {
+            if (result.success) {
+                if (!embed) {
+                    moveFile(
+                        path.join(__dirname, root, inputOutput.fileFromName + '.csv'),
+                        path.join(inputOutput.fileFromDir, inputOutput.fileFromName + '.csv')
+                    );
                 }
-
-                longresponse += datasplit[i];
+            } else {
+                dialog.showErrorBox("Error", result.error as string);
             }
-        }
-    });
+        });
+    } catch (error) {
+        dialog.showMessageBox(mainWindow, {
+            type: "error",
+            message: (error instanceof Error) ? error.message : String(error),
+        });
+    }
+    mainWindow.webContents.send("clearLoader");
+});
+
+
+async function copyFile(src: string, dest: string) {
+    try {
+        await fs.promises.copyFile(src, dest);
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: (error instanceof Error) ? error.message : String(error) };
+    }
+}
+
+async function moveFile(src: string, dest: string) {
+    try {
+        await fs.promises.rename(src, dest);
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: (error instanceof Error) ? error.message : String(error) };
+    }
+}
+
+async function deleteFile(filePath: string) {
+    try {
+        await fs.promises.unlink(filePath);
+        return { success: true };
+    } catch (error) {
+        return { success: false, error: (error instanceof Error) ? error.message : String(error) };
+    }
+}
+
+
+const inputOutput: interfaces.InputOutputType = {
+    inputType: "",
+    fileFrom: "",
+    fileFromDir: "",
+    fileFromName: "",
+    fileFromExt: "",
+
+    outputType: "",
+    fileTo: "",
+    fileToDir: "",
+    fileToName: "",
+    fileToExt: ""
 };
+
