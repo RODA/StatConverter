@@ -4,7 +4,7 @@ import { util } from './library/helpers';
 import * as interfaces from './library/interfaces';
 
 
-const inputOutput: interfaces.InputOutputType = {
+const inputOutput: interfaces.InputOutput = {
     inputType: '',
     fileFrom: '',
     fileFromDir: '',
@@ -54,7 +54,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // ipcRenderer.send('sendCommand', 'require(DDIwR)');
 
     let all_vars_selected = true;
-    const variables: interfaces.VariablesType = {};
+    const variables: interfaces.Variables = {};
 
     const inputType = util.selectElement('inputType');
     const fileEncoding = util.selectElement('fileEncoding');
@@ -510,7 +510,7 @@ function removeActive() {
     });
 }
 
-function filterVar(variables: interfaces.VariablesType, f1: string, f2: string, make: boolean) {
+function filterVar(variables: interfaces.Variables, f1: string, f2: string, make: boolean) {
     if (f2 == '') {
         alert('Text or pattern should be specified.');
     } else {
@@ -553,7 +553,7 @@ function filterVar(variables: interfaces.VariablesType, f1: string, f2: string, 
     }
 }
 
-function varSearchF(variables: interfaces.VariablesType): void {
+function varSearchF(variables: interfaces.Variables): void {
     const value = (util.htmlElement('varsearch')).value;
     if (value != '') {
         for (const key in variables) {
@@ -570,7 +570,7 @@ function varSearchF(variables: interfaces.VariablesType): void {
     }
 }
 
-function varSearchCasesF(variables: interfaces.VariablesType): void {
+function varSearchCasesF(variables: interfaces.Variables): void {
     const value = (util.htmlElement('varSearchCases')).value;
     if (value != '') {
         for (const key in variables) {

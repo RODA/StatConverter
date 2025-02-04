@@ -4,21 +4,16 @@ import * as path from "path";
 import * as interfaces from "./interfaces";
 
 
-// local interfaces
-interface ValidationHelpers {
-    valueInInterval: (value: number, interval: [min: number, max: number]) => boolean;
-}
-
 interface UtilHelpersInterface {
     getKeys(obj: Record<string, unknown>): Array<string>;
-    isNumeric: (value: string) => boolean;
-    possibleNumeric: (value: string) => boolean;
-    isInteger: (value: number) => boolean;
-    asNumeric(value: string): number;
-    asInteger(value: string): number;
-    isTrue: (value: boolean) => boolean;
-    isFalse: (value: boolean) => boolean;
-    isNull: (value: unknown) => boolean;
+    isNumeric: (x: string) => boolean;
+    possibleNumeric: (x: string) => boolean;
+    isInteger: (x: number) => boolean;
+    asNumeric(x: string): number;
+    asInteger(x: string): number;
+    isTrue: (x: boolean) => boolean;
+    isFalse: (x: boolean) => boolean;
+    isNull: (x: unknown) => boolean;
     makeSum: (array: number[]) => number;
     makeSumFromElements: (array: string[]) => number;
     makeSumDecimal: (array: number[]) => string;
@@ -60,25 +55,13 @@ interface UtilHelpersInterface {
     prod: (x: Array<number>) => number;
     getExtensionFromType: (type: string) => string;
     getTypeFromExtension: (ext: string) => string;
-    fileFromInfo: (inputType: string) => interfaces.FileFromInfoType;
-    validate: (inputOutput: interfaces.InputOutputType) => string;
+    fileFromInfo: (inputType: string) => interfaces.FileFromInfo;
+    validate: (inputOutput: interfaces.InputOutput) => string;
     replaceUnicode: (x: Array<string>) => Array<string>;
 }
 
-interface ValidationMessageType {
-    [element: string]: {
-        name: string;
-        errors: string[];
-    }
-}
-
-interface ErrorTippyType {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [element: string]: Array<any>
-}
-
-const validation_messages: ValidationMessageType = {};
-const error_tippy: ErrorTippyType = {};
+const validation_messages: interfaces.ValidationMessage = {};
+const error_tippy: interfaces.ErrorTippy = {};
 
 const errorHelperFunctions = {
     // https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
@@ -230,7 +213,7 @@ export const errorHandler = {
 }
 
 // Validation functions
-export const validate: ValidationHelpers = {
+export const validate: interfaces.ValidationHelpers = {
 
     valueInInterval: (value: number, interval: [min: number, max: number]) => {
         if (value >= interval[0] && value <= interval[1]) {
@@ -245,13 +228,13 @@ export const validate: ValidationHelpers = {
 export const util: UtilHelpersInterface = {
 
 
-    getKeys: function(obj: Record<string, unknown>): Array<string> {
+    getKeys: function(obj) {
         if (obj === null) return([]);
         return Object.keys(obj);
     },
 
 
-    isNumeric: function (x: string|number): boolean {
+    isNumeric: function (x) {
         if (util.missing(x) || x === null || ("" + x).length == 0) {
             return false;
         }
@@ -264,7 +247,7 @@ export const util: UtilHelpersInterface = {
     },
 
 
-    possibleNumeric: function(x: string): boolean {
+    possibleNumeric: function(x) {
         if (util.isNumeric(x)) {
             return true;
         }
@@ -277,35 +260,35 @@ export const util: UtilHelpersInterface = {
     },
 
 
-    isInteger: function (x: number): boolean {
+    isInteger: function (x) {
         return parseFloat("" + x) == parseInt("" + x, 10);
     },
 
-    asNumeric: function(x: string|number): number {
+    asNumeric: function(x) {
         return parseFloat("" + x);
     },
 
-    asInteger: function(x: string|number): number {
+    asInteger: function(x) {
         return parseInt("" + x);
     },
 
-    isTrue: function(x: boolean): boolean {
+    isTrue: function(x) {
         return (x === true);
     },
 
-    isFalse: function(x: boolean): boolean {
+    isFalse: function(x) {
         return (x === false);
     },
 
-    isNull: function(x: unknown): boolean {
+    isNull: function(x) {
         return (x === null);
     },
 
-    makeSum: (array: number[]) => {
+    makeSum: (array) => {
         return array.reduce((sum, i) => sum + i, 0);
     },
 
-    makeSumFromElements: (array: string[]): number => {
+    makeSumFromElements: (array) => {
         const elements = new Array(array.length);
         for (let i = 0; i < array.length; i++) {
             const value = util.getInputNumericValue(array[i]);
@@ -314,11 +297,11 @@ export const util: UtilHelpersInterface = {
         return(util.makeSum(elements));
     },
 
-    makeSumDecimal: (array: number[]) => {
+    makeSumDecimal: (array) => {
         return util.makeSum(array).toFixed(2);
     },
 
-    makeInputSumDecimal: (array: string[]) => {
+    makeInputSumDecimal: (array) => {
         let sum = 0;
         array.forEach(item => {
             sum += util.getInputDecimalValue(item);
@@ -326,7 +309,7 @@ export const util: UtilHelpersInterface = {
         return sum.toFixed(2);
     },
 
-    getInputNumericValue: (el: string) => {
+    getInputNumericValue: (el) => {
         const input = document.getElementById(el) as HTMLInputElement;
         if (!util.isNull(input)) {
             return Number(input.value);
@@ -334,7 +317,7 @@ export const util: UtilHelpersInterface = {
         return 0;
     },
 
-    getInputDecimalValue: (el: string) => {
+    getInputDecimalValue: (el) => {
         const input = document.getElementById(el) as HTMLInputElement;
         if (!util.isNull(input)) {
             return !isNaN(parseFloat(input.value)) ? parseFloat(input.value) : 0;
@@ -342,7 +325,7 @@ export const util: UtilHelpersInterface = {
         return 0;
     },
 
-    inputHasValue: (el: string) => {
+    inputHasValue: (el) => {
         const input = util.htmlElement(el);
         if (input.value != '') {
             return true;
@@ -350,7 +333,7 @@ export const util: UtilHelpersInterface = {
         return false;
     },
 
-    allInputsHaveValue: (array: string[]) => {
+    allInputsHaveValue: (array) => {
         let hasvalue = true;
         let i = 0;
         while (hasvalue && i < array.length - 1) {
@@ -361,7 +344,7 @@ export const util: UtilHelpersInterface = {
         return hasvalue;
     },
 
-    anyInputHasValue: (array: string[]) => {
+    anyInputHasValue: (array) => {
         let hasvalue = false;
         let i = 0;
         while (!hasvalue && i < array.length - 1) {
@@ -438,7 +421,7 @@ export const util: UtilHelpersInterface = {
         }
     },
 
-    customDate: (el?: string) => {
+    customDate: (el?) => {
         if (el) {
             return el.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$2-$1')
         } else {
@@ -493,19 +476,19 @@ export const util: UtilHelpersInterface = {
         util.htmlElement(element).blur();
     },
 
-    addOption: (element: string, value: string, text: string) => {
+    addOption: (element, value, text) => {
         const option = document.createElement("option");
         option.value = value;
         option.text = text;
         util.htmlElement(element).appendChild(option);
     },
 
-    resetSelect: (element: string, value: string, text: string) => {
+    resetSelect: (element, value, text) => {
         util.htmlElement(element).innerHTML = "";
         util.addOption(element, value, text);
     },
 
-    selectValues: (element: string) => {
+    selectValues: (element) => {
         const item = document.getElementById(element) as HTMLSelectElement;
         return Array.from(item.options).map((el) => el.value);
     },
@@ -532,9 +515,7 @@ export const util: UtilHelpersInterface = {
     },
 
     // modified version from: https://github.com/pieterprovoost/jerzy/blob/master/lib/vector.js
-    sortArray: function(
-        x: Array<string|number>, options?: {[key: string]: boolean}
-    ): Array<string|number> {
+    sortArray: function(x, options?) {
 
         // empty last is needed to get something like:
         // ["A", "B", ""] instead of ["", "A", "B"]
@@ -552,7 +533,7 @@ export const util: UtilHelpersInterface = {
             }
         }
 
-        const sorted: Array<string|number> = orderBy(
+        const sorted = orderBy(
             x,
             [],
             decreasing ? ["desc"] : ["asc"]
@@ -579,14 +560,13 @@ export const util: UtilHelpersInterface = {
     },
 
 
-
-    round: function(x: number, decimals: number): number {
+    round: function(x, decimals) {
         decimals = Math.pow(10, decimals);
         return(Math.round(x * decimals)/decimals);
     },
 
 
-    all: function(x: Array<number|string>, rule: string, value?: unknown): boolean {
+    all: function(x, rule, value?) {
         if (util.missing(value)) {
             value = "";
         }
@@ -611,7 +591,7 @@ export const util: UtilHelpersInterface = {
     },
 
 
-    any: function(x: Array<number|string>, rule: string, value?: unknown): boolean {
+    any: function(x, rule, value?) {
         if (util.missing(value)) {
             value = "";
         }
@@ -634,7 +614,7 @@ export const util: UtilHelpersInterface = {
     },
 
 
-    order: function(x: Array<number|string>, descending = false): Array<number|string> {
+    order: function(x, descending = false) {
 
         // const values = cloneDeep(x);
         const values = [];
@@ -663,7 +643,7 @@ export const util: UtilHelpersInterface = {
         return [1];
     },
 
-    unique: function(x: Array<number|string>): Array<number|string> {
+    unique: function(x) {
 
         const uniques: Array<number|string> = [];
 
@@ -676,17 +656,16 @@ export const util: UtilHelpersInterface = {
         return(uniques);
     },
 
-    min: function(x: Array<number>): number {
+    min: function(x) {
         return(Math.min.apply(null, x));
     },
 
-    max: function(x: Array<number>): number {
+    max: function(x) {
         return(Math.max.apply(null, x));
     },
 
-    //                                         options?: {sep: string, from: number, to: number}
-    //                                         options?: {[key: string]: string|number}
-    paste: function(arr: Array<number|string>, options?: Record<string, string|number>): string {
+    //                   options?: {sep, from, to}
+    paste: function(arr, options?) {
         if (arr.length == 0) return("");
 
         let sep = " ";
@@ -725,7 +704,7 @@ export const util: UtilHelpersInterface = {
 
     // adapted from:
     // http://stackoverflow.com/questions/840781/easiest-way-to-find-duplicate-values-in-a-javascript-array
-    duplicates: function(arr: Array<number|string>): Array<number|string> {
+    duplicates: function(arr) {
         const len = arr.length,
             out: Array<number|string> = [],
             counts: {
@@ -751,15 +730,15 @@ export const util: UtilHelpersInterface = {
         return out;
     },
 
-    sum: function (x: Array<number>): number {
+    sum: function (x) {
         return(x.reduce((sum, i) => sum + i, 0));
     },
 
-    prod: function(x: Array<number>): number {
+    prod: function(x) {
         return x.reduce((prod, i) => prod * i);
     },
 
-    getExtensionFromType: function(type: string): string {
+    getExtensionFromType: function(type) {
         let ext = '';
         switch (type) {
             case 'ddi':
@@ -788,7 +767,7 @@ export const util: UtilHelpersInterface = {
         return ext;
     },
 
-    getTypeFromExtension: function(ext: string): string {
+    getTypeFromExtension: function(ext) {
         let type = '';
         switch (ext) {
             case '.xml':
@@ -889,7 +868,7 @@ export const util: UtilHelpersInterface = {
 
     },
 
-    replaceUnicode: function(x: Array<string>): Array<string> {
+    replaceUnicode: function(x) {
         for (let i = 0; i < x.length; i++) {
             x[i] = x[i].replace(
                 /<U\+([A-Fa-f0-9]{4})>/g,
