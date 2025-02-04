@@ -1,11 +1,7 @@
 node_modules/
-R_portable/
-R_portable_development/
 dist/
 build/output/
 package-lock.json
 .DS_Store
 docs/images/Thumbs.db
-R_Portable_arm64.zip
-R_Portable_x86_64_BigSur.zip
-R_Portable_x86_64_HighSierra.zip
+instructions.txt
