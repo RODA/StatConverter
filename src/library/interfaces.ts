@@ -50,3 +50,8 @@ export interface ErrorTippy {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [element: string]: Array<any>
 }
+
+export interface CommandArgs {
+    command: string;
+    variables: boolean;
+}

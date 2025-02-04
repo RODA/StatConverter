@@ -10,4 +10,3 @@ export const showMessage = (obj: interfaces.ShowMessage) => {
 export const showError = (message: string) => {
     ipcRenderer.send('showError', message);
 }
-``

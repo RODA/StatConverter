@@ -29,11 +29,11 @@ window.addEventListener('DOMContentLoaded', () => {
     // }
 
     document.getElementById('declared')?.addEventListener('click', () => {
-        ipcRenderer.send('declared', {});
+        ipcRenderer.send('declared');
     });
 
     document.getElementById('gotoRODA')?.addEventListener('click', () => {
-        ipcRenderer.send('gotoRODA', {});
+        ipcRenderer.send('gotoRODA');
     });
 
     ipcRenderer.on('startLoader', () => {
@@ -97,7 +97,7 @@ window.addEventListener('DOMContentLoaded', () => {
         inputOutput.fileFromName = io.fileFromName;
         inputOutput.fileFromExt = io.fileFromExt;
 
-        let command = "dataset <- convert('/host/dataset" + io.fileFromExt + "', declared = FALSE, n_max = 10";
+        let command = "dataset <- convert('/host/" + io.fileFromName + io.fileFromExt + "', declared = FALSE, n_max = 10";
         if (fileEncoding.value != 'utf8') {
             if (fileEncoding.value == "default") {
                 command += ", encoding = NULL";
@@ -113,9 +113,12 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         command += ")";
-
         console.log(command);
-        ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
+
+        ipcRenderer.send('sendCommand', {
+            command: command.replace(/\\/g, '/'),
+            variables: true
+        });
 
         fileFrom.value = io.fileFrom;
 
@@ -139,7 +142,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         if (message == 'Unsupported input type.') {
             inputType.selectedIndex = 0;
-            ipcRenderer.send('showError', { message: message });
+            ipcRenderer.send('showError', message);
         }
         else {
             fileTo.dispatchEvent(new Event('change'));
@@ -166,7 +169,7 @@ window.addEventListener('DOMContentLoaded', () => {
             outputType.selectedIndex = 0;
             inputOutput.outputType = '';
             outputType.dispatchEvent(new Event('change'));
-            ipcRenderer.send('showError', { message: message });
+            ipcRenderer.send('showError', message);
         }
 
         fileTo.dispatchEvent(new Event('change'));
@@ -190,9 +193,9 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         if (indices.length == 0 && !all_vars_selected) {
-            ipcRenderer.send('showError', { message: 'At least one variable has to be selected.' });
+            ipcRenderer.send('showError', 'At least one variable has to be selected.');
         } else {
-            let command = "convert('/host/dataset" + inputOutput.fileFromExt + "', to = '/host/" + inputOutput.fileToName + inputOutput.fileToExt + "'";
+            let command = "convert('/host/" + inputOutput.fileFromName + inputOutput.fileFromExt + "', to = '/host/" + inputOutput.fileToName + inputOutput.fileToExt + "'";
             // let command = "convert('" + inputOutput.fileFrom + "', to = '" + inputOutput.fileTo + "'";
 
             const declaredTRUE = util.htmlElement("declaredTRUE");
@@ -306,9 +309,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
             command += ")";
 
-            ipcRenderer.send('startConvert', {
+            ipcRenderer.send('sendCommand', {
                 command: command.replace(/\\/g, '/'),
-                embed: !embedFALSE.checked
+                variables: false
             });
         }
     });
@@ -621,6 +624,6 @@ function insertAtPosition(areaId: string, text: string) {
 }
 
 
-ipcRenderer.on('consolog', (event, message: string) => {
-    console.log(message);
+ipcRenderer.on('consolog', (event, object: any) => {
+    console.log(object);
 });
