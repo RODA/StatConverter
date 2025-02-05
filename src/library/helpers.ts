@@ -273,14 +273,23 @@ export const util: UtilHelpersInterface = {
     },
 
     isTrue: function(x) {
+        if (util.missing(x) || util.isNull(x)) {
+            return false;
+        }
         return (x === true);
     },
 
     isFalse: function(x) {
+        if (util.missing(x) || util.isNull(x)) {
+            return false;
+        }
         return (x === false);
     },
 
     isNull: function(x) {
+        if (util.missing(x)) {
+            return false;
+        }
         return (x === null);
     },
 
