@@ -48,8 +48,8 @@
 
                     <p>&nbsp;</p>
                     <p>
-                        <a target="_blank" href="https://nodejs.org/download/release/v14.18.2/">Node.js</a> needs
-                        to be installed, we recommend at least version 18 which we are using.</p>
+                        <a target="_blank" href="https://nodejs.org/download/release/v22.7.0/">Node.js</a> needs
+                        to be installed, we recommend at least version 22 which we are using.</p>
 
                     <p>&nbsp;</p>
                     <p>
@@ -96,7 +96,8 @@ npm start
                     <p>
                         MacOS users need to install the
                         <a href="https://mac.install.guide/commandlinetools/index.html">XCode Command Line Tools</a>
-                        (either from the entire XCode, otherwise the CLTs are sufficient)
+                        (either from the entire XCode, otherwise the CLTs are sufficient). Do make sure to delete the build configuration
+                        for Linux, as MacOS is also Unix based.
                     </p>
 
                     <p>&nbsp;</p>
@@ -106,6 +107,19 @@ npm start
 <div>
 <pre class="code">
 npm run dist
+</pre>
+</div>
+
+
+<p>&nbsp;</p>
+<p>
+    On Linux, you might need to delete the build configuration for MacOS, and the command is different:
+</p>
+
+
+<div>
+<pre class="code">
+npx electron-builder --linux --x64 --arm64
 </pre>
 </div>
 
