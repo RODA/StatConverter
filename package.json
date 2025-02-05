@@ -1,7 +1,7 @@
 {
   "name": "statconverter",
   "version": "1.2.0",
-  "description": "",
+  "description": "Statistical package converter using the DDI standard interface",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
@@ -45,10 +45,6 @@
     },
     "linux": {
       "target": "AppImage",
-      "arch": [
-        "x64",
-        "arm64"
-      ],
       "icon": "build/StatConverter.png",
       "category": "Utility",
       "maintainer": "Adrian Dusa <dusa.adrian@gmail.com>"
