@@ -51,8 +51,6 @@ window.addEventListener('DOMContentLoaded', () => {
         (<HTMLDivElement>document.getElementById('cover')).classList.add('d-none');
     });
 
-    // ipcRenderer.send('sendCommand', 'require(DDIwR)');
-
     let all_vars_selected = true;
     const variables: interfaces.Variables = {};
 
@@ -113,11 +111,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         command += ")";
-        console.log(command);
+        console.log("preload116: ", command);
 
         ipcRenderer.send('sendCommand', {
             command: command.replace(/\\/g, '/'),
-            variables: true
+            updateVariables: true
         });
 
         fileFrom.value = io.fileFrom;
@@ -311,7 +309,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             ipcRenderer.send('sendCommand', {
                 command: command.replace(/\\/g, '/'),
-                variables: false
+                updateVariables: false
             });
         }
     });
@@ -329,7 +327,10 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             command += ")";
-            ipcRenderer.send('sendCommand', command.replace(/\\/g, '/'));
+            ipcRenderer.send('sendCommand', {
+                command: command.replace(/\\/g, '/'),
+                updateVariables: true
+            });
         }
     });
 
@@ -373,7 +374,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // =================================================
     // ================= Variables =====================
-    ipcRenderer.on('sendCommand-reply', (event, variables) => {
+    ipcRenderer.on('updateVariables', (event, variables) => {
         // console.log(variables);
         //load variable list
         const variablesList = util.htmlElement('variables');
@@ -626,4 +627,8 @@ function insertAtPosition(areaId: string, text: string) {
 
 ipcRenderer.on('consolog', (event, object: any) => {
     console.log(object);
+});
+
+ipcRenderer.on('consoletrace', (event, object: any) => {
+    console.trace(object);
 });

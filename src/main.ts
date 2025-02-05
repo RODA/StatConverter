@@ -14,18 +14,17 @@ const production = process.env.NODE_ENV === 'production';
 const development = process.env.NODE_ENV === 'development';
 const OS_Windows = process.platform == 'win32';
 
-import { app, BrowserWindow, ipcMain, dialog, shell, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, shell, Menu, session } from "electron";
 import * as path from "path";
 import * as fs from "fs";
 import * as webr from "webr";
 import * as interfaces from './library/interfaces';
 import { util } from "./library/helpers";
-import * as comm from "./communication";
 
 
 const webR = new webr.WebR({ interactive: false });
 let mainWindow: BrowserWindow;
-const root = production ? "../../" : "../";
+// const root = production ? "../../" : "../";
 
 async function mount(dir: string) {
     webR.FS.unmount("/host");
@@ -36,45 +35,51 @@ async function mount(dir: string) {
             { root: dir },
             "/host"
         );
-        return(true)
     } catch (error) {
-        return false;
+        console.log(error);
+        throw error;
     }
 }
 
 async function initWebR() {
-    await webR.init();
+    try {
+        await webR.init();
 
-    // mount a virtual filesystem containing contributed R packages
-    const data =  new Blob([
-        fs.readFileSync(
-            path.join(__dirname, '../src/library/R/library.data')
-        )
-    ]);
+        console.log(__dirname);
 
-    const metadata = JSON.parse(
-        fs.readFileSync(
-            path.join(__dirname, '../src/library/R/library.js.metadata'),
-            'utf-8'
-        )
-    );
+        // mount a virtual filesystem containing contributed R packages
+        const data =  new Blob([
+            fs.readFileSync(
+                path.join(__dirname, '../src/library/R/library.data')
+            )
+        ]);
 
-    const options = {
-        packages: [{
-            blob: data,
-            metadata: metadata,
-        }]
-    };
+        const metadata = JSON.parse(
+            fs.readFileSync(
+                path.join(__dirname, '../src/library/R/library.js.metadata'),
+                'utf-8'
+            )
+        );
 
-    await webR.FS.mkdir('/my-library');
-    await webR.FS.mount(
-        "WORKERFS",
-        options,
-        '/my-library'
-    );
+        const options = {
+            packages: [{
+                blob: data,
+                metadata: metadata,
+            }]
+        };
 
-    await webR.evalR(`.libPaths(c(.libPaths(), "/my-library"))`);
-    await webR.evalR(`library(DDIwR)`);
+        await webR.FS.mkdir('/my-library');
+        await webR.FS.mount(
+            "WORKERFS",
+            options,
+            '/my-library'
+        );
+
+        await webR.evalR(`.libPaths(c(.libPaths(), "/my-library"))`);
+        await webR.evalR(`library(DDIwR)`);
+    } catch (error) {
+        throw error;
+    }
 }
 
 // Create the main browser window
@@ -110,15 +115,9 @@ function createWindow() {
 
 }
 
-app.whenReady().then(async () => {
-
+app.whenReady().then(() => {
     createWindow();
-
-    try {
-        await initWebR();
-    } catch (error) {
-        console.error("Error during initialization:", error);
-    }
+    initWebR();
 });
 
 
@@ -156,9 +155,9 @@ ipcMain.on("declared", () => {
 });
 
 
-ipcMain.on("selectFileFrom", async (event, args) => {
+ipcMain.on("selectFileFrom", (event, args) => {
     if (args.inputType === "Select file type") {
-        comm.showError("Select input type");
+        dialog.showErrorBox("Error", "Select input type");
     } else {
         const info = util.fileFromInfo(args.inputType);
 
@@ -171,7 +170,8 @@ ipcMain.on("selectFileFrom", async (event, args) => {
                 },
             ],
             properties: ["openFile"],
-        }).then((result) => {
+        }).then(async (result) => {
+            // if (!result.canceled) {
             if (!result.canceled) {
                 inputOutput.fileFrom = result.filePaths[0];
 
@@ -184,20 +184,14 @@ ipcMain.on("selectFileFrom", async (event, args) => {
 
                 inputOutput.fileFromExt = ext;
 
-                mount(inputOutput.fileFromDir).then((result) => {
-                    if (result) {
-                        // consolog(inputOutput);
-                        event.reply("selectFileFrom-reply", inputOutput);
-                    } else {
-                        comm.showError("Could not mount the directory");
-                    }
-
-                });
-
                 if (OS_Windows) {
                     inputOutput.fileFrom = inputOutput.fileFrom.replace(/\\/g, '/');
                     inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
                 }
+
+                mount(inputOutput.fileFromDir).then(() => {
+                    mainWindow.webContents.send("selectFileFrom-reply", inputOutput);
+                });
             }
         });
 
@@ -211,7 +205,7 @@ ipcMain.on("outputType", (event, args) => {
 
 ipcMain.on("selectFileTo", (event, args) => {
     if (args.outputType === "Select file type") {
-        comm.showError("Select output type");
+        dialog.showErrorBox("Error", "Select output type");
     } else {
         const ext = util.getExtensionFromType(args.outputType);
 
@@ -239,11 +233,11 @@ ipcMain.on("selectFileTo", (event, args) => {
                     inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
                 }
 
-                event.reply("selectFileTo-reply", inputOutput);
+                mainWindow.webContents.send("selectFileTo-reply", inputOutput);
             }
         })
         .catch((err) => {
-            console.log(err);
+            consolog(err);
         });
     }
 });
@@ -260,13 +254,20 @@ ipcMain.on("declared", () => {
 
 // Handle the command request
 ipcMain.on("sendCommand", async (event, args) => {
-    const command = args.command
-    console.log(command);
+    const command = args.command;
     mainWindow.webContents.send("startLoader");
+    // consolog("main266: " + command);
+
     try {
         await webR.evalR(command);
-        if (args.variables) {
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 
+    if (util.isTrue(args.updateVariables)) {
+        // consolog("main: updating variables");
+        try {
             const result = await webR.evalR(`as.character(jsonlite::toJSON(lapply(
                 collectRMetadata(dataset),
                 function(x) {
@@ -277,20 +278,20 @@ ipcMain.on("sendCommand", async (event, args) => {
                 }
             )))`);
 
-            if (!webr.isRCharacter(result)) {
-                comm.showError('Not a character!');
-            }
+            if (!webr.isRCharacter(result)) throw new Error('Not a character!');
 
             const response = await result.toString();
-            // consolog(JSON.parse(response[0] as string));
             webR.destroy(result);
+            mainWindow.webContents.send("updateVariables", JSON.parse(response));
 
-            event.reply("sendCommand-reply", JSON.parse(response));
+        } catch (error) {
+            console.log(error);
+            throw error;
         }
-    } catch (error) {
-        comm.showError(String(error));
     }
+
     mainWindow.webContents.send("clearLoader");
+
 });
 
 const inputOutput: interfaces.InputOutput = {
@@ -307,6 +308,20 @@ const inputOutput: interfaces.InputOutput = {
     fileToExt: ""
 };
 
+
 function consolog(x: any) {
     mainWindow.webContents.send("consolog", x);
 }
+
+
+function consoletrace(x: any) {
+    mainWindow.webContents.send("consoletrace", x);
+}
+
+
+process.on('unhandledRejection', (error: Error, promise) => {
+    consoletrace(error);
+});
+
+
+app.commandLine.appendSwitch('log-level', '3');
