@@ -95,7 +95,7 @@ window.addEventListener('DOMContentLoaded', () => {
         inputOutput.fileFromName = io.fileFromName;
         inputOutput.fileFromExt = io.fileFromExt;
 
-        let command = "dataset <- convert('/host/" + io.fileFromName + io.fileFromExt + "', declared = FALSE, n_max = 10";
+        let command = "dataset <- convert('/input/" + io.fileFromName + io.fileFromExt + "', declared = FALSE, n_max = 10";
         if (fileEncoding.value != 'utf8') {
             if (fileEncoding.value == "default") {
                 command += ", encoding = NULL";
@@ -111,7 +111,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         command += ")";
-        console.log("preload116: ", command);
+        // console.log("preload116: ", command);
 
         ipcRenderer.send('sendCommand', {
             command: command.replace(/\\/g, '/'),
@@ -193,7 +193,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (indices.length == 0 && !all_vars_selected) {
             ipcRenderer.send('showError', 'At least one variable has to be selected.');
         } else {
-            let command = "convert('/host/" + inputOutput.fileFromName + inputOutput.fileFromExt + "', to = '/host/" + inputOutput.fileToName + inputOutput.fileToExt + "'";
+            let command = "convert('/input/" + inputOutput.fileFromName + inputOutput.fileFromExt + "', to = '/output/" + inputOutput.fileToName + inputOutput.fileToExt + "'";
             // let command = "convert('" + inputOutput.fileFrom + "', to = '" + inputOutput.fileTo + "'";
 
             const declaredTRUE = util.htmlElement("declaredTRUE");
@@ -306,6 +306,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             command += ")";
+            // console.log("preload309: ", command);
 
             ipcRenderer.send('sendCommand', {
                 command: command.replace(/\\/g, '/'),
@@ -327,6 +328,8 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             command += ")";
+            // console.log("preload331: ", command);
+
             ipcRenderer.send('sendCommand', {
                 command: command.replace(/\\/g, '/'),
                 updateVariables: true

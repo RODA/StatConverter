@@ -26,17 +26,28 @@ const webR = new webr.WebR({ interactive: false });
 let mainWindow: BrowserWindow;
 // const root = production ? "../../" : "../";
 
-async function mount(dir: string) {
-    webR.FS.unmount("/host");
-    await webR.FS.mkdir("/host");
+async function mount(obj: interfaces.MountArgs) {
+
+    try {
+        await webR.FS.unmount(obj.where);
+    } catch (error) {
+        // consolog(obj.where + " directory is not mounted yet.");
+        try {
+            await webR.FS.mkdir(obj.where);
+        } catch (error) {
+            consolog("Failed to make " + obj.where);
+            throw error;
+        }
+    }
+
     try {
         await webR.FS.mount(
             "NODEFS",
-            { root: dir },
-            "/host"
+            { root: obj.what },
+            obj.where
         );
     } catch (error) {
-        console.log(error);
+        consolog("Failed to mount " + obj.what + " to " + obj.where);
         throw error;
     }
 }
@@ -44,8 +55,6 @@ async function mount(dir: string) {
 async function initWebR() {
     try {
         await webR.init();
-
-        console.log(__dirname);
 
         // mount a virtual filesystem containing contributed R packages
         const data =  new Blob([
@@ -142,7 +151,11 @@ ipcMain.on('showMessage', (event, args) => {
 });
 
 ipcMain.on('showError', (event, message) => {
-    dialog.showErrorBox("Error", message)
+    dialog.showMessageBox(mainWindow, {
+        type: "error",
+        title: "Error",
+        message: message
+    });
 });
 
 
@@ -157,7 +170,11 @@ ipcMain.on("declared", () => {
 
 ipcMain.on("selectFileFrom", (event, args) => {
     if (args.inputType === "Select file type") {
-        dialog.showErrorBox("Error", "Select input type");
+        dialog.showMessageBox(mainWindow, {
+            type: "error",
+            title: "Error",
+            message: "Select input type"
+        });
     } else {
         const info = util.fileFromInfo(args.inputType);
 
@@ -189,7 +206,7 @@ ipcMain.on("selectFileFrom", (event, args) => {
                     inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
                 }
 
-                mount(inputOutput.fileFromDir).then(() => {
+                mount({ what: inputOutput.fileFromDir, where: "/input" }).then(() => {
                     mainWindow.webContents.send("selectFileFrom-reply", inputOutput);
                 });
             }
@@ -201,11 +218,18 @@ ipcMain.on("selectFileFrom", (event, args) => {
 
 ipcMain.on("outputType", (event, args) => {
     inputOutput.fileToExt = args.extension;
+    if (inputOutput.fileFromDir != "" && inputOutput.fileToDir == "") {
+        mount({ what: inputOutput.fileFromDir, where: "/output" });
+    }
 })
 
 ipcMain.on("selectFileTo", (event, args) => {
     if (args.outputType === "Select file type") {
-        dialog.showErrorBox("Error", "Select output type");
+        dialog.showMessageBox(mainWindow, {
+            type: "error",
+            title: "Error",
+            message: "Select output type"
+        });
     } else {
         const ext = util.getExtensionFromType(args.outputType);
 
@@ -233,7 +257,9 @@ ipcMain.on("selectFileTo", (event, args) => {
                     inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
                 }
 
-                mainWindow.webContents.send("selectFileTo-reply", inputOutput);
+                mount({ what: inputOutput.fileToDir, where: "/output" }).then(() => {
+                    mainWindow.webContents.send("selectFileTo-reply", inputOutput);
+                });
             }
         })
         .catch((err) => {
@@ -256,42 +282,59 @@ ipcMain.on("declared", () => {
 ipcMain.on("sendCommand", async (event, args) => {
     const command = args.command;
     mainWindow.webContents.send("startLoader");
-    // consolog("main266: " + command);
 
-    try {
-        await webR.evalR(command);
-    } catch (error) {
-        console.log(error);
-        throw error;
+    let output_dir_writable = true;
+    if (!util.isTrue(args.updateVariables)) {
+        try {
+            await webR.evalR(`write.csv(data.frame(A = 1:2), "/output/test.csv")`);
+            await webR.evalR(`unlink("/output/test.csv")`);
+        } catch (error) {
+            output_dir_writable = false;
+        }
     }
 
-    if (util.isTrue(args.updateVariables)) {
-        // consolog("main: updating variables");
+    if (util.isFalse(args.updateVariables) && util.isFalse(output_dir_writable)) {
+        dialog.showMessageBox(mainWindow, {
+            type: "error",
+            title: "Error",
+            message:"The target directory has writing constraints. Try saving into a different one."
+        });
+    } else {
+
         try {
-            const result = await webR.evalR(`as.character(jsonlite::toJSON(lapply(
-                collectRMetadata(dataset),
-                function(x) {
-                    values <- names(x$labels)
-                    names(values) <- x$labels
-                    x$values <- as.list(values)
-                    return(x)
-                }
-            )))`);
-
-            if (!webr.isRCharacter(result)) throw new Error('Not a character!');
-
-            const response = await result.toString();
-            webR.destroy(result);
-            mainWindow.webContents.send("updateVariables", JSON.parse(response));
-
+            await webR.evalR(command);
         } catch (error) {
             console.log(error);
             throw error;
         }
+
+        if (util.isTrue(args.updateVariables)) {
+            // consolog("main: updating variables");
+            try {
+                const result = await webR.evalR(`as.character(jsonlite::toJSON(lapply(
+                    collectRMetadata(dataset),
+                    function(x) {
+                        values <- names(x$labels)
+                        names(values) <- x$labels
+                        x$values <- as.list(values)
+                        return(x)
+                    }
+                )))`);
+
+                if (!webr.isRCharacter(result)) throw new Error('Not a character!');
+
+                const response = await result.toString();
+                webR.destroy(result);
+                mainWindow.webContents.send("updateVariables", JSON.parse(response));
+
+            } catch (error) {
+                console.log(error);
+                throw error;
+            }
+        }
     }
 
     mainWindow.webContents.send("clearLoader");
-
 });
 
 const inputOutput: interfaces.InputOutput = {
@@ -322,6 +365,3 @@ function consoletrace(x: any) {
 process.on('unhandledRejection', (error: Error, promise) => {
     consoletrace(error);
 });
-
-
-app.commandLine.appendSwitch('log-level', '3');
