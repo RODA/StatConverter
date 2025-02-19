@@ -18,6 +18,7 @@ import { app, BrowserWindow, ipcMain, dialog, shell, Menu, session } from "elect
 import * as path from "path";
 import * as fs from "fs";
 import * as webr from "webr";
+import { ungzip } from "pako"
 import * as interfaces from './library/interfaces';
 import { util } from "./library/helpers";
 
@@ -58,9 +59,9 @@ async function initWebR() {
 
         // mount a virtual filesystem containing contributed R packages
         const data =  new Blob([
-            fs.readFileSync(
-                path.join(__dirname, '../src/library/R/library.data')
-            )
+            ungzip(fs.readFileSync(
+                path.join(__dirname, '../src/library/R/library.data.gz')
+            ))
         ]);
 
         const metadata = JSON.parse(
