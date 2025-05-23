@@ -18,9 +18,10 @@ import { app, BrowserWindow, ipcMain, dialog, shell, Menu, session } from "elect
 import * as path from "path";
 import * as fs from "fs";
 import * as webr from "webr";
-import { ungzip } from "pako"
+import { ungzip } from "pako";
 import * as interfaces from './library/interfaces';
 import { util } from "./library/helpers";
+import { autoUpdater } from "electron-updater";
 
 
 const webR = new webr.WebR({ interactive: false });
@@ -128,6 +129,10 @@ function createWindow() {
 app.whenReady().then(() => {
     createWindow();
     initWebR();
+
+    if (production) {
+        autoUpdater.checkForUpdatesAndNotify();
+    }
 });
 
 
@@ -365,4 +370,25 @@ function consoletrace(x: any) {
 
 process.on('unhandledRejection', (error: Error, promise) => {
     consoletrace(error);
+});
+
+autoUpdater.on('update-available', () => {
+    dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'Update Available',
+        message: 'A new version is available. It will be downloaded in the background.',
+    });
+});
+
+autoUpdater.on('update-downloaded', () => {
+    dialog.showMessageBox(mainWindow, {
+        type: 'question',
+        buttons: ['Restart', 'Later'],
+        defaultId: 0,
+        cancelId: 1,
+        title: 'Update Ready',
+        message: 'Update downloaded. Restart now to apply it?',
+    }).then(result => {
+        if (result.response === 0) autoUpdater.quitAndInstall();
+    });
 });
