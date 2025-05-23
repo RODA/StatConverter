@@ -11,9 +11,11 @@ interface UtilHelpersInterface {
     isInteger: (x: number) => boolean;
     asNumeric(x: string): number;
     asInteger(x: string): number;
-    isTrue: (x: boolean) => boolean;
-    isFalse: (x: boolean) => boolean;
+    isTrue: (x: unknown) => boolean;
+    isFalse: (x: unknown) => boolean;
     isNull: (x: unknown) => boolean;
+    isElementOf<T>(x: T, set: T[]): boolean;
+    isNotElementOf<T>(x: T, set: T[]): boolean;
     makeSum: (array: number[]) => number;
     makeSumFromElements: (array: string[]) => number;
     makeSumDecimal: (array: number[]) => string;
@@ -227,12 +229,10 @@ export const validate: interfaces.ValidationHelpers = {
 // Util functions
 export const util: UtilHelpersInterface = {
 
-
     getKeys: function(obj) {
         if (obj === null) return([]);
         return Object.keys(obj);
     },
-
 
     isNumeric: function (x) {
         if (util.missing(x) || x === null || ("" + x).length == 0) {
@@ -246,7 +246,6 @@ export const util: UtilHelpersInterface = {
         )
     },
 
-
     possibleNumeric: function(x) {
         if (util.isNumeric(x)) {
             return true;
@@ -258,7 +257,6 @@ export const util: UtilHelpersInterface = {
 
         return false;
     },
-
 
     isInteger: function (x) {
         return parseFloat("" + x) == parseInt("" + x, 10);
@@ -276,21 +274,46 @@ export const util: UtilHelpersInterface = {
         if (util.missing(x) || util.isNull(x)) {
             return false;
         }
-        return (x === true);
+        return (x === true || (typeof x === 'string' && (x === 'true' || x === 'True')));
     },
 
     isFalse: function(x) {
         if (util.missing(x) || util.isNull(x)) {
             return false;
         }
-        return (x === false);
+        return (x === false || (typeof x === 'string' && (x === 'false' || x === 'False')));
     },
 
     isNull: function(x) {
-        if (util.missing(x)) {
+        return util.exists(x) && x === null;
+    },
+
+    isElementOf: function <T>(x: T, set: T[]): boolean {
+        if (
+            util.missing(x) ||
+            util.isNull(x) ||
+            util.missing(set) ||
+            util.isNull(set) ||
+            set.length === 0
+        ) {
             return false;
         }
-        return (x === null);
+
+        return set.indexOf(x) >= 0;
+    },
+
+    isNotElementOf: function <T>(x: T, set: T[]): boolean {
+        if (
+            util.missing(x) ||
+            util.isNull(x) ||
+            util.missing(set) ||
+            util.isNull(set) ||
+            set.length === 0
+        ) {
+            return false;
+        }
+
+        return set.indexOf(x) < 0;
     },
 
     makeSum: (array) => {
@@ -568,12 +591,10 @@ export const util: UtilHelpersInterface = {
         return sorted;
     },
 
-
     round: function(x, decimals) {
         decimals = Math.pow(10, decimals);
         return(Math.round(x * decimals)/decimals);
     },
-
 
     all: function(x, rule, value?) {
         if (util.missing(value)) {
@@ -599,7 +620,6 @@ export const util: UtilHelpersInterface = {
         return(check);
     },
 
-
     any: function(x, rule, value?) {
         if (util.missing(value)) {
             value = "";
@@ -621,7 +641,6 @@ export const util: UtilHelpersInterface = {
 
         return(check);
     },
-
 
     order: function(x, descending = false) {
 
