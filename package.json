@@ -8,6 +8,7 @@
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "npm run build && electron ./dist/main.js",
+    "predist": "ts-node check-env.ts",
     "dist": "npm run build && electron-builder",
     "rename:unix": "bash scripts/rename-unix-binaries.sh",
     "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1",
@@ -66,6 +67,7 @@
     "electron-builder": "^26.0.1",
     "eslint": "^9.18.0",
     "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
