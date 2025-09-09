@@ -288,7 +288,7 @@ export const util: UtilHelpersInterface = {
         return util.exists(x) && x === null;
     },
 
-    isElementOf: function <T>(x: T, set: T[]): boolean {
+    isElementOf: function(x, set) {
         if (
             util.missing(x) ||
             util.isNull(x) ||
@@ -302,7 +302,7 @@ export const util: UtilHelpersInterface = {
         return set.indexOf(x) >= 0;
     },
 
-    isNotElementOf: function <T>(x: T, set: T[]): boolean {
+    isNotElementOf: function(x, set) {
         if (
             util.missing(x) ||
             util.isNull(x) ||

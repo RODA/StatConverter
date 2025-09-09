@@ -59,11 +59,10 @@ async function initWebR() {
         await webR.init();
 
         // mount a virtual filesystem containing contributed R packages
-        const data =  new Blob([
-            ungzip(fs.readFileSync(
-                path.join(__dirname, '../src/library/R/library.data.gz')
-            ))
-        ]);
+        const buffer = Buffer.from(ungzip(fs.readFileSync(
+            path.join(__dirname, '../src/library/R/library.data.gz')
+        )));
+        const data = new Blob([buffer]);
 
         const metadata = JSON.parse(
             fs.readFileSync(
@@ -212,12 +211,16 @@ ipcMain.on("selectFileFrom", (event, args) => {
                     inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
                 }
 
-                mount({ what: inputOutput.fileFromDir, where: "/input" }).then(() => {
+                mount(
+                    {
+                        what: inputOutput.fileFromDir,
+                        where: "/input"
+                    }
+                ).then(() => {
                     mainWindow.webContents.send("selectFileFrom-reply", inputOutput);
                 });
             }
         });
-
     }
 });
 
@@ -225,7 +228,12 @@ ipcMain.on("selectFileFrom", (event, args) => {
 ipcMain.on("outputType", (event, args) => {
     inputOutput.fileToExt = args.extension;
     if (inputOutput.fileFromDir != "" && inputOutput.fileToDir == "") {
-        mount({ what: inputOutput.fileFromDir, where: "/output" });
+        mount(
+            {
+                what: inputOutput.fileFromDir,
+                where: "/output"
+            }
+        );
     }
 })
 
@@ -310,7 +318,13 @@ ipcMain.on("sendCommand", async (event, args) => {
         try {
             await webR.evalR(command);
         } catch (error) {
-            console.log(error);
+            const message = '' + error;
+            dialog.showMessageBox(mainWindow, {
+                type: "error",
+                title: "Error",
+                message: message.substring(message.lastIndexOf(":") + 1)
+            });
+            mainWindow.webContents.send("clearLoader");
             throw error;
         }
 

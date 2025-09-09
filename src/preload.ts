@@ -99,8 +99,7 @@ window.addEventListener('DOMContentLoaded', () => {
         if (fileEncoding.value != 'utf8') {
             if (fileEncoding.value == "default") {
                 command += ", encoding = NULL";
-            }
-            else {
+            } else {
                 command += ", encoding = '" + fileEncoding.value + "'";
             }
         }
@@ -111,7 +110,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         command += ")";
-        // console.log("preload116: ", command);
+        // console.log("preload114: ", command);
 
         ipcRenderer.send('sendCommand', {
             command: command.replace(/\\/g, '/'),
@@ -317,7 +316,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     fileEncoding.addEventListener('change', function () {
         if (inputOutput.fileFrom != '') {
-            let command = "dataset <- convert('" + inputOutput.fileFrom + "', declared = FALSE, n_max = 10";
+            let command = "dataset <- convert('/input/" + inputOutput.fileFromName + inputOutput.fileFromExt + "', declared = FALSE, n_max = 10";
             if (fileEncoding.value != 'utf8') {
                 if (fileEncoding.value == "default") {
                     command += ", encoding = NULL";

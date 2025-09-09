@@ -140,9 +140,9 @@ After building, rename the output files using platform-specific scripts:
 
 This ensures consistent filenames like:
 
-- `StatConverter_1.2.0_intel.dmg`
-- `StatConverter_1.2.0_intel.AppImage`
-- `StatConverter_setup_1.2.0.exe`
+- `StatConverter_1.2.1_intel.dmg`
+- `StatConverter_1.2.1_intel.AppImage`
+- `StatConverter_setup_1.2.1.exe`
 
 Note: For Windows, the rename is version-based only; architecture is no longer included in filenames since only 64-bit builds are produced.
 
@@ -186,8 +186,8 @@ This Bash script is used on macOS and Linux to rename the output binary (`.dmg` 
   - Platform (`Darwin` or `Linux`)
   - Architecture (`x86_64`, `arm64`, etc.)
 - It renames files like:
-  - `StatConverter-1.2.0.dmg` → `StatConverter_1.2.0_intel.dmg`
-  - `StatConverter-1.2.0.AppImage` → `StatConverter_1.2.0_intel.AppImage`
+  - `StatConverter-1.2.1.dmg` → `StatConverter_1.2.1_intel.dmg`
+  - `StatConverter-1.2.1.AppImage` → `StatConverter_1.2.1_intel.AppImage`
 
 ### Script contents:
 
@@ -243,7 +243,7 @@ This PowerShell script is used on Windows to rename the installer binary based o
 
 - Detects architecture (`x86`, `x64`) but currently standardizes output to 64-bit naming only.
 - Renames:
-  - `StatConverter Setup 1.2.0.exe` → `StatConverter_setup_1.2.0.exe`
+  - `StatConverter Setup 1.2.1.exe` → `StatConverter_setup_1.2.1.exe`
 
 These scripts ensure that all output files follow a consistent naming convention for GitHub Releases.
 
