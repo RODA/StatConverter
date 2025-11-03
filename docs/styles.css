@@ -1,8 +1,27 @@
+@font-face {
+    font-family: 'Inter';
+    src: url('./fonts/Inter/Inter-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    letter-spacing: -0.02em;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url('./fonts/Inter/Inter-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    letter-spacing: -0.02em;
+}
+
+
+
 /* Box sizing rules */
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 /* Remove default margin */
@@ -16,37 +35,37 @@ figure,
 blockquote,
 dl,
 dd {
-  margin: 0;
+    margin: 0;
 }
 
 /* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
 ul[role='list'],
 ol[role='list'] {
-  list-style: none;
+    list-style: none;
 }
 
 /* Set core root defaults */
 html:focus-within {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 /* Set core body defaults */
 body {
-  min-height: 100vh;
-  text-rendering: optimizeSpeed;
-  line-height: 1.5;
+    min-height: 100vh;
+    text-rendering: optimizeSpeed;
+    line-height: 1.5;
 }
 
 /* A elements that don't have a class get default styles */
 a:not([class]) {
-  text-decoration-skip-ink: auto;
+    text-decoration-skip-ink: auto;
 }
 
 /* Make images easier to work with */
 img,
 picture {
-  max-width: 100%;
-  display: block;
+    max-width: 100%;
+    display: block;
 }
 
 /* Inherit fonts for inputs and buttons */
@@ -54,23 +73,23 @@ input,
 button,
 textarea,
 select {
-  font: inherit;
+    font: inherit;
 }
 
 /* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
 @media (prefers-reduced-motion: reduce) {
-  html:focus-within {
-   scroll-behavior: auto;
-  }
-  
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+    html:focus-within {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 
@@ -78,8 +97,8 @@ body, html {
     height: 100%;
 }
 body {
-    font-family: 'Source Sans Pro', sans-serif;
-    font-size: 1.2rem;
+    font-family: 'Inter', 'Source Sans Pro', sans-serif;
+    font-size: 1rem;
     margin: 0;
 }
 a {
@@ -89,12 +108,12 @@ a {
 
 h1 {
     margin-bottom: 1rem;
-    font-size: 2em;
+    font-size: 1.8em;
 }
 
 h2 {
     margin-bottom: 0.5rem;
-    font-size: 1.4em;
+    font-size: 1.3em;
 }
 
 .button{
@@ -106,7 +125,7 @@ h2 {
     text-decoration: none;
     color: #fff;
     padding: 3px 10px 5px 10px;
-    font-size: 1rem;
+    font-size: 0.9rem;
     border-radius: 0.15rem;
     transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     user-select: none;
@@ -125,7 +144,7 @@ h2 {
     height: 100%
 }
 .sidebar {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Inter', "Helvetica Neue", Helvetica, Arial, sans-serif;
     position: absolute;
     top: 0;
     left: -300px;
@@ -147,7 +166,7 @@ h2 {
 .sidebar a {
     padding: 10px 10px 10px 20px;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: #818181;
     display: block;
     transition: 0.3s;
@@ -167,7 +186,7 @@ h2 {
 }
 
 .openbtn {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     cursor: pointer;
     background-color: #fff;
     color: #333;
@@ -178,7 +197,7 @@ h2 {
 .openbtn:hover {
     background-color: #e2dfdf;
 }
-@media (max-width:600px) {    
+@media (max-width:600px) {
     .sidebar {
         width: calc(100% - 60px);
         bottom: 0;
