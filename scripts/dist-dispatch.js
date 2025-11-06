@@ -48,9 +48,9 @@ function run(cmd, args, opts = {}) {
     return;
   }
 
-  // macOS and Windows: regular electron-builder, then OS-specific rename
-  const builder = bin('electron-builder');
-  await run(builder, ['--publish', 'never']);
+  // macOS and Windows: run electron-builder via its JS CLI to avoid .cmd spawn issues on Windows
+  const builderCli = require.resolve('electron-builder/out/cli/cli.js', { paths: [root] });
+  await run(process.execPath, [builderCli, '--publish', 'never']);
 
   if (isMac) {
     await run.npm('rename:mac');
