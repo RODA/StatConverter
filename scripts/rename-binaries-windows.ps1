@@ -104,3 +104,31 @@ if (Test-Path -LiteralPath $unpackedDir) {
         }
     }
 }
+
+# Zip the renamed directory (NAME_VERSION) as NAME_VERSION.zip in build/output
+if (Test-Path -LiteralPath $finalDirPath) {
+    $zipPath = Join-Path -Path "build/output" -ChildPath ("{0}.zip" -f $finalDirName)
+    try {
+        if (Test-Path -LiteralPath $zipPath) {
+            try {
+                Remove-Item -LiteralPath $zipPath -Force -ErrorAction Stop
+                Write-Host "Removed existing archive: $zipPath"
+            } catch {
+                Write-Warning "Could not remove existing archive: $zipPath - $($_.Exception.Message)"
+            }
+        }
+
+        # Create the archive so that the top-level folder inside the zip is NAME_VERSION
+        Push-Location "build/output"
+        try {
+            Compress-Archive -Path $finalDirName -DestinationPath ("{0}.zip" -f $finalDirName) -Force -ErrorAction Stop
+        } finally {
+            Pop-Location
+        }
+        Write-Host "Created archive: $zipPath"
+    } catch {
+        Write-Warning "Failed to create zip archive: $($_.Exception.Message)"
+    }
+} else {
+    Write-Warning "Final directory not found for zipping: $finalDirPath"
+}
