@@ -8,7 +8,7 @@
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "npm run build && cross-env NODE_ENV=development electron ./dist/main.js",
-    "predist": "cross-env NODE_ENV=production ts-node check-env.ts",
+    "predist": "cross-env NODE_ENV=production node scripts/check-env.js",
     "dist": "npm run build && electron-builder --publish never",
     "dist:publish": "npm run build && electron-builder --publish onTagOrDraft",
     "rename:linux": "bash scripts/rename-binaries-linux.sh",
