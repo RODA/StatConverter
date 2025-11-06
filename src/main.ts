@@ -5,10 +5,7 @@
 // ./node_modules/.bin/electron-builder install-app-deps --arch arm64
 // ./node_modules/.bin/electron-builder install-app-deps --arch x64
 
-
-// Setting ENVIROMENT
-process.env.NODE_ENV = 'development';
-// process.env.NODE_ENV = 'production';
+// Environment is controlled via npm scripts (NODE_ENV). Do not override here.
 
 const production = process.env.NODE_ENV === 'production';
 const development = process.env.NODE_ENV === 'development';
@@ -17,14 +14,14 @@ const OS_Windows = process.platform == 'win32';
 import { app, BrowserWindow, ipcMain, dialog, shell, Menu, session } from "electron";
 import * as path from "path";
 import * as fs from "fs";
-import * as webr from "webr";
+import { WebR } from "webr";
 import { ungzip } from "pako";
 import * as interfaces from './library/interfaces';
 import { util } from "./library/helpers";
 import { autoUpdater } from "electron-updater";
 
 
-const webR = new webr.WebR({ interactive: false });
+const webR = new WebR({ interactive: false });
 let mainWindow: BrowserWindow;
 // const root = production ? "../../" : "../";
 
@@ -85,8 +82,8 @@ async function initWebR() {
             '/my-library'
         );
 
-        await webR.evalR(`.libPaths(c(.libPaths(), "/my-library"))`);
-        await webR.evalR(`library(DDIwR)`);
+        await webR.evalRVoid(`.libPaths(c(.libPaths(), "/my-library"))`);
+        await webR.evalRVoid(`library(DDIwR)`);
     } catch (error) {
         throw error;
     }
@@ -300,8 +297,8 @@ ipcMain.on("sendCommand", async (event, args) => {
     let output_dir_writable = true;
     if (!util.isTrue(args.updateVariables)) {
         try {
-            await webR.evalR(`write.csv(data.frame(A = 1:2), "/output/test.csv")`);
-            await webR.evalR(`unlink("/output/test.csv")`);
+            await webR.evalRVoid(`write.csv(data.frame(A = 1:2), "/output/test.csv")`);
+            await webR.evalRVoid(`unlink("/output/test.csv")`);
         } catch (error) {
             output_dir_writable = false;
         }
@@ -316,7 +313,7 @@ ipcMain.on("sendCommand", async (event, args) => {
     } else {
 
         try {
-            await webR.evalR(command);
+            await webR.evalRVoid(command);
         } catch (error) {
             const message = '' + error;
             dialog.showMessageBox(mainWindow, {
@@ -331,7 +328,7 @@ ipcMain.on("sendCommand", async (event, args) => {
         if (util.isTrue(args.updateVariables)) {
             // consolog("main: updating variables");
             try {
-                const result = await webR.evalR(`as.character(jsonlite::toJSON(lapply(
+                const result = await webR.evalRString(`as.character(jsonlite::toJSON(lapply(
                     collectRMetadata(dataset),
                     function(x) {
                         values <- names(x$labels)
@@ -341,11 +338,7 @@ ipcMain.on("sendCommand", async (event, args) => {
                     }
                 )))`);
 
-                if (!webr.isRCharacter(result)) throw new Error('Not a character!');
-
-                const response = await result.toString();
-                webR.destroy(result);
-                mainWindow.webContents.send("updateVariables", JSON.parse(response));
+                mainWindow.webContents.send("updateVariables", JSON.parse(result));
 
             } catch (error) {
                 console.log(error);

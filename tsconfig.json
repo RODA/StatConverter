@@ -13,14 +13,10 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
-    "paths": {
-      "*": [
-        "node_modules/*"
-      ]
-    },
     "types": [
-      "node"
+      "node",
+      "lodash",
+      "pako"
     ],
     "typeRoots": [
       "node_modules/@types"

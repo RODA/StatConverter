@@ -1,5 +1,5 @@
 import tippy from "tippy.js";
-import orderBy from "lodash/orderBy";
+import { orderBy } from "lodash";
 import * as path from "path";
 import * as interfaces from "./interfaces";
 

@@ -64,6 +64,11 @@ npx electron-builder --linux --x64 --arm64
 This command will create an `.AppImage` file for that specific architecture in the `build/output` directory.
 
 
+# R packages
+
+See `~/Documents/GitHub/R-wasm` for details.
+
+
 # 🚀 Auto-Updater
 
 Implemented in `main.ts`:
@@ -155,7 +160,7 @@ You can simplify your build and rename process by adding scripts to `package.jso
 ```json
 "scripts": {
   "dist": "npm run build && electron-builder",
-  "rename:unix": "bash scripts/rename-unix-binaries.sh",
+  "rename:unix": "bash scripts/rename-binaries-unix.sh",
   "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1",
   "dist:unix": "npm run dist && npm run rename:unix",
   "dist:win": "npm run dist && npm run rename:win"
@@ -268,6 +273,24 @@ if (Test-Path $originalFile) {
     exit 1
 }
 ```
+
+
+# App's icon
+
+The app's icon files are located in the `build` directory.
+Steps to obtain it:
+1. Create a .png file with a size of at least 512x512 pixels.
+
+2. Convert and optimize:
+`magick icon.png -resize 256x256 -strip -quality 90 icon-256.png`
+
+3. Convert the .png file to .icns (for macOS) and .ico (for Windows) formats using your preferred image conversion tool.
+`npx electron-icon-builder --input=icon-256.png --output=build --flatten`
+
+It will generate:
+	-	build/icons/icon.ico (Windows)
+	-	build/icons/icon.icns (macOS)
+	-	smaller .png for Linux
 
 # ✅ Tips
 
