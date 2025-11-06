@@ -1,43 +1,65 @@
-#!/bin/bash
+
+#!/usr/bin/env bash
+set -euo pipefail
 
 VERSION=$(node -p "require('./package.json').version")
-ARCH=$(uname -m)
-PLATFORM=$(uname -s)
+NAME=$(node -p "(p=> (p.build && p.build.productName) ? p.build.productName : p.name)(require('./package.json'))")
+# Use a filename-safe variant (replace spaces with underscores)
+NAME_FILE=$(printf '%s' "$NAME" | sed 's/[[:space:]]\+/_/g')
 
-if [ "$PLATFORM" = "Darwin" ]; then
-    # macOS section
-    if [ "$ARCH" = "arm64" ]; then
-        NEW_NAME="StatConverter_${VERSION}_silicon.dmg"
-    elif [ "$ARCH" = "x86_64" ]; then
-        NEW_NAME="StatConverter_${VERSION}_intel.dmg"
-    else
-        echo "Unknown macOS architecture: $ARCH"
-        exit 1
-    fi
-    ORIGINAL_FILE="build/output/StatConverter-${VERSION}.dmg"
+# Expected electron-builder outputs (current config produces mac DMGs)
+ORIGINAL_APPLE_ARM="build/output/${NAME}-${VERSION}-arm64.dmg"
+NEW_APPLE_ARM="${NAME_FILE}_${VERSION}_silicon.dmg"
 
-elif [ "$PLATFORM" = "Linux" ]; then
-    # Linux section
-    if [ "$ARCH" = "x86_64" ]; then
-        NEW_NAME="StatConverter_${VERSION}_intel.AppImage"
-    elif [ "$ARCH" = "aarch64" ]; then
-        NEW_NAME="StatConverter_${VERSION}_arm.AppImage"
-    else
-        echo "Unknown Linux architecture: $ARCH"
-        exit 1
-    fi
-    ORIGINAL_FILE="build/output/StatConverter-${VERSION}.AppImage"
+ORIGINAL_APPLE_INTEL="build/output/${NAME}-${VERSION}.dmg"
+NEW_APPLE_INTEL="${NAME_FILE}_${VERSION}_intel.dmg"
 
-else
-    echo "Unsupported platform: $PLATFORM"
-    exit 1
+# Optional Linux artifacts (if you add Linux target later)
+ORIGINAL_LINUX_ARM="build/output/${NAME}-${VERSION}-arm64.AppImage"
+NEW_LINUX_ARM="${NAME_FILE}_${VERSION}_silicon.AppImage"
+
+ORIGINAL_LINUX_INTEL="build/output/${NAME}-${VERSION}.AppImage"
+NEW_LINUX_INTEL="${NAME_FILE}_${VERSION}_intel.AppImage"
+
+renamed_any=0
+
+if [ -f "$ORIGINAL_APPLE_ARM" ]; then
+    echo "Renaming $(basename "$ORIGINAL_APPLE_ARM") -> $NEW_APPLE_ARM"
+    mv "$ORIGINAL_APPLE_ARM" "build/output/$NEW_APPLE_ARM"
+    renamed_any=1
 fi
 
-# Rename if file exists
-if [ -f "$ORIGINAL_FILE" ]; then
-    mv "$ORIGINAL_FILE" "build/output/$NEW_NAME"
-    echo "Renamed to $NEW_NAME"
-else
-    echo "Original file not found: $ORIGINAL_FILE"
-    exit 1
+if [ -f "$ORIGINAL_APPLE_INTEL" ]; then
+    echo "Renaming $(basename "$ORIGINAL_APPLE_INTEL") -> $NEW_APPLE_INTEL"
+    mv "$ORIGINAL_APPLE_INTEL" "build/output/$NEW_APPLE_INTEL"
+    renamed_any=1
 fi
+
+if [ -f "$ORIGINAL_LINUX_ARM" ]; then
+    echo "Renaming $(basename "$ORIGINAL_LINUX_ARM") -> $NEW_LINUX_ARM"
+    mv "$ORIGINAL_LINUX_ARM" "build/output/$NEW_LINUX_ARM"
+    renamed_any=1
+fi
+
+if [ -f "$ORIGINAL_LINUX_INTEL" ]; then
+    echo "Renaming $(basename "$ORIGINAL_LINUX_INTEL") -> $NEW_LINUX_INTEL"
+    mv "$ORIGINAL_LINUX_INTEL" "build/output/$NEW_LINUX_INTEL"
+    renamed_any=1
+fi
+
+if [ "$renamed_any" -eq 0 ]; then
+    echo "No matching artifacts found to rename in build/output for version $VERSION." >&2
+fi
+
+# Clean up auxiliary files we don't want to distribute
+echo "Cleaning up .yml, .yaml, and .blockmap files in build/output..."
+for f in build/output/*; do
+    if [ -f "$f" ]; then
+        case "$f" in
+            *.yml|*.yaml|*.blockmap)
+                echo "Removing $(basename "$f")"
+                rm -f "$f"
+                ;;
+        esac
+    fi
+done
