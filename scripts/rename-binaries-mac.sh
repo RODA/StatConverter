@@ -14,13 +14,6 @@ NEW_APPLE_ARM="${NAME_FILE}_${VERSION}_silicon.dmg"
 ORIGINAL_APPLE_INTEL="build/output/${NAME}-${VERSION}.dmg"
 NEW_APPLE_INTEL="${NAME_FILE}_${VERSION}_intel.dmg"
 
-# Optional Linux artifacts (if you add Linux target later)
-ORIGINAL_LINUX_ARM="build/output/${NAME}-${VERSION}-arm64.AppImage"
-NEW_LINUX_ARM="${NAME_FILE}_${VERSION}_silicon.AppImage"
-
-ORIGINAL_LINUX_INTEL="build/output/${NAME}-${VERSION}.AppImage"
-NEW_LINUX_INTEL="${NAME_FILE}_${VERSION}_intel.AppImage"
-
 renamed_any=0
 
 if [ -f "$ORIGINAL_APPLE_ARM" ]; then
@@ -32,18 +25,6 @@ fi
 if [ -f "$ORIGINAL_APPLE_INTEL" ]; then
     echo "Renaming $(basename "$ORIGINAL_APPLE_INTEL") -> $NEW_APPLE_INTEL"
     mv "$ORIGINAL_APPLE_INTEL" "build/output/$NEW_APPLE_INTEL"
-    renamed_any=1
-fi
-
-if [ -f "$ORIGINAL_LINUX_ARM" ]; then
-    echo "Renaming $(basename "$ORIGINAL_LINUX_ARM") -> $NEW_LINUX_ARM"
-    mv "$ORIGINAL_LINUX_ARM" "build/output/$NEW_LINUX_ARM"
-    renamed_any=1
-fi
-
-if [ -f "$ORIGINAL_LINUX_INTEL" ]; then
-    echo "Renaming $(basename "$ORIGINAL_LINUX_INTEL") -> $NEW_LINUX_INTEL"
-    mv "$ORIGINAL_LINUX_INTEL" "build/output/$NEW_LINUX_INTEL"
     renamed_any=1
 fi
 
