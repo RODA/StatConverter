@@ -11,9 +11,11 @@
     "predist": "cross-env NODE_ENV=production ts-node check-env.ts",
     "dist": "npm run build && electron-builder --publish never",
     "dist:publish": "npm run build && electron-builder --publish onTagOrDraft",
-    "rename:unix": "bash scripts/rename-binaries-unix.sh",
+    "rename:linux": "bash scripts/rename-binaries-linux.sh",
+    "rename:mac": "bash scripts/rename-binaries-mac.sh",
     "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1",
-    "dist:unix": "npm run dist && npm run rename:unix",
+    "dist:linux": "npm run predist && npm run build && node scripts/build-linux.js && npm run rename:linux",
+    "dist:mac": "npm run dist && npm run rename:mac",
     "dist:win": "npm run dist && npm run rename:win"
   },
   "author": "RODA",
