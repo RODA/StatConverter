@@ -31,7 +31,7 @@
       "output": "build/output"
     },
     "win": {
-      "icon": "build/StatConverter.ico",
+      "icon": "icons/StatConverter.ico",
       "legalTrademarks": "MIT Licence",
       "target": {
         "target": "nsis",
@@ -49,7 +49,7 @@
           "arm64"
         ]
       },
-      "icon": "build/StatConverter.icns"
+      "icon": "icons/StatConverter.icns"
     },
     "publish": {
       "provider": "github",
