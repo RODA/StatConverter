@@ -9,14 +9,11 @@
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "npm run build && cross-env NODE_ENV=development electron ./dist/main.js",
     "predist": "cross-env NODE_ENV=production node scripts/check-env.js",
-    "dist": "npm run build && electron-builder --publish never",
+    "dist": "node scripts/dist-dispatch.js",
     "dist:publish": "npm run build && electron-builder --publish onTagOrDraft",
     "rename:linux": "bash scripts/rename-binaries-linux.sh",
     "rename:mac": "bash scripts/rename-binaries-mac.sh",
-    "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1",
-    "dist:linux": "npm run predist && npm run build && node scripts/build-linux.js && npm run rename:linux",
-    "dist:mac": "npm run dist && npm run rename:mac",
-    "dist:win": "npm run dist && npm run rename:win"
+    "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1"
   },
   "author": "RODA",
   "license": "CC0-1.0",
