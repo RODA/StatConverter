@@ -15,8 +15,9 @@
     "rename:mac": "bash scripts/rename-binaries-mac.sh",
     "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1"
   },
-  "author": "RODA",
-  "license": "CC0-1.0",
+  "author": "Adrian Dusa",
+  "contributors": ["RODA"],
+  "license": "SEE LICENSE IN LICENSE",
   "bugs": {
     "url": "https://github.com/RODA/StatConverter/issues"
   },
@@ -27,9 +28,13 @@
     "directories": {
       "output": "build/output"
     },
+    "extraResources": [
+      "LICENSE"
+    ],
     "win": {
       "icon": "icons/StatConverter.ico",
-      "legalTrademarks": "MIT Licence",
+      "legalTrademarks": "Academic Non-Commercial License (see LICENSE file for details).",
+      "publisherName": "RODA",
       "target": {
         "target": "nsis",
         "arch": [
@@ -38,18 +43,24 @@
       }
     },
     "mac": {
+      "icon": "icons/StatConverter.icns",
       "category": "public.app-category.productivity",
+      "extendInfo": {
+        "NSHumanReadableCopyright": "© 2021-2025 Adrian Dusa — Academic Non-Commercial License (see LICENSE file for details)."
+      },
       "target": {
         "target": "dmg",
         "arch": [
           "x64",
           "arm64"
         ]
-      },
-      "icon": "icons/StatConverter.icns"
+      }
+    },
+    "dmg": {
+      "license": "LICENSE"
     },
     "publish": {
-      "provider": "github",
+      "provider": "GitHub",
       "owner": "RODA",
       "repo": "StatConverter"
     }
@@ -59,12 +70,12 @@
     "@types/emscripten": "^1.41.5",
     "@types/lodash": "^4.17.20",
     "@types/pako": "^2.0.4",
-    "@types/serviceworker": "^0.0.165",
+    "@types/serviceworker": "^0.0.166",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
     "@typescript-eslint/parser": "^8.46.3",
     "cross-env": "^10.1.0",
-    "electron": "^39.1.0",
+    "electron": "^39.1.1",
     "electron-builder": "^26.1.0",
     "eslint": "^9.39.1",
     "ts-loader": "^9.5.4",

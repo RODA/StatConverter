@@ -191,8 +191,8 @@ This Bash script is used on macOS and Linux to rename the output binary (`.dmg` 
   - Platform (`Darwin` or `Linux`)
   - Architecture (`x86_64`, `arm64`, etc.)
 - It renames files like:
-  - `StatConverter-1.2.1.dmg` → `StatConverter_1.2.1_intel.dmg`
-  - `StatConverter-1.2.1.AppImage` → `StatConverter_1.2.1_intel.AppImage`
+  - `StatConverter-1.2.1.dmg` -> `StatConverter_1.2.1_intel.dmg`
+  - `StatConverter-1.2.1.AppImage` -> `StatConverter_1.2.1_intel.AppImage`
 
 ### Script contents:
 
@@ -248,7 +248,7 @@ This PowerShell script is used on Windows to rename the installer binary based o
 
 - Detects architecture (`x86`, `x64`) but currently standardizes output to 64-bit naming only.
 - Renames:
-  - `StatConverter Setup 1.2.1.exe` → `StatConverter_setup_1.2.1.exe`
+  - `StatConverter Setup 1.2.1.exe` -> `StatConverter_setup_1.2.1.exe`
 
 These scripts ensure that all output files follow a consistent naming convention for GitHub Releases.
 
@@ -297,3 +297,38 @@ It will generate:
 - Always increment `"version"` in `package.json` before releasing.
 - Ensure the `GH_TOKEN` has `repo` access rights.
 - All artifacts will attach to a single GitHub release for auto-update compatibility.
+
+
+# GH_TOKEN
+
+This is how to provide GH_TOKEN for electron-builder publishing to RODA/StatConverter.
+
+Local (macOS/Linux, zsh/bash)
+  * One-shot: GH_TOKEN=YOUR_TOKEN npm run dist:publish
+  * Session: export GH_TOKEN=YOUR_TOKEN
+  * Persistent: add export GH_TOKEN=YOUR_TOKEN to ~/.zshrc (then restart shell)
+
+Local (Windows PowerShell)
+  * Current session: $env:GH_TOKEN="YOUR_TOKEN"
+  Persistent: setx GH_TOKEN "YOUR_TOKEN" (restart terminal)
+
+GitHub Actions
+  * Use the built-in token: env: GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  * Or add a PAT secret (e.g., GH_TOKEN) and reference it the same way
+
+Required token permissions
+  * Public repo: classic PAT scope public_repo (or fine-grained with Repository permissions -> Contents: Read and write, Metadata: Read-only).
+  * Private repo: classic PAT scope repo (or fine-grained with the same Contents permission).
+  * No admin permissions needed.
+
+Quick checks
+  * Verify it's set: node -e "console.log(!!process.env.GH_TOKEN)"
+  * Electron Builder reads GH_TOKEN (or GITHUB_TOKEN). Either works.
+
+Security tips
+  * Don't hardcode tokens in scripts or package.json.
+  * Prefer environment variables; avoid passing on the command line regularly to keep it out of shell history.
+
+Optionally, set up:
+  * A .env.example (no secrets) and wire dotenv-cli to load GH_TOKEN for local builds.
+  * A minimal GitHub Actions workflow that publishes on tag pushes using ${{ secrets.GITHUB_TOKEN }}.

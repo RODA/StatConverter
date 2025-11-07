@@ -29,14 +29,19 @@ function run(cmd, args, opts = {}) {
   const base = pkg.build || {};
 
   const linuxConfig = Object.assign({}, base, {
-    // Remove mac section to avoid any cross-platform confusion
+    // Remove mac/win sections to avoid any cross-platform confusion
     mac: undefined,
+    win: undefined,
     // Ensure linux section is present and configured
     linux: Object.assign({}, base.linux || {}, {
-      target: 'AppImage',
-      icon: base.linux?.icon || 'icons/original/icon.png',
+      target: base.linux?.target || 'AppImage',
+      icon: base.linux?.icon || 'icons/StatConverter.png',
       category: base.linux?.category || 'Utility',
-      maintainer: base.linux?.maintainer || 'Adrian Dusa <dusa.adrian@gmail.com>'
+      vendor: base.linux?.vendor || 'RODA',
+      maintainer: base.linux?.maintainer || 'Adrian Dusa <dusa.adrian@gmail.com>',
+      desktop: Object.assign({}, base.linux?.desktop || {}, {
+        Comment: base.linux?.desktop?.Comment || 'Academic Non-Commercial License (see LICENSE file for details).'
+      })
     })
   });
 
@@ -63,4 +68,3 @@ function run(cmd, args, opts = {}) {
   console.error(err.message || err);
   process.exit(1);
 });
-

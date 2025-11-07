@@ -1,3 +1,10 @@
+/*
+    Copyright (c) 2021-2025, Adrian Dusa
+    All rights reserved.
+
+    License: Academic Non-Commercial License (see LICENSE file for details).
+    SPDX-License-Identifier: LicenseRef-ANCL-AdrianDusa
+*/
 import { ipcRenderer } from 'electron';
 import * as path from 'path';
 import { util } from './library/helpers';
