@@ -117,7 +117,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         command += ")";
-        // console.log("preload114: ", command);
+        // console.log("preload120: ", command);
 
         ipcRenderer.send('sendCommand', {
             command: command.replace(/\\/g, '/'),
@@ -312,7 +312,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             command += ")";
-            // console.log("preload309: ", command);
+            // console.log("preload315: ", command);
 
             ipcRenderer.send('sendCommand', {
                 command: command.replace(/\\/g, '/'),
@@ -334,7 +334,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             command += ")";
-            // console.log("preload331: ", command);
+            // console.log("preload337: ", command);
 
             ipcRenderer.send('sendCommand', {
                 command: command.replace(/\\/g, '/'),
@@ -430,16 +430,21 @@ window.addEventListener('DOMContentLoaded', () => {
                     formCheck.classList.add('activeVariable');
 
                     const el = <HTMLInputElement>document.querySelector('.activeVariable input[type="checkbox"]');
-                    if (variables[el.id] && variables[el.id].label[0]) {
-                        (util.htmlElement('variable-label')).innerHTML = util.replaceUnicode(variables[el.id].label)[0];
-                        const vals = util.htmlElement('value-labels');
-                        let valList = '';
-                        if (Object.keys(variables[el.id].values).length > 0) {
-                            for (const key in variables[el.id].values) {
-                                valList += '<div class="ms-2">' + key + ' : ' + util.replaceUnicode(variables[el.id].values[key]) + '</div>';
+                    if (variables[el.id] && !util.isNull(variables[el.id])) {
+                        if (variables[el.id].label) {
+                            (util.htmlElement('variable-label')).innerHTML = util.replaceUnicode(variables[el.id].label);
+                            const vals = util.htmlElement('value-labels');
+                            let valList = '';
+                            if (Object.keys(variables[el.id].values).length > 0) {
+                                for (const key in variables[el.id].values) {
+                                    valList += '<div class="ms-2">' + key + ' : ' + util.replaceUnicode(variables[el.id].values[key]) + '</div>';
+                                }
                             }
+                            vals.innerHTML = valList;
+                        } else {
+                            (util.htmlElement('variable-label')).innerHTML = '';
+                            (util.htmlElement('value-labels')).innerHTML = '';
                         }
-                        vals.innerHTML = valList;
                     }
                 }
             });

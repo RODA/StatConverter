@@ -66,7 +66,7 @@ interface UtilHelpersInterface {
     getTypeFromExtension: (ext: string) => string;
     fileFromInfo: (inputType: string) => interfaces.FileFromInfo;
     validate: (inputOutput: interfaces.InputOutput) => string;
-    replaceUnicode: (x: Array<string>) => Array<string>;
+    replaceUnicode: (x: string) => string;
 }
 
 const validation_messages: interfaces.ValidationMessage = {};
@@ -904,15 +904,16 @@ export const util: UtilHelpersInterface = {
     },
 
     replaceUnicode: function(x) {
-        for (let i = 0; i < x.length; i++) {
-            x[i] = x[i].replace(
+        // for (let i = 0; i < x.length; i++) {
+            // x[i] = x[i].replace(
+            x = x.replace(
                 /<U\+([A-Fa-f0-9]{4})>/g,
                 function(match: string, hex: string): string {
                     const codepoint = parseInt(hex, 16);
                     return String.fromCharCode(codepoint);
                 }
             );
-        }
+        // }
         return(x);
     }
 }

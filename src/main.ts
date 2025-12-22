@@ -91,6 +91,14 @@ async function initWebR() {
 
         await webR.evalRVoid(`.libPaths(c(.libPaths(), "/my-library"))`);
         await webR.evalRVoid(`library(DDIwR)`);
+
+        const rAssetsPath = production
+            ? path.join(process.resourcesPath, "library", "R")
+            : path.join(__dirname, "../src/library/R");
+
+        await mount({ what: rAssetsPath, where: "/app-r" });
+        await webR.evalRVoid(`source("/app-r/utils.R")`);
+
     } catch (error) {
         throw error;
     }
@@ -232,12 +240,7 @@ ipcMain.on("selectFileFrom", (event, args) => {
 ipcMain.on("outputType", (event, args) => {
     inputOutput.fileToExt = args.extension;
     if (inputOutput.fileFromDir != "" && inputOutput.fileToDir == "") {
-        mount(
-            {
-                what: inputOutput.fileFromDir,
-                where: "/output"
-            }
-        );
+        mount({ what: inputOutput.fileFromDir, where: "/output" });
     }
 })
 
@@ -311,6 +314,7 @@ ipcMain.on("sendCommand", async (event, args) => {
         }
     }
 
+    // TODO: a false updateVariables signals a save command: replace with a proper, explicit flag
     if (util.isFalse(args.updateVariables) && util.isFalse(output_dir_writable)) {
         dialog.showMessageBox(mainWindow, {
             type: "error",
@@ -319,38 +323,41 @@ ipcMain.on("sendCommand", async (event, args) => {
         });
     } else {
 
-        try {
-            await webR.evalRVoid(command);
-        } catch (error) {
-            const message = '' + error;
+        const result = await webR.evalRString(`run_cmd("${command}")`);
+        const parsed = JSON.parse(result);
+        // consolog(parsed);
+
+
+        if (!parsed.ok && parsed.error) {
             dialog.showMessageBox(mainWindow, {
                 type: "error",
                 title: "Error",
-                message: message.substring(message.lastIndexOf(":") + 1)
+                message: parsed.error
             });
+
             mainWindow.webContents.send("clearLoader");
-            throw error;
+            throw parsed.error;
         }
 
         if (util.isTrue(args.updateVariables)) {
             // consolog("main: updating variables");
-            try {
-                const result = await webR.evalRString(`as.character(jsonlite::toJSON(lapply(
-                    collectRMetadata(dataset),
-                    function(x) {
-                        values <- names(x$labels)
-                        names(values) <- x$labels
-                        x$values <- as.list(values)
-                        return(x)
-                    }
-                )))`);
 
-                mainWindow.webContents.send("updateVariables", JSON.parse(result));
+            const result = await webR.evalRString(`run_cmd("dataset_metadata()")`);
+            const parsed = JSON.parse(result);
 
-            } catch (error) {
-                console.log(error);
-                throw error;
+            if (!parsed.ok && parsed.error) {
+                dialog.showMessageBox(mainWindow, {
+                    type: "error",
+                    title: "Error",
+                    message: parsed.error
+                });
+
+                mainWindow.webContents.send("clearLoader");
+                throw parsed.error;
             }
+
+            mainWindow.webContents.send("consolog", parsed);
+            mainWindow.webContents.send("updateVariables", parsed.result);
         }
     }
 
