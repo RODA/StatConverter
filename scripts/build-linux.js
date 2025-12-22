@@ -40,7 +40,11 @@ function run(cmd, args, opts = {}) {
       vendor: base.linux?.vendor || 'RODA',
       maintainer: base.linux?.maintainer || 'Adrian Dusa <dusa.adrian@gmail.com>',
       desktop: Object.assign({}, base.linux?.desktop || {}, {
-        Comment: base.linux?.desktop?.Comment || 'Academic Non-Commercial License (see LICENSE file for details).'
+        entry: Object.assign({}, base.linux?.desktop?.entry || {}, {
+          Comment: base.linux?.desktop?.entry?.Comment
+            || base.linux?.desktop?.Comment
+            || 'Academic Non-Commercial License (see LICENSE file for details).'
+        })
       })
     })
   });
