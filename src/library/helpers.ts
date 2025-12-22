@@ -8,7 +8,20 @@
 import tippy from "tippy.js";
 import { orderBy } from "lodash";
 import * as path from "path";
+import * as os from "os";
+import * as fs from "fs";
 import * as interfaces from "./interfaces";
+
+// Lightweight file logger shared by main/preload; writes to user's home.
+export function debugLog(...args: Array<string | number | boolean>) {
+    try {
+        const logFile = path.join(os.homedir(), "statconverter-debug.log");
+        const ts = new Date().toISOString();
+        fs.appendFileSync(logFile, `${ts} | ${args.join(" ")}\n`);
+    } catch (_) {
+        // ignore logging errors
+    }
+}
 
 
 interface UtilHelpersInterface {
