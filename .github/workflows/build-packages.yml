@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  linux-x64:
+  linux-x86:
     runs-on: ubuntu-22.04
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -29,7 +29,7 @@ jobs:
       - name: Build TypeScript output
         run: npm run build
 
-      - name: Build Electron app (Linux x64)
+      - name: Build Electron app (Linux x86)
         run: npx electron-builder --linux AppImage deb --x64 --publish never
 
       - name: Rename Linux artifacts
@@ -38,13 +38,13 @@ jobs:
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-x64-build
+          name: linux-x86-build
           path: |
             build/output/*.AppImage
             build/output/*.deb
           if-no-files-found: error
 
-  windows-x64:
+  windows-x86:
     runs-on: windows-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -69,7 +69,7 @@ jobs:
       - name: Build TypeScript output
         run: npm run build
 
-      - name: Build Electron app (Windows x64)
+      - name: Build Electron app (Windows x86)
         run: npx electron-builder --win nsis portable --x64 --publish never
 
       - name: Rename Windows artifacts
@@ -78,7 +78,7 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-x64-build
+          name: windows-x86-build
           path: |
             build/output/*.exe
             build/output/*.zip
