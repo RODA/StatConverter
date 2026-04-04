@@ -10,7 +10,7 @@ const root = path.resolve(__dirname, '..');
 const targetDir = path.join(root, 'R-runtime');
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'statconverter-r-portable-'));
 
-const DEFAULT_BASE_URL = 'https://github.com/dusadrian/binaries/tree/R-4.5.3';
+const DEFAULT_BASE_URL = 'https://github.com/dusadrian/binaries/releases/download/R-4.5.3';
 
 const ARCHIVE_FILENAMES = {
   linux: {

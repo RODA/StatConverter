@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/tree/R-4.5.3
+      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/releases/download/R-4.5.3
       SC_GITHUB_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
 
     steps:
@@ -48,7 +48,7 @@ jobs:
     runs-on: windows-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/tree/R-4.5.3
+      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/releases/download/R-4.5.3
       SC_GITHUB_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
 
     steps:
