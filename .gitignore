@@ -6,3 +6,10 @@ package-lock.json
 docs/images/Thumbs.db
 instructions.txt
 R-runtime/
+*.dmg
+*.exe
+*.deb
+*.rpm
+*.AppImage
+*.zip
+*.tar.gz
