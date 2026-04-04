@@ -1,12 +1,13 @@
 {
   "name": "statconverter",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Statistical package converter using the DDI standard interface",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
+    "prepare:r-portable": "node scripts/prepare-r-portable.js",
     "start": "npm run build && cross-env NODE_ENV=development electron ./dist/main.js",
     "predist": "cross-env NODE_ENV=production node scripts/check-env.js",
     "dist": "node scripts/dist-dispatch.js",
@@ -30,6 +31,13 @@
     },
     "extraResources": [
       "LICENSE",
+      {
+        "from": "R-runtime",
+        "to": "R-runtime",
+        "filter": [
+          "**/*"
+        ]
+      },
       {
         "from": "src/library/R",
         "to": "library/R",
@@ -66,13 +74,12 @@
       "provider": "github",
       "owner": "RODA",
       "repo": "StatConverter"
-    }
+    },
+    "beforePack": "./scripts/electron-builder-before-pack.js"
   },
   "devDependencies": {
     "@types/electron": "^1.4.38",
-    "@types/emscripten": "^1.41.5",
     "@types/lodash": "^4.17.21",
-    "@types/pako": "^2.0.4",
     "@types/serviceworker": "^0.0.170",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.50.0",
@@ -93,10 +100,8 @@
     "bootstrap": "^5.3.8",
     "electron-updater": "^6.7.3",
     "lodash": "^4.17.21",
-    "pako": "^2.1.0",
     "tippy.js": "^6.3.7",
     "uuid": "^13.0.0",
-    "webr": "^0.5.8",
     "ws": "^8.18.3"
   },
   "postinstall": "electron-builder install-app-deps"

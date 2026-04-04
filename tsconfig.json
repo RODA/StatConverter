@@ -15,8 +15,7 @@
     "esModuleInterop": true,
     "types": [
       "node",
-      "lodash",
-      "pako"
+      "lodash"
     ],
     "typeRoots": [
       "node_modules/@types"

@@ -35,10 +35,6 @@ window.addEventListener('DOMContentLoaded', () => {
     //     replaceText(`${type}-version`, <any> process.versions[type as keyof NodeJS.ProcessVersions]);
     // }
 
-    document.getElementById('declared')?.addEventListener('click', () => {
-        ipcRenderer.send('declared');
-    });
-
     document.getElementById('gotoRODA')?.addEventListener('click', () => {
         ipcRenderer.send('gotoRODA');
     });
@@ -202,10 +198,6 @@ window.addEventListener('DOMContentLoaded', () => {
             let command = "convert('/input/" + inputOutput.fileFromName + inputOutput.fileFromExt + "', to = '/output/" + inputOutput.fileToName + inputOutput.fileToExt + "'";
             // let command = "convert('" + inputOutput.fileFrom + "', to = '" + inputOutput.fileTo + "'";
 
-            const declaredTRUE = util.htmlElement("declaredTRUE");
-            command += ", declared = " + ((inputOutput.outputType == "r" && declaredTRUE.checked) ? "TRUE" : "FALSE");
-
-
             // recode is by default TRUE, for instance from Stata to SPSS this is mandatory
             // const from_extended = inputOutput.inputType == "stata" || inputOutput.inputType == "sas";
             // const to_normal = inputOutput.outputType == "spss" || inputOutput.outputType == "ddi";
@@ -314,10 +306,11 @@ window.addEventListener('DOMContentLoaded', () => {
             command += ")";
             // console.log("preload315: ", command);
 
-            ipcRenderer.send('sendCommand', {
-                command: command.replace(/\\/g, '/'),
-                updateVariables: false
-            });
+        ipcRenderer.send('sendCommand', {
+            command: command.replace(/\\/g, '/'),
+            updateVariables: false,
+            io: inputOutput
+        });
         }
     });
 
@@ -338,7 +331,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
             ipcRenderer.send('sendCommand', {
                 command: command.replace(/\\/g, '/'),
-                updateVariables: true
+                updateVariables: true,
+                io: inputOutput
             });
         }
     });

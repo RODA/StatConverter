@@ -24,13 +24,14 @@
 				background-color: #ccc;
 			}
 			.loader {
-				font-size: 3rem;
+				font-size: 1.6rem;
 				font-weight: 700;
 				color: #ffffff;
 				position: fixed;
 				z-index: 1050;
-				left: calc(50% - 145px);
-				top: calc(50% - 70px);
+				left: 50%;
+				top: calc(50% - 32px);
+				transform: translateX(-50%);
 				text-align: center;
 			}
 
@@ -349,22 +350,6 @@
 										</div>
 									</div>
 								</div>
-								<div class="row">
-									<div class="col-8">
-										<span>Make the R dataset &quot;<a id="declared" href="#">declared</a>&quot;</span>
-									</div>
-									<div class="col-3 text-start">
-										<div class="form-check form-check-inline">
-											<input class="form-check-input" type="radio" name="declared" id="declaredTRUE" value="yes" checked />
-											<label class="form-check-label" for="declaredTRUE">Yes</label>
-										</div>
-										<div class="form-check form-check-inline">
-											<input class="form-check-input" type="radio" name="declared" id="declaredFALSE" value="no" />
-											<label class="form-check-label" for="declaredFALSE">No</label>
-										</div>
-									</div>
-								</div>
-
                                 <hr style="margin: 1.2rem 0;">
 
 								<p class="mb-3"><strong>DDI / XML specific:</strong></p>

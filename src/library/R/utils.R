@@ -60,15 +60,60 @@ env$run_cmd <- local({
 })
 
 env$dataset_metadata <- function() {
+    extract_values <- function(x) {
+        labels_attr <- attr(x, "labels", exact = TRUE)
+        labels_fun <- tryCatch(labels(x), error = function(e) NULL)
+        labels <- labels_attr
+
+        if (is.null(labels) || length(labels) == 0) {
+            labels <- labels_fun
+        }
+
+        if (is.null(labels) || length(labels) == 0) {
+            return(list())
+        }
+
+        if (is.data.frame(labels)) {
+            nms <- tolower(names(labels))
+            vals_col <- NULL
+            labs_col <- NULL
+
+            if (is.element("value", nms)) vals_col <- labels[[which(nms == "value")[1]]]
+            if (is.element("values", nms)) vals_col <- labels[[which(nms == "values")[1]]]
+            if (is.element("label", nms)) labs_col <- labels[[which(nms == "label")[1]]]
+            if (is.element("labels", nms)) labs_col <- labels[[which(nms == "labels")[1]]]
+            if (is.null(vals_col) && ncol(labels) >= 1) vals_col <- labels[[1]]
+            if (is.null(labs_col) && ncol(labels) >= 2) labs_col <- labels[[2]]
+
+            values <- as.character(unname(vals_col))
+            names(values) <- as.character(unname(labs_col))
+        } else {
+            values <- as.character(unname(labels))
+            names(values) <- as.character(names(labels))
+        }
+
+        named_values <- as.list(names(values))
+        names(named_values) <- unname(values)
+        return(named_values)
+    }
+
+    meta <- collectRMetadata(dataset)
     return(lapply(
-        collectRMetadata(dataset),
-        function(x) {
-            values <- names(x$labels)
-            names(values) <- x$labels
-            x$values <- as.list(values)
+        names(meta),
+        function(varname) {
+            x <- meta[[varname]]
+            variable <- dataset[[varname]]
+
+            x$values <- extract_values(variable)
+            x$selected <- list(TRUE)
+
+            if (is.null(x$label)) {
+                x$label <- attr(variable, "label", exact = TRUE)
+            }
+
             return(x)
         }
-    ))
+    ) |> stats::setNames(names(meta)))
 }
 
 # Hide the helper reference symbol to avoid polluting the workspace

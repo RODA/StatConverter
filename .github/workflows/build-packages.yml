@@ -1,0 +1,85 @@
+name: build-packages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  linux-x64:
+    runs-on: ubuntu-22.04
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/tree/R-4.5.3
+      SC_GITHUB_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare bundled R runtime
+        run: npm run prepare:r-portable
+
+      - name: Build TypeScript output
+        run: npm run build
+
+      - name: Build Electron app (Linux x64)
+        run: npx electron-builder --linux AppImage deb --x64 --publish never
+
+      - name: Rename Linux artifacts
+        run: npm run rename:linux
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64-build
+          path: |
+            build/output/*.AppImage
+            build/output/*.deb
+          if-no-files-found: error
+
+  windows-x64:
+    runs-on: windows-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/tree/R-4.5.3
+      SC_GITHUB_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare bundled R runtime
+        run: npm run prepare:r-portable
+
+      - name: Build TypeScript output
+        run: npm run build
+
+      - name: Build Electron app (Windows x64)
+        run: npx electron-builder --win nsis portable --x64 --publish never
+
+      - name: Rename Windows artifacts
+        run: npm run rename:win
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-build
+          path: |
+            build/output/*.exe
+            build/output/*.zip
+          if-no-files-found: error

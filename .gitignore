@@ -5,3 +5,4 @@ package-lock.json
 .DS_Store
 docs/images/Thumbs.db
 instructions.txt
+R-runtime/

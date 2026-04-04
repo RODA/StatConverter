@@ -78,7 +78,7 @@ import { autoUpdater } from "electron-updater";
 
 app.whenReady().then(() => {
   createWindow();
-  initWebR();
+  initEmbeddedR();
   if (production) {
     autoUpdater.checkForUpdatesAndNotify();
   }

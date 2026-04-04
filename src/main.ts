@@ -6,102 +6,48 @@
     SPDX-License-Identifier: LicenseRef-ANCL-AdrianDusa
 */
 
-// https://r-wasm.github.io/rwasm/articles/mount-fs-image.html
-// https://docs.r-wasm.org/webr/latest/
-
 // ./node_modules/.bin/electron-builder install-app-deps --arch arm64
 // ./node_modules/.bin/electron-builder install-app-deps --arch x64
 
 import { app, BrowserWindow, ipcMain, dialog, shell, Menu, session } from "electron";
 import * as path from "path";
 import * as fs from "fs";
-import { WebR } from "webr";
-import { ungzip } from "pako";
 import * as interfaces from './library/interfaces';
 import { util } from "./library/helpers"; // , debugLog
 import { autoUpdater } from "electron-updater";
+import { evalRString, initEmbeddedR } from "./modules/backend/embeddedR";
 
 // Environment detection: prefer app.isPackaged at runtime; fall back to NODE_ENV for dev tooling
 const production = app.isPackaged || process.env.NODE_ENV === 'production';
 const development = !production;
 const OS_Windows = process.platform == 'win32';
-
-
-const webR = new WebR({ interactive: false });
 let mainWindow: BrowserWindow;
-// const root = production ? "../../" : "../";
 
-async function mount(obj: interfaces.MountArgs) {
-
-    try {
-        await webR.FS.unmount(obj.where);
-    } catch (error) {
-        // consolog(obj.where + " directory is not mounted yet.");
-        try {
-            await webR.FS.mkdir(obj.where);
-        } catch (error) {
-            consolog("Failed to make " + obj.where);
-            throw error;
-        }
-    }
-
-    try {
-        await webR.FS.mount(
-            "NODEFS",
-            { root: obj.what },
-            obj.where
-        );
-    } catch (error) {
-        consolog("Failed to mount " + obj.what + " to " + obj.where);
-        throw error;
-    }
+function normalizePathForR(filePath: string): string {
+    return (OS_Windows ? filePath.replace(/\\/g, "/") : filePath)
+        .replace(/'/g, "\\'");
 }
 
-async function initWebR() {
-    try {
-        // debugLog("initWebR start", production ? "prod" : "dev");
-        await webR.init();
+function replaceAllLiteral(input: string, search: string, replacement: string): string {
+    return input.split(search).join(replacement);
+}
 
-        const rAssetsPath = production
-            ? path.join(process.resourcesPath, "library", "R")
-            : path.join(__dirname, "../src/library/R");
-        const rFile = (name: string) => path.join(rAssetsPath, name);
+function commandToHostPaths(command: string): string {
+    let resolved = command;
 
-        const buffer = Buffer.from(ungzip(fs.readFileSync(rFile("library.data.gz"))));
-        const data = new Blob([buffer]);
-
-        const metadata = JSON.parse(
-            fs.readFileSync(
-                rFile("library.js.metadata"),
-                "utf-8"
-            )
-        );
-
-        const options = {
-            packages: [{
-                blob: data,
-                metadata: metadata,
-            }]
-        };
-
-        await webR.FS.mkdir("/my-library");
-        await webR.FS.mount(
-            "WORKERFS",
-            options,
-            "/my-library"
-        );
-
-        await webR.evalRVoid(`.libPaths(c(.libPaths(), "/my-library"))`);
-        await webR.evalRVoid(`library(DDIwR)`);
-
-        await mount({ what: rAssetsPath, where: "/app-r" });
-        await webR.evalRVoid(`source("/app-r/utils.R")`);
-        // debugLog("initWebR done");
-
-    } catch (error) {
-        // debugLog("initWebR error", String(error));
-        throw error;
+    if (inputOutput.fileFrom) {
+        const fileFromPath = normalizePathForR(inputOutput.fileFrom);
+        const inputToken = `/input/${inputOutput.fileFromName}${inputOutput.fileFromExt}`;
+        resolved = replaceAllLiteral(resolved, inputToken, fileFromPath);
     }
+
+    if (inputOutput.fileTo) {
+        const fileToPath = normalizePathForR(inputOutput.fileTo);
+        const outputToken = `/output/${inputOutput.fileToName}${inputOutput.fileToExt}`;
+        resolved = replaceAllLiteral(resolved, outputToken, fileToPath);
+    }
+
+    return resolved;
 }
 
 function createWindow() {
@@ -138,7 +84,13 @@ function createWindow() {
 
 app.whenReady().then(() => {
     createWindow();
-    initWebR();
+    initEmbeddedR().catch((error: Error) => {
+        dialog.showMessageBox(mainWindow, {
+            type: "error",
+            title: "Error",
+            message: error.message || "Failed to initialize the embedded R runtime."
+        });
+    });
 
     if (production) {
         autoUpdater.checkForUpdatesAndNotify();
@@ -148,9 +100,6 @@ app.whenReady().then(() => {
 
 ipcMain.on("outputType", (event, args) => {
     inputOutput.fileToExt = args.extension;
-    if (inputOutput.fileFromDir != "" && inputOutput.fileToDir == "") {
-        mount({ what: inputOutput.fileFromDir, where: "/output" });
-    }
 })
 
 ipcMain.on("selectFileTo", (event, args) => {
@@ -187,9 +136,7 @@ ipcMain.on("selectFileTo", (event, args) => {
                     inputOutput.fileToDir = inputOutput.fileToDir.replace(/\\/g, '/');
                 }
 
-                mount({ what: inputOutput.fileToDir, where: "/output" }).then(() => {
-                    mainWindow.webContents.send("selectFileTo-reply", inputOutput);
-                });
+                mainWindow.webContents.send("selectFileTo-reply", inputOutput);
             }
         })
         .catch((err) => {
@@ -202,11 +149,6 @@ ipcMain.on("selectFileTo", (event, args) => {
 ipcMain.on("gotoRODA", () => {
     shell.openExternal("http://www.roda.ro");
 });
-
-ipcMain.on("declared", () => {
-    shell.openExternal("https://cran.r-project.org/web/packages/declared/index.html");
-});
-
 
 ipcMain.on("selectFileFrom", (event, args) => {
     if (args.inputType === "Select file type") {
@@ -246,16 +188,7 @@ ipcMain.on("selectFileFrom", (event, args) => {
                     inputOutput.fileFrom = inputOutput.fileFrom.replace(/\\/g, '/');
                     inputOutput.fileFromDir = inputOutput.fileFromDir.replace(/\\/g, '/');
                 }
-
-                mount(
-                    {
-                        what: inputOutput.fileFromDir,
-                        where: "/input"
-                    }
-                ).then(() => {
-                    // debugLog("selectFileFrom mounted", inputOutput.fileFromDir);
-                    mainWindow.webContents.send("selectFileFrom-reply", inputOutput);
-                });
+                mainWindow.webContents.send("selectFileFrom-reply", inputOutput);
             }
             else {
                 // debugLog("selectFileFrom canceled");
@@ -267,15 +200,25 @@ ipcMain.on("selectFileFrom", (event, args) => {
 
 // Handle the command request
 ipcMain.on("sendCommand", async (event, args) => {
-    const command = args.command;
+    if (args.io && typeof args.io === "object") {
+        Object.assign(inputOutput, args.io);
+    }
+
+    const command = commandToHostPaths(args.command);
     mainWindow.webContents.send("startLoader");
 
     let output_dir_writable = true;
     if (!util.isTrue(args.updateVariables)) {
         try {
-            await webR.evalRVoid(`write.csv(data.frame(A = 1:2), "/output/test.csv")`);
-            await webR.evalRVoid(`unlink("/output/test.csv")`);
-        } catch (error) {
+            if (!inputOutput.fileTo) {
+                throw new Error("Missing output directory");
+            }
+            const outputDir = path.dirname(inputOutput.fileTo);
+            const probeFile = path.join(outputDir, `.statconverter-write-test-${Date.now()}.tmp`);
+            fs.writeFileSync(probeFile, "ok");
+            fs.unlinkSync(probeFile);
+        }
+        catch (error) {
             output_dir_writable = false;
         }
     }
@@ -290,7 +233,7 @@ ipcMain.on("sendCommand", async (event, args) => {
     } else {
         // debugLog("sendCommand", command);
 
-        const result = await webR.evalRString(`run_cmd(${JSON.stringify(command)}, return = FALSE)`);
+        const result = await evalRString(`run_cmd(${JSON.stringify(command)}, return = FALSE)`);
         const parsed = JSON.parse(result);
         // debugLog("sendCommand parsed.ok", parsed.ok === true, "error", parsed.error ? parsed.error : "");
         // consolog(parsed);
@@ -310,7 +253,7 @@ ipcMain.on("sendCommand", async (event, args) => {
         if (util.isTrue(args.updateVariables)) {
             // consolog("main: updating variables");
 
-            const result = await webR.evalRString(`run_cmd("dataset_metadata()")`);
+            const result = await evalRString(`run_cmd("dataset_metadata()")`);
             const parsed = JSON.parse(result);
 
             if (!parsed.ok && parsed.error) {
