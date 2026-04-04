@@ -20,6 +20,26 @@ if (Test-Path $originalFile) {
     exit 1
 } 
 
+# Rename the standalone portable executable to include the Intel suffix.
+$portableCandidates = @(
+    "build/output/${name} Portable $version.exe",
+    "build/output/${name} $version.exe"
+)
+$portableNewName = "${nameForFile}_${version}_intel.exe"
+$portableNewPath = "build/output/$portableNewName"
+$portableOriginalFile = $portableCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+if ($portableOriginalFile) {
+    if ($portableOriginalFile -ne $portableNewPath) {
+        Rename-Item -Path $portableOriginalFile -NewName $portableNewName
+        Write-Host "Renamed portable executable to $portableNewName"
+    } else {
+        Write-Host "Portable executable already named $portableNewName"
+    }
+} else {
+    Write-Warning "Portable executable not found. Checked: $($portableCandidates -join ', ')"
+}
+
 # Also remove update metadata artifacts we don't want to ship alongside the installer
 $artifactDir = "build/output"
 $patterns = @("*.yml", "*.yaml", "*.blockmap")
@@ -87,8 +107,8 @@ if (Test-Path -LiteralPath $unpackedDir) {
     Write-Warning "Unpacked directory not found: $unpackedDir"
 }
 
-# Finally, rename win-unpacked to NAME_VERSION (NAME from build.productName or package name)
-$finalDirName = "${name}_${version}"
+# Finally, rename win-unpacked to NAME_VERSION_intel (NAME from build.productName or package name)
+$finalDirName = "${name}_${version}_intel"
 $finalDirPath = Join-Path -Path "build/output" -ChildPath $finalDirName
 
 if (Test-Path -LiteralPath $unpackedDir) {

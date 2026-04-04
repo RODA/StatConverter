@@ -148,8 +148,10 @@ This ensures consistent filenames like:
 - `StatConverter_1.2.1_intel.dmg`
 - `StatConverter_1.2.1_intel.AppImage`
 - `StatConverter_setup_1.2.1.exe`
+- `StatConverter_1.2.1_intel.exe`
+- `StatConverter_1.2.1_intel.zip`
 
-Note: For Windows, the rename is version-based only; architecture is no longer included in filenames since only 64-bit builds are produced.
+Note: For Windows, the installer keeps the version-based name, while the portable `.exe` and `.zip` include the `_intel` suffix.
 
 After renaming, upload all binaries manually to the **same GitHub release** corresponding to the current version in `package.json`.
 
@@ -244,11 +246,12 @@ fi
 
 ## 🪟 `scripts/rename-binaries-windows.ps1`
 
-This PowerShell script is used on Windows to rename the installer binary based on the version in `package.json`.
+This PowerShell script is used on Windows to rename the installer binary, rename the portable executable, and generate the portable `.zip` with consistent release names.
 
-- Detects architecture (`x86`, `x64`) but currently standardizes output to 64-bit naming only.
 - Renames:
   - `StatConverter Setup 1.2.1.exe` -> `StatConverter_setup_1.2.1.exe`
+  - `StatConverter Portable 1.2.1.exe` -> `StatConverter_1.2.1_intel.exe`
+  - `StatConverter_1.2.1_intel/` -> `StatConverter_1.2.1_intel.zip`
 
 These scripts ensure that all output files follow a consistent naming convention for GitHub Releases.
 
@@ -271,6 +274,14 @@ if (Test-Path $originalFile) {
 } else {
     Write-Error "Original file not found: $originalFile"
     exit 1
+}
+
+$portableOriginalFile = "build/output/StatConverter Portable $version.exe"
+$portableNewName = "StatConverter_${version}_intel.exe"
+
+if (Test-Path $portableOriginalFile) {
+    Rename-Item -Path $portableOriginalFile -NewName $portableNewName
+    Write-Host "Renamed to $portableNewName"
 }
 ```
 
