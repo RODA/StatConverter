@@ -16,7 +16,10 @@
     "rename:mac": "bash scripts/rename-binaries-mac.sh",
     "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1"
   },
-  "author": "Adrian Dusa",
+  "author": {
+    "name": "Adrian Dusa",
+    "email": "dusa.adrian@gmail.com"
+  },
   "contributors": ["RODA"],
   "license": "SEE LICENSE IN LICENSE",
   "bugs": {
@@ -68,6 +71,17 @@
           "x64",
           "arm64"
         ]
+      }
+    },
+    "linux": {
+      "icon": "icons/StatConverter.png",
+      "category": "Utility",
+      "vendor": "RODA",
+      "maintainer": "Adrian Dusa <dusa.adrian@gmail.com>",
+      "desktop": {
+        "entry": {
+          "Comment": "Academic Non-Commercial License (see LICENSE file for details)."
+        }
       }
     },
     "publish": {
