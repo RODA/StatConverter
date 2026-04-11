@@ -97,7 +97,9 @@ env$dataset_metadata <- function() {
         return(named_values)
     }
 
-    meta <- collectRMetadata(dataset)
+    # Preview only needs labels, formats, and variable annotations; type inference
+    # is expensive on wide files and is not consumed by the UI.
+    meta <- collectRMetadata(dataset, infer_type = FALSE)
     return(lapply(
         names(meta),
         function(varname) {
