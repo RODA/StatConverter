@@ -1,6 +1,6 @@
 {
   "name": "statconverter",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Statistical package converter using the DDI standard interface",
   "main": "dist/main.js",
   "scripts": {
