@@ -8,7 +8,7 @@ $nameForFile = ($name -replace "\s+", "_")
 
 # Define original and new file names (installer)
 $originalFile = "build/output/${name} Setup $version.exe"
-$newName = "${nameForFile}_setup_${version}.exe"
+$newName = "${nameForFile}_setup_${version}_intel.exe"
 $newPath = "build/output/$newName"
 
 # Rename if file exists

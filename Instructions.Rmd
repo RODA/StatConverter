@@ -147,11 +147,11 @@ This ensures consistent filenames like:
 
 - `StatConverter_1.2.1_intel.dmg`
 - `StatConverter_1.2.1_intel.AppImage`
-- `StatConverter_setup_1.2.1.exe`
+- `StatConverter_setup_1.2.1_intel.exe`
 - `StatConverter_1.2.1_intel.exe`
 - `StatConverter_1.2.1_intel.zip`
 
-Note: For Windows, the installer keeps the version-based name, while the portable `.exe` and `.zip` include the `_intel` suffix.
+Note: For Windows, the installer, portable `.exe`, and `.zip` all include the `_intel` suffix.
 
 After renaming, upload all binaries manually to the **same GitHub release** corresponding to the current version in `package.json`.
 
@@ -249,7 +249,7 @@ fi
 This PowerShell script is used on Windows to rename the installer binary, rename the portable executable, and generate the portable `.zip` with consistent release names.
 
 - Renames:
-  - `StatConverter Setup 1.2.1.exe` -> `StatConverter_setup_1.2.1.exe`
+  - `StatConverter Setup 1.2.1.exe` -> `StatConverter_setup_1.2.1_intel.exe`
   - `StatConverter Portable 1.2.1.exe` -> `StatConverter_1.2.1_intel.exe`
   - `StatConverter_1.2.1_intel/` -> `StatConverter_1.2.1_intel.zip`
 
@@ -264,7 +264,7 @@ $version = $packageJson.version
 
 # Define original and new file names
 $originalFile = "build/output/StatConverter Setup $version.exe"
-$newName = "StatConverter_setup_${version}.exe"
+$newName = "StatConverter_setup_${version}_intel.exe"
 $newPath = "build/output/$newName"
 
 # Rename if file exists
