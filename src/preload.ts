@@ -206,9 +206,9 @@ window.addEventListener('DOMContentLoaded', () => {
                 command += ", recode = FALSE";
             }
 
-            const harmonizeTRUE = util.htmlElement("harmonizeTRUE");
-            if (harmonizeTRUE.checked) {
-                command += ", harmonize = TRUE";
+            const harmonizeFALSE = util.htmlElement("harmonizeFALSE");
+            if (harmonizeFALSE.checked) {
+                command += ", harmonize = FALSE";
             }
 
             const chartonum = util.htmlElement("chartonumTRUE");
