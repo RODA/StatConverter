@@ -39,7 +39,8 @@
                     <h1>Running StatConverter from sources</h1>
 
                     <p>
-                        For the advanced users (Linux, usually) StatConverter can also be started from its source files.
+                        StatConverter can also be started directly from its source files, which is especially useful
+                        for development and testing on any supported platform.
                     </p>
 
                     <p>&nbsp;</p>
@@ -51,7 +52,7 @@
                     <p>&nbsp;</p>
                     <p>
                         <a target="_blank" href="https://nodejs.org/download/release/v22.7.0/">Node.js</a> needs
-                        to be installed, we recommend at least version 22 which we are using.</p>
+                        to be installed; we recommend at least version 22, which is what the project currently uses.</p>
 
                     <p>&nbsp;</p>
                     <p>Then open a Terminal in the clone of the StatConverter directory, and type:</p>
@@ -90,12 +91,13 @@ npm start
                     <p>
                         MacOS users need to install the
                         <a href="https://mac.install.guide/commandlinetools/index.html">XCode Command Line Tools</a>
-                        (either from the entire XCode, otherwise the CLTs are sufficient). Do make sure to delete the build configuration
-                        for Linux, as MacOS is also Unix based.
+                        (either from the entire XCode, otherwise the CLTs are sufficient).
                     </p>
 
                     <p>&nbsp;</p>
-                    <p>In the Terminal, this command will produce the binary:</p>
+                    <p>
+                        On all platforms, the recommended build command is:
+                    </p>
 
 
 <div>
@@ -107,15 +109,16 @@ npm run dist
 
 <p>&nbsp;</p>
 <p>
-    On Linux, you might need to delete the build configuration for MacOS, and the command is different:
+    This command builds the application in production mode and dispatches to the appropriate platform-specific
+    packaging flow. On Linux, it uses a dedicated Linux-only build script and then runs the Linux artifact
+    renaming script automatically, so there is no longer any need to edit or remove other platform build
+    configuration by hand.
 </p>
 
-
-<div>
-<pre class="code">
-npx electron-builder --linux --x64 --arm64
-</pre>
-</div>
+<p>&nbsp;</p>
+<p>
+    The generated binaries are written to the <code>build/output</code> directory.
+</p>
 
                 </section>
             </div>

@@ -49,68 +49,58 @@
                     <p>
                         The actual package that does the heavy lifting is called
                         <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a>
-                        (DDI with R), which uses the package
-                        <a target="_blank" href="https://cran.r-project.org/web/packages/haven/index.html">haven</a>
-                        which in turn uses an excellent C library called
-                        <a target="_blank" href="https://github.com/WizardMac/ReadStat">ReadStat</a>. All of these are
+                        (DDI with R), which directly employs the excellent C library
+                        <a target="_blank" href="https://github.com/WizardMac/ReadStat">ReadStat</a>.
+                        Both are
                         open source software, and get improved on a constant basis.
                     </p>
 
                     <p>&nbsp;</p>
+
+                    <p>&nbsp;</p>
+                    
                     <h2 id="r-on-the-system-path">Installing the R packages to the latest version</h2>
-                    <p>
-                        The official versions of these packages are located on
-                        <a target="_blank" href="https://cran.r-project.org/web/packages/available_packages_by_name.html">CRAN</a>,
-                        and they can be (re)installed using the command:
-                    </p>
 
-<div>
-<pre class="code">
-install.packages("DDIwR", dependencies = TRUE)
-</pre>
-</div>
+                    <p>&nbsp;</p>
 
                     <p>
-                        These packages will likely change versions and future
-                        functionality will necessarily depend on updated versions of the R packages,
-                        especially <a target="_blank" href="https://cran.r-project.org/web/packages/DDIwR/index.html">DDIwR</a>
-                        that relies on a number of other packages, among which
+                        The functionality of the R package DDIwR necessarily depends on a number of other packages, among which
                         <a target="_blank" href="https://cran.r-project.org/web/packages/admisc/index.html">admisc</a>
                         and <a target="_blank" href="https://cran.r-project.org/web/packages/declared/index.html">declared</a>.
+                        Future functionality will necessarily depend on updated versions of all these R packages.
                     </p>
 
                     <p>&nbsp;</p>
+
                     <p>
-                        The very latest development versions of these packages are located on GitHub. To install those,
-                        package remotes has to be installed and then loaded:
+                        The latest development versions are available from Adrian Dușa's
+                        <a target="_blank" href="https://dusadrian.r-universe.dev/ui#packages">R-universe</a>
+                        repository, and can be installed or updated using:
                     </p>
 
 <div>
 <pre class="code">
-library(remotes)
-install_github(
-    c("dusadrian/admisc", "dusadrian/declared", "dusadrian/DDIwR")
+install.packages(
+    c("admisc", "declared", "DDIwR"),
+    repos = "dusadrian.r-universe.dev"
 )
 </pre>
 </div>
 
                     <p>&nbsp;</p>
+
                     <p>
-                        Some of these packages contain C code that need compilation.
-                        Users who do not have the necessary build tools can install a precompiled binary
-                        version from a different package management server, incrementally updated for each
-                        pre-CRAN development version of the packages:
+                        Since some of these packages contain C code that needs compilation, R-universe also provides
+                        precompiled binaries where available, which makes this installation route preferable to older
+                        GitHub-based installation instructions.
                     </p>
 
-<div>
-<pre class="code">
-options(repos = c("dusadrian.r-universe.dev", getOption("repos")))
-install.packages(c("admisc", "declared", "DDIwR"))
-</pre>
-</div>
-
                     <p>&nbsp;</p>
-                    <p>For more detailed information, visit Adrian Dușa's <a target="_blank" href="https://dusadrian.r-universe.dev/ui#packages">R-universe</a> repository.</p>
+
+                    <p>
+                        For more detailed information, visit Adrian Dușa's <a target="_blank" href="https://dusadrian.r-universe.dev/ui#packages">R-universe</a> repository.
+                    </p>
+
                     <p>&nbsp;</p>
                     <p>&nbsp;</p>
 
