@@ -3,6 +3,9 @@ name: build-packages
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   linux-x86:
     runs-on: ubuntu-22.04
@@ -83,3 +86,53 @@ jobs:
             build/output/*.exe
             build/output/*.zip
           if-no-files-found: error
+
+  publish-release:
+    runs-on: ubuntu-22.04
+    needs:
+      - linux-x86
+      - windows-x86
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-x86-build
+          path: release-assets/linux-x86
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-x86-build
+          path: release-assets/windows-x86
+
+      - name: Resolve release metadata
+        id: release
+        run: |
+          echo "tag=latest" >> "$GITHUB_OUTPUT"
+          echo "name=Latest build" >> "$GITHUB_OUTPUT"
+
+      - name: Publish assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.release.outputs.name }}
+          generate_release_notes: false
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          append_body: false
+          make_latest: false
+          files: |
+            release-assets/linux-x86/*
+            release-assets/windows-x86/*
