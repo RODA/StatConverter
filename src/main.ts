@@ -14,7 +14,6 @@ import * as path from "path";
 import * as fs from "fs";
 import * as interfaces from './library/interfaces';
 import { util } from "./library/helpers"; // , debugLog
-import { autoUpdater } from "electron-updater";
 import { evalRString, initEmbeddedR } from "./modules/backend/embeddedR";
 
 // Environment detection: prefer app.isPackaged at runtime; fall back to NODE_ENV for dev tooling
@@ -22,6 +21,55 @@ const production = app.isPackaged || process.env.NODE_ENV === 'production';
 const development = !production;
 const OS_Windows = process.platform == 'win32';
 let mainWindow: BrowserWindow;
+let autoUpdaterInstance: import("electron-updater").AppUpdater | null = null;
+
+function normalizeSemverLike(version: string): string {
+    const match = /^([0-9]+)\.([0-9]+)\.([0-9]+)(.*)$/.exec(version);
+
+    if (!match) {
+        return version;
+    }
+
+    const [, major, minor, patch, suffix] = match;
+    return `${Number(major)}.${Number(minor)}.${Number(patch)}${suffix}`;
+}
+
+function initializeAutoUpdater() {
+    const rawVersion = app.getVersion();
+    const normalizedVersion = normalizeSemverLike(rawVersion);
+
+    if (normalizedVersion !== rawVersion) {
+        (app as Electron.App & { getVersion(): string }).getVersion = () => normalizedVersion;
+    }
+
+    const { autoUpdater } = require("electron-updater") as typeof import("electron-updater");
+    autoUpdaterInstance = autoUpdater;
+
+    autoUpdaterInstance.on('update-available', () => {
+        dialog.showMessageBox(mainWindow, {
+            type: 'info',
+            title: 'Update Available',
+            message: 'A new version is available. It will be downloaded in the background.',
+        });
+    });
+
+    autoUpdaterInstance.on('update-downloaded', () => {
+        dialog.showMessageBox(mainWindow, {
+            type: 'question',
+            buttons: ['Restart', 'Later'],
+            defaultId: 0,
+            cancelId: 1,
+            title: 'Update Ready',
+            message: 'Update downloaded. Restart now to apply it?',
+        }).then(result => {
+            if (result.response === 0) {
+                autoUpdaterInstance?.quitAndInstall();
+            }
+        });
+    });
+
+    autoUpdaterInstance.checkForUpdatesAndNotify();
+}
 
 function normalizePathForR(filePath: string): string {
     return (OS_Windows ? filePath.replace(/\\/g, "/") : filePath)
@@ -93,7 +141,7 @@ app.whenReady().then(() => {
     });
 
     if (production) {
-        autoUpdater.checkForUpdatesAndNotify();
+        initializeAutoUpdater();
     }
 });
 
@@ -302,25 +350,4 @@ function consoletrace(x: any) {
 
 process.on('unhandledRejection', (error: Error, promise) => {
     consoletrace(error);
-});
-
-autoUpdater.on('update-available', () => {
-    dialog.showMessageBox(mainWindow, {
-        type: 'info',
-        title: 'Update Available',
-        message: 'A new version is available. It will be downloaded in the background.',
-    });
-});
-
-autoUpdater.on('update-downloaded', () => {
-    dialog.showMessageBox(mainWindow, {
-        type: 'question',
-        buttons: ['Restart', 'Later'],
-        defaultId: 0,
-        cancelId: 1,
-        title: 'Update Ready',
-        message: 'Update downloaded. Restart now to apply it?',
-    }).then(result => {
-        if (result.response === 0) autoUpdater.quitAndInstall();
-    });
 });

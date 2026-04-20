@@ -1,6 +1,6 @@
 {
   "name": "statconverter",
-  "version": "1.3.2",
+  "version": "1.3.03",
   "description": "Statistical package converter using the DDI standard interface",
   "main": "dist/main.js",
   "scripts": {
@@ -93,30 +93,30 @@
   },
   "devDependencies": {
     "@types/electron": "^1.4.38",
-    "@types/lodash": "^4.17.21",
-    "@types/serviceworker": "^0.0.170",
+    "@types/lodash": "^4.17.24",
+    "@types/serviceworker": "^0.0.195",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.50.0",
-    "@typescript-eslint/parser": "^8.46.3",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
     "cross-env": "^10.1.0",
     "electron": "^39.2.7",
-    "electron-builder": "^26.4.0",
-    "eslint": "^9.39.2",
-    "ts-loader": "^9.5.4",
+    "electron-builder": "^26.9.0",
+    "eslint": "^10.2.1",
+    "ts-loader": "^9.5.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "webpack": "^5.104.1",
-    "webpack-cli": "^6.0.1"
+    "typescript": "^6.0.3",
+    "webpack": "^5.106.2",
+    "webpack-cli": "^7.0.2"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
     "bootstrap": "^5.3.8",
-    "electron-updater": "^6.7.3",
-    "lodash": "^4.17.21",
+    "electron-updater": "^6.8.4",
+    "lodash": "^4.18.1",
     "tippy.js": "^6.3.7",
-    "uuid": "^13.0.0",
-    "ws": "^8.18.3"
+    "uuid": "^14.0.0",
+    "ws": "^8.20.0"
   },
   "postinstall": "electron-builder install-app-deps"
 }

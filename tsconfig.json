@@ -7,9 +7,11 @@
       "dom"
     ],
     "target": "es5",
+    "ignoreDeprecations": "6.0",
     "module": "commonjs",
     "noImplicitAny": true,
     "sourceMap": true,
+    "rootDir": "src",
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,

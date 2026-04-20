@@ -2,16 +2,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION=$(node -p "require('./package.json').version")
+VERSION=$(node -p "require('./scripts/version-info').getVersionInfo().rawVersion")
+NORMALIZED_VERSION=$(node -p "require('./scripts/version-info').getVersionInfo().normalizedVersion")
 NAME=$(node -p "(p=> (p.build && p.build.productName) ? p.build.productName : p.name)(require('./package.json'))")
 # Use a filename-safe variant (replace spaces with underscores)
 NAME_FILE=$(printf '%s' "$NAME" | sed 's/[[:space:]]\+/_/g')
 
-# Expected electron-builder outputs (current config produces mac DMGs)
-ORIGINAL_APPLE_ARM="build/output/${NAME}-${VERSION}-arm64.dmg"
+# Expected electron-builder outputs (current config produces mac DMGs).
+# electron-builder canonicalizes 1.3.03 to 1.3.3, so match against the normalized version
+# and rename to the exact package.json version.
+ORIGINAL_APPLE_ARM="build/output/${NAME}-${NORMALIZED_VERSION}-arm64.dmg"
 NEW_APPLE_ARM="${NAME_FILE}_${VERSION}_silicon.dmg"
 
-ORIGINAL_APPLE_INTEL="build/output/${NAME}-${VERSION}.dmg"
+ORIGINAL_APPLE_INTEL="build/output/${NAME}-${NORMALIZED_VERSION}.dmg"
 NEW_APPLE_INTEL="${NAME_FILE}_${VERSION}_intel.dmg"
 
 renamed_any=0

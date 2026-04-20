@@ -1,13 +1,18 @@
 # Get name and version from package.json
 $packageJson = Get-Content "./package.json" -Raw | ConvertFrom-Json
-$version = $packageJson.version
+$versionInfo = node -e "const info = require('./scripts/version-info').getVersionInfo(); process.stdout.write(JSON.stringify(info));"
+$versionData = $versionInfo | ConvertFrom-Json
+$version = $versionData.rawVersion
+$normalizedVersion = $versionData.normalizedVersion
 $name = if ($packageJson.build -and $packageJson.build.productName) { $packageJson.build.productName } else { $packageJson.name }
 
 # Normalize name used in filenames (avoid spaces in file names we create)
 $nameForFile = ($name -replace "\s+", "_")
 
-# Define original and new file names (installer)
-$originalFile = "build/output/${name} Setup $version.exe"
+# Define original and new file names (installer). electron-builder canonicalizes
+# 1.3.03 to 1.3.3, so match the generated artifact using the normalized version
+# and rename it to the exact package.json version.
+$originalFile = "build/output/${name} Setup $normalizedVersion.exe"
 $newName = "${nameForFile}_setup_${version}_intel.exe"
 $newPath = "build/output/$newName"
 
@@ -22,8 +27,8 @@ if (Test-Path $originalFile) {
 
 # Rename the standalone portable executable to include the Intel suffix.
 $portableCandidates = @(
-    "build/output/${name} Portable $version.exe",
-    "build/output/${name} $version.exe"
+    "build/output/${name} Portable $normalizedVersion.exe",
+    "build/output/${name} $normalizedVersion.exe"
 )
 $portableNewName = "${nameForFile}_${version}_intel.exe"
 $portableNewPath = "build/output/$portableNewName"

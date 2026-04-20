@@ -2,16 +2,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION=$(node -p "require('./package.json').version")
+VERSION=$(node -p "require('./scripts/version-info').getVersionInfo().rawVersion")
+NORMALIZED_VERSION=$(node -p "require('./scripts/version-info').getVersionInfo().normalizedVersion")
 NAME=$(node -p "(p=> (p.build && p.build.productName) ? p.build.productName : p.name)(require('./package.json'))")
 # Use a filename-safe variant (replace spaces with underscores)
 NAME_FILE=$(printf '%s' "$NAME" | sed 's/[[:space:]]\+/_/g')
 
-# Optional Linux artifacts (if you add Linux target later)
-ORIGINAL_LINUX_ARM="build/output/${NAME}-${VERSION}-arm64.AppImage"
+# Optional Linux artifacts (if you add Linux target later).
+# electron-builder canonicalizes 1.3.03 to 1.3.3, so match against the normalized version
+# and rename to the exact package.json version.
+ORIGINAL_LINUX_ARM="build/output/${NAME}-${NORMALIZED_VERSION}-arm64.AppImage"
 NEW_LINUX_ARM="${NAME_FILE}_${VERSION}_silicon.AppImage"
 
-ORIGINAL_LINUX_INTEL="build/output/${NAME}-${VERSION}.AppImage"
+ORIGINAL_LINUX_INTEL="build/output/${NAME}-${NORMALIZED_VERSION}.AppImage"
 NEW_LINUX_INTEL="${NAME_FILE}_${VERSION}_intel.AppImage"
 
 renamed_any=0

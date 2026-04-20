@@ -10,6 +10,7 @@ import * as path from 'path';
 import { util } from './library/helpers';
 import * as interfaces from './library/interfaces';
 
+const appVersion = require('../package.json').version;
 
 const inputOutput: interfaces.InputOutput = {
     inputType: '',
@@ -26,6 +27,11 @@ const inputOutput: interfaces.InputOutput = {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
+    const appVersionElement = document.getElementById('appVersion');
+    if (appVersionElement) {
+        appVersionElement.textContent = appVersion;
+    }
+
     // const replaceText = (selector: string, text: string) => {
     //     const element = document.getElementById(selector)
     //     if (element) element.innerText = text
