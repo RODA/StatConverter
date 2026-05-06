@@ -5,13 +5,14 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   linux-x86:
     runs-on: ubuntu-22.04
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/releases/download/R-4.5.3
+      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/releases/download/R_Portable
       SC_GITHUB_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
 
     steps:
@@ -49,9 +50,10 @@ jobs:
 
   windows-x86:
     runs-on: windows-latest
+    environment: signing
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/releases/download/R-4.5.3
+      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/releases/download/R_Portable
       SC_GITHUB_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
 
     steps:
@@ -77,6 +79,25 @@ jobs:
 
       - name: Rename Windows artifacts
         run: npm run rename:win
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_APPLICATION_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign Windows artifacts
+        uses: azure/artifact-signing-action@v1
+        with:
+          endpoint: https://plc.codesigning.azure.net/
+          signing-account-name: dusadrian
+          certificate-profile-name: electron-profile
+          files-folder: ${{ github.workspace }}\build\output
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
