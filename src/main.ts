@@ -14,7 +14,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as interfaces from './library/interfaces';
 import { util } from "./library/helpers"; // , debugLog
-import { evalRString, initEmbeddedR } from "./modules/backend/embeddedR";
+import { evalRString, initEmbeddedR, shutdownEmbeddedR } from "./modules/backend/embeddedR";
 
 // Environment detection: prefer app.isPackaged at runtime; fall back to NODE_ENV for dev tooling
 const production = app.isPackaged || process.env.NODE_ENV === 'production';
@@ -22,6 +22,16 @@ const development = !production;
 const OS_Windows = process.platform == 'win32';
 let mainWindow: BrowserWindow;
 let autoUpdaterInstance: import("electron-updater").AppUpdater | null = null;
+let backendShutdownStarted = false;
+
+function shutdownBackend() {
+    if (backendShutdownStarted) {
+        return;
+    }
+
+    backendShutdownStarted = true;
+    try { shutdownEmbeddedR(); } catch {}
+}
 
 function normalizeSemverLike(version: string): string {
     const match = /^([0-9]+)\.([0-9]+)\.([0-9]+)(.*)$/.exec(version);
@@ -350,4 +360,21 @@ function consoletrace(x: any) {
 
 process.on('unhandledRejection', (error: Error, promise) => {
     consoletrace(error);
+});
+
+app.on("window-all-closed", () => {
+    app.quit();
+});
+
+app.on("before-quit", shutdownBackend);
+app.on("will-quit", shutdownBackend);
+app.on("quit", shutdownBackend);
+process.once("exit", shutdownBackend);
+process.once("SIGINT", () => {
+    shutdownBackend();
+    setTimeout(() => process.exit(130), 1600);
+});
+process.once("SIGTERM", () => {
+    shutdownBackend();
+    setTimeout(() => process.exit(143), 1600);
 });

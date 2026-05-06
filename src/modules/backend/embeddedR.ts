@@ -35,6 +35,13 @@ const prependEnvPath = (currentValue: string | undefined, valueToAdd: string, se
 };
 
 const resolveNativeRBinaryPath = (rscript: string): string => {
+    if (process.platform === "darwin") {
+        const execCandidate = path.join(path.dirname(rscript), "exec", "R");
+        if (fs.existsSync(execCandidate)) {
+            return execCandidate;
+        }
+    }
+
     if (process.platform !== "win32") {
         return rscript.replace(/Rscript(?:\.exe)?$/i, "R");
     }
@@ -90,6 +97,8 @@ class EmbeddedRWorker {
     private readyResolve: (() => void) | null = null;
     private readyReject: ((error: Error) => void) | null = null;
     private initialized = false;
+    private stopping = false;
+    private stopTimer: NodeJS.Timeout | null = null;
 
     start(rscript: string, libraryDir: string, runtimeLibraryDir?: string): Promise<void> {
         if (this.readyPromise) {
@@ -99,24 +108,33 @@ class EmbeddedRWorker {
         this.nextId = 1;
         this.pending.clear();
         this.initialized = false;
+        this.stopping = false;
+        this.clearStopTimer();
 
         const rbin = resolveNativeRBinaryPath(rscript);
         this.proc = spawn(rbin, ["--vanilla", "--quiet", "--no-save", "--no-restore", "--slave"], {
             stdio: ["pipe", "pipe", "pipe"],
-            env: buildRuntimeEnv(rscript, runtimeLibraryDir)
+            env: buildRuntimeEnv(rscript, runtimeLibraryDir),
+            detached: process.platform !== "win32"
         });
 
-        const rl = readline.createInterface({ input: this.proc.stdout! });
+        const proc = this.proc;
+        const rl = readline.createInterface({ input: proc.stdout! });
         this.reader = rl;
         let stderrBuf = "";
 
         rl.on("line", (line: string) => this.handleLine(line));
-        this.proc.stderr!.on("data", (chunk: Buffer) => {
+        proc.stderr!.on("data", (chunk: Buffer) => {
             stderrBuf += chunk.toString();
         });
 
-        this.proc.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
-            if (!this.initialized && this.readyReject) {
+        proc.on("exit", (code: number | null, signal: NodeJS.Signals | null) => {
+            if (this.proc !== proc) {
+                return;
+            }
+
+            this.clearStopTimer();
+            if (!this.stopping && !this.initialized && this.readyReject) {
                 const details: string[] = [];
                 if (typeof code === "number") {
                     details.push(`exit code ${code}`);
@@ -138,8 +156,13 @@ class EmbeddedRWorker {
             this.cleanup();
         });
 
-        this.proc.on("error", (error: Error) => {
-            if (!this.initialized && this.readyReject) {
+        proc.on("error", (error: Error) => {
+            if (this.proc !== proc) {
+                return;
+            }
+
+            this.clearStopTimer();
+            if (!this.stopping && !this.initialized && this.readyReject) {
                 this.readyReject(new EmbeddedWorkerInitError(error.message));
             }
 
@@ -189,10 +212,26 @@ class EmbeddedRWorker {
     }
 
     stop() {
-        if (this.proc && !this.proc.killed) {
-            this.proc.kill();
+        const proc = this.proc;
+        this.stopping = true;
+        this.rejectAllPending(new Error("Embedded R session stopped"));
+        if (!proc) {
+            this.cleanup();
+            return;
         }
-        this.cleanup();
+
+        try {
+            proc.stdin?.write('q("no", status = 0, runLast = FALSE)\n');
+            proc.stdin?.end();
+        } catch {}
+
+        this.killProcess(proc, "SIGTERM");
+        this.stopTimer = setTimeout(() => {
+            this.killProcess(proc, "SIGKILL");
+            if (this.proc === proc) {
+                this.cleanup();
+            }
+        }, 1500);
     }
 
     private handleLine(line: string) {
@@ -248,6 +287,7 @@ class EmbeddedRWorker {
     }
 
     private cleanup() {
+        this.clearStopTimer();
         this.reader?.close();
         this.reader = null;
         this.proc = null;
@@ -255,6 +295,30 @@ class EmbeddedRWorker {
         this.readyResolve = null;
         this.readyReject = null;
         this.initialized = false;
+        this.stopping = false;
+    }
+
+    private clearStopTimer() {
+        if (this.stopTimer) {
+            clearTimeout(this.stopTimer);
+            this.stopTimer = null;
+        }
+    }
+
+    private killProcess(proc: ChildProcess, signal: NodeJS.Signals) {
+        if (!proc.pid) {
+            return;
+        }
+
+        try {
+            if (process.platform !== "win32") {
+                process.kill(-proc.pid, signal);
+            } else {
+                proc.kill(signal);
+            }
+        } catch {
+            try { proc.kill(signal); } catch {}
+        }
     }
 }
 
@@ -340,4 +404,9 @@ export async function evalRString(expr: string): Promise<string> {
 
 export function getEmbeddedRscriptPath(): string | null {
     return embeddedRscriptPath;
+}
+
+export function shutdownEmbeddedR(): void {
+    embeddedRWorker.stop();
+    embeddedRscriptPath = null;
 }
