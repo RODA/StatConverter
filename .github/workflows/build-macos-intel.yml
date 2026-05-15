@@ -1,0 +1,94 @@
+name: build MacOS Intel
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  macos-intel:
+    runs-on: macos-15-intel
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+      CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+      GH_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Verify macOS signing secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${CSC_LINK:-}" ] || [ -z "${CSC_KEY_PASSWORD:-}" ]; then
+            echo "::error::MAC_CSC_LINK and MAC_CSC_KEY_PASSWORD secrets are required for signed macOS builds."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare macOS bundled R runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/darwin-x86.tar.gz"
+          extract_dir="$RUNNER_TEMP/R_Portable_extract"
+          mkdir -p "$extract_dir"
+          gh release download R_Portable --repo dusadrian/binaries --pattern darwin-x86.tar.gz --dir "$RUNNER_TEMP" --clobber
+          if unzip -tq "$archive" >/dev/null 2>&1; then
+            unzip -q "$archive" -d "$extract_dir"
+          else
+            tar -xf "$archive" -C "$extract_dir"
+          fi
+          rm -rf R-runtime
+          if [ -d "$extract_dir/darwin-x86" ]; then
+            cp -R "$extract_dir/darwin-x86" R-runtime
+          else
+            mkdir -p R-runtime
+            cp -R "$extract_dir"/. R-runtime
+          fi
+
+      - name: Build TypeScript output
+        run: npm run build
+
+      - name: Build Electron app (macOS intel, signed)
+        run: npx electron-builder --mac dmg --x64 --publish never -c.mac.forceCodeSigning=true
+
+      - name: Verify macOS code signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_path="$(find build/output -path '*/StatConverter.app' -type d -print -quit)"
+          if [ -z "$app_path" ]; then
+            echo "::error::Could not find built StatConverter.app under build/output."
+            exit 1
+          fi
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          codesign --display --verbose=2 "$app_path"
+
+      - name: Rename macOS artifacts
+        run: npm run rename:mac
+
+      - name: Publish assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          target_commitish: ${{ github.sha }}
+          name: Latest build
+          generate_release_notes: false
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          append_body: false
+          make_latest: false
+          files: build/output/*.dmg

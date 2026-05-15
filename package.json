@@ -68,7 +68,6 @@
       "target": {
         "target": "dmg",
         "arch": [
-          "x64",
           "arm64"
         ]
       }
@@ -88,8 +87,7 @@
       "provider": "github",
       "owner": "RODA",
       "repo": "StatConverter"
-    },
-    "beforePack": "./scripts/electron-builder-before-pack.js"
+    }
   },
   "devDependencies": {
     "@types/electron": "^1.4.38",

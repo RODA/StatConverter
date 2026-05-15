@@ -1,0 +1,56 @@
+name: build Linux Intel
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linux-intel:
+    runs-on: ubuntu-22.04
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/releases/download/R_Portable
+      SC_GITHUB_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare bundled R runtime
+        run: npm run prepare:r-portable
+
+      - name: Build TypeScript output
+        run: npm run build
+
+      - name: Build Electron app (Linux intel)
+        run: npx electron-builder --linux AppImage deb --x64 --publish never
+
+      - name: Rename Linux artifacts
+        run: npm run rename:linux
+
+      - name: Publish assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          target_commitish: ${{ github.sha }}
+          name: Latest build
+          generate_release_notes: false
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          append_body: false
+          make_latest: false
+          files: |
+            build/output/*.AppImage
+            build/output/*.deb

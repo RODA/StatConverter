@@ -1,0 +1,77 @@
+name: build Windows Intel
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  windows-intel:
+    runs-on: windows-latest
+    environment: signing
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      SC_R_PORTABLE_BASE_URL: https://github.com/dusadrian/binaries/releases/download/R_Portable
+      SC_GITHUB_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare bundled R runtime
+        run: npm run prepare:r-portable
+
+      - name: Build TypeScript output
+        run: npm run build
+
+      - name: Build Electron app (Windows intel)
+        run: npx electron-builder --win nsis portable --x64 --publish never
+
+      - name: Rename Windows artifacts
+        run: npm run rename:win
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_APPLICATION_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign Windows artifacts
+        uses: azure/artifact-signing-action@v1
+        with:
+          endpoint: https://plc.codesigning.azure.net/
+          signing-account-name: dusadrian
+          certificate-profile-name: electron-profile
+          files-folder: ${{ github.workspace }}\build\output
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Publish assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          target_commitish: ${{ github.sha }}
+          name: Latest build
+          generate_release_notes: false
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          append_body: false
+          make_latest: false
+          files: |
+            build/output/*.exe
+            build/output/*.zip

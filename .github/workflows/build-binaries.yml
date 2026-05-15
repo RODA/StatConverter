@@ -1,4 +1,4 @@
-name: build-packages
+name: build binaries
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ permissions:
   id-token: write
 
 jobs:
-  linux-x86:
+  linux-intel:
     runs-on: ubuntu-22.04
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -33,7 +33,7 @@ jobs:
       - name: Build TypeScript output
         run: npm run build
 
-      - name: Build Electron app (Linux x86)
+      - name: Build Electron app (Linux intel)
         run: npx electron-builder --linux AppImage deb --x64 --publish never
 
       - name: Rename Linux artifacts
@@ -42,13 +42,13 @@ jobs:
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-x86-build
+          name: linux-intel-build
           path: |
             build/output/*.AppImage
             build/output/*.deb
           if-no-files-found: error
 
-  windows-x86:
+  windows-intel:
     runs-on: windows-latest
     environment: signing
     env:
@@ -74,7 +74,7 @@ jobs:
       - name: Build TypeScript output
         run: npm run build
 
-      - name: Build Electron app (Windows x86)
+      - name: Build Electron app (Windows intel)
         run: npx electron-builder --win nsis portable --x64 --publish never
 
       - name: Rename Windows artifacts
@@ -102,17 +102,19 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-x86-build
+          name: windows-intel-build
           path: |
             build/output/*.exe
             build/output/*.zip
           if-no-files-found: error
 
-  publish-release:
-    runs-on: ubuntu-22.04
-    needs:
-      - linux-x86
-      - windows-x86
+  macos-intel:
+    runs-on: macos-15-intel
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+      CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+      GH_TOKEN: ${{ secrets.SC_R_PORTABLE_TOKEN }}
 
     steps:
       - name: Checkout repo
@@ -123,17 +125,92 @@ jobs:
         with:
           node-version: 20
 
+      - name: Verify macOS signing secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${CSC_LINK:-}" ] || [ -z "${CSC_KEY_PASSWORD:-}" ]; then
+            echo "::error::MAC_CSC_LINK and MAC_CSC_KEY_PASSWORD secrets are required for signed macOS builds."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare macOS bundled R runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/darwin-x86.tar.gz"
+          extract_dir="$RUNNER_TEMP/R_Portable_extract"
+          mkdir -p "$extract_dir"
+          gh release download R_Portable --repo dusadrian/binaries --pattern darwin-x86.tar.gz --dir "$RUNNER_TEMP" --clobber
+          if unzip -tq "$archive" >/dev/null 2>&1; then
+            unzip -q "$archive" -d "$extract_dir"
+          else
+            tar -xf "$archive" -C "$extract_dir"
+          fi
+          rm -rf R-runtime
+          if [ -d "$extract_dir/darwin-x86" ]; then
+            cp -R "$extract_dir/darwin-x86" R-runtime
+          else
+            mkdir -p R-runtime
+            cp -R "$extract_dir"/. R-runtime
+          fi
+
+      - name: Build TypeScript output
+        run: npm run build
+
+      - name: Build Electron app (macOS intel, signed)
+        run: npx electron-builder --mac dmg --x64 --publish never -c.mac.forceCodeSigning=true
+
+      - name: Verify macOS code signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_path="$(find build/output -path '*/StatConverter.app' -type d -print -quit)"
+          if [ -z "$app_path" ]; then
+            echo "::error::Could not find built StatConverter.app under build/output."
+            exit 1
+          fi
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          codesign --display --verbose=2 "$app_path"
+
+      - name: Rename macOS artifacts
+        run: npm run rename:mac
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-intel-build
+          path: build/output/*.dmg
+          if-no-files-found: error
+
+  publish-release:
+    runs-on: ubuntu-22.04
+    needs:
+      - linux-intel
+      - windows-intel
+      - macos-intel
+
+    steps:
       - name: Download Linux artifacts
         uses: actions/download-artifact@v4
         with:
-          name: linux-x86-build
-          path: release-assets/linux-x86
+          name: linux-intel-build
+          path: release-assets/linux-intel
 
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4
         with:
-          name: windows-x86-build
-          path: release-assets/windows-x86
+          name: windows-intel-build
+          path: release-assets/windows-intel
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-intel-build
+          path: release-assets/macos-intel
 
       - name: Resolve release metadata
         id: release
@@ -155,5 +232,6 @@ jobs:
           append_body: false
           make_latest: false
           files: |
-            release-assets/linux-x86/*
-            release-assets/windows-x86/*
+            release-assets/linux-intel/*
+            release-assets/windows-intel/*
+            release-assets/macos-intel/*
