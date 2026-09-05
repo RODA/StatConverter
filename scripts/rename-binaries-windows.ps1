@@ -2,7 +2,6 @@
 $packageJson = Get-Content "./package.json" -Raw | ConvertFrom-Json
 $versionInfo = node -e "const info = require('./scripts/version-info').getVersionInfo(); process.stdout.write(JSON.stringify(info));"
 $versionData = $versionInfo | ConvertFrom-Json
-$version = $versionData.rawVersion
 $normalizedVersion = $versionData.normalizedVersion
 $name = if ($packageJson.build -and $packageJson.build.productName) { $packageJson.build.productName } else { $packageJson.name }
 
@@ -10,10 +9,12 @@ $name = if ($packageJson.build -and $packageJson.build.productName) { $packageJs
 $nameForFile = ($name -replace "\s+", "_")
 
 # Define original and new file names (installer). electron-builder canonicalizes
-# 1.3.03 to 1.3.3, so match the generated artifact using the normalized version
-# and rename it to the exact package.json version.
+# 1.3.03 to 1.3.3, so match the generated artifact using the normalized version, then
+# rename it to a version-free name: SmartScreen builds its reputation per file, so a
+# download name that stays the same across releases keeps the trust it has earned, and
+# the download page never needs re-linking.
 $originalFile = "build/output/${name} Setup $normalizedVersion.exe"
-$newName = "${nameForFile}_setup_${version}_intel.exe"
+$newName = "${nameForFile}_setup_intel.exe"
 $newPath = "build/output/$newName"
 
 # Rename if file exists
@@ -30,7 +31,7 @@ $portableCandidates = @(
     "build/output/${name} Portable $normalizedVersion.exe",
     "build/output/${name} $normalizedVersion.exe"
 )
-$portableNewName = "${nameForFile}_${version}_intel.exe"
+$portableNewName = "${nameForFile}_intel.exe"
 $portableNewPath = "build/output/$portableNewName"
 $portableOriginalFile = $portableCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 
@@ -45,13 +46,18 @@ if ($portableOriginalFile) {
     Write-Warning "Portable executable not found. Checked: $($portableCandidates -join ', ')"
 }
 
-# Also remove update metadata artifacts we don't want to ship alongside the installer
+# Keep the Windows update channel. Its installer checksum and blockmap are refreshed
+# after Azure signing, because signing changes the installer bytes.
 $artifactDir = "build/output"
 $patterns = @("*.yml", "*.yaml", "*.blockmap")
 
 foreach ($pattern in $patterns) {
     $files = Get-ChildItem -Path $artifactDir -Filter $pattern -File -ErrorAction SilentlyContinue
     foreach ($f in $files) {
+        if ($f.Name -like "latest*.yml" -or $f.Name -like "*setup*.exe.blockmap") {
+            Write-Host "Keeping: $($f.Name)"
+            continue
+        }
         try {
             Remove-Item -Path $f.FullName -Force -ErrorAction Stop
             Write-Host "Removed: $($f.Name)"
@@ -112,8 +118,8 @@ if (Test-Path -LiteralPath $unpackedDir) {
     Write-Warning "Unpacked directory not found: $unpackedDir"
 }
 
-# Finally, rename win-unpacked to NAME_VERSION_intel (NAME from build.productName or package name)
-$finalDirName = "${name}_${version}_intel"
+# Finally, rename win-unpacked to NAME_intel (NAME from build.productName or package name)
+$finalDirName = "${nameForFile}_intel"
 $finalDirPath = Join-Path -Path "build/output" -ChildPath $finalDirName
 
 if (Test-Path -LiteralPath $unpackedDir) {
@@ -130,7 +136,7 @@ if (Test-Path -LiteralPath $unpackedDir) {
     }
 }
 
-# Zip the renamed directory (NAME_VERSION) as NAME_VERSION.zip in build/output
+# Zip the renamed directory (NAME_intel) as NAME_intel.zip in build/output
 if (Test-Path -LiteralPath $finalDirPath) {
     $zipPath = Join-Path -Path "build/output" -ChildPath ("{0}.zip" -f $finalDirName)
     try {
@@ -143,7 +149,7 @@ if (Test-Path -LiteralPath $finalDirPath) {
             }
         }
 
-        # Create the archive so that the top-level folder inside the zip is NAME_VERSION
+        # Create the archive so that the top-level folder inside the zip is NAME_intel
         Push-Location "build/output"
         try {
             Compress-Archive -Path $finalDirName -DestinationPath ("{0}.zip" -f $finalDirName) -Force -ErrorAction Stop

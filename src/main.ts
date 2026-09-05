@@ -24,6 +24,19 @@ let mainWindow: BrowserWindow;
 let autoUpdaterInstance: import("electron-updater").AppUpdater | null = null;
 let backendShutdownStarted = false;
 
+type AppUpdateMode = "available" | "downloading" | "downloaded" | "hidden";
+
+interface AppUpdateState {
+    mode: AppUpdateMode;
+    percent: number;
+    version: string;
+}
+
+const APP_UPDATE_STATE_CHANNEL = "app-update-state";
+const APP_UPDATE_ACTION_CHANNEL = "app-update-action";
+const UPDATE_FEED_URL = "https://github.com/RODA/StatConverter/releases/download/latest";
+const UPDATE_CHANNEL = process.arch === "arm64" ? "latest-arm64" : "latest-x64";
+
 function shutdownBackend() {
     if (backendShutdownStarted) {
         return;
@@ -54,31 +67,161 @@ function initializeAutoUpdater() {
 
     const { autoUpdater } = require("electron-updater") as typeof import("electron-updater");
     autoUpdaterInstance = autoUpdater;
+    autoUpdaterInstance.autoDownload = false;
+    autoUpdaterInstance.autoInstallOnAppQuit = false;
+    autoUpdaterInstance.channel = UPDATE_CHANNEL;
+    autoUpdaterInstance.setFeedURL({ provider: "generic", url: UPDATE_FEED_URL });
 
-    autoUpdaterInstance.on('update-available', () => {
-        dialog.showMessageBox(mainWindow, {
-            type: 'info',
-            title: 'Update Available',
-            message: 'A new version is available. It will be downloaded in the background.',
+    let availableInfo: import("electron-updater").UpdateInfo | null = null;
+    let available = false;
+    let downloading = false;
+    let downloaded = false;
+    let installRequested = false;
+
+    const sendUpdateState = (state: AppUpdateState) => {
+        if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isDestroyed()) {
+            return;
+        }
+        mainWindow.webContents.send(APP_UPDATE_STATE_CHANNEL, state);
+    };
+
+    const formatVersion = (info: import("electron-updater").UpdateInfo | null): string => {
+        return String(info?.version || "").trim();
+    };
+
+    const clearProgress = () => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.setProgressBar(-1);
+        }
+    };
+
+    const hideUpdate = () => {
+        available = false;
+        downloading = false;
+        clearProgress();
+        sendUpdateState({ mode: "hidden", percent: 0, version: "" });
+    };
+
+    const isMissingUpdateMetadataError = (error: unknown): boolean => {
+        const message = String(
+            error instanceof Error ? `${error.name} ${error.message}` : error || ""
+        ).toLowerCase();
+        const referencesMetadata = message.includes("latest.yml")
+            || message.includes("-mac.yml")
+            || message.includes("latest-linux.yml")
+            || message.includes("app-update.yml")
+            || message.includes("channel file");
+        const isMissing = message.includes("status 404")
+            || message.includes(" 404")
+            || message.includes("not found")
+            || message.includes("enoent")
+            || message.includes("cannot find channel");
+        return referencesMetadata && isMissing;
+    };
+
+    autoUpdaterInstance.on("update-available", (info) => {
+        availableInfo = info;
+        available = true;
+        downloading = false;
+        downloaded = false;
+        sendUpdateState({ mode: "available", percent: 0, version: formatVersion(info) });
+    });
+
+    autoUpdaterInstance.on("update-not-available", hideUpdate);
+
+    autoUpdaterInstance.on("download-progress", (progress) => {
+        const percent = Math.max(0, Math.min(100, progress.percent || 0));
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.setProgressBar(percent / 100);
+        }
+        sendUpdateState({
+            mode: "downloading",
+            percent,
+            version: formatVersion(availableInfo)
         });
     });
 
-    autoUpdaterInstance.on('update-downloaded', () => {
-        dialog.showMessageBox(mainWindow, {
-            type: 'question',
-            buttons: ['Restart', 'Later'],
-            defaultId: 0,
-            cancelId: 1,
-            title: 'Update Ready',
-            message: 'Update downloaded. Restart now to apply it?',
-        }).then(result => {
-            if (result.response === 0) {
-                autoUpdaterInstance?.quitAndInstall();
+    autoUpdaterInstance.on("update-downloaded", (info) => {
+        availableInfo = info;
+        available = false;
+        downloading = false;
+        downloaded = true;
+        clearProgress();
+        sendUpdateState({ mode: "downloaded", percent: 100, version: formatVersion(info) });
+    });
+
+    autoUpdaterInstance.on("error", (error) => {
+        const userWasWaiting = downloading || installRequested;
+        installRequested = false;
+
+        if (isMissingUpdateMetadataError(error)) {
+            hideUpdate();
+            return;
+        }
+
+        if (downloading && availableInfo) {
+            available = true;
+            downloading = false;
+            clearProgress();
+            sendUpdateState({
+                mode: "available",
+                percent: 0,
+                version: formatVersion(availableInfo)
+            });
+        } else if (downloaded) {
+            sendUpdateState({
+                mode: "downloaded",
+                percent: 100,
+                version: formatVersion(availableInfo)
+            });
+        } else {
+            hideUpdate();
+        }
+
+        if (userWasWaiting) {
+            dialog.showMessageBox(mainWindow, {
+                type: "error",
+                title: "Update Failed",
+                message: error instanceof Error ? error.message : String(error)
+            });
+        }
+    });
+
+    ipcMain.on(APP_UPDATE_ACTION_CHANNEL, () => {
+        if (!autoUpdaterInstance) {
+            return;
+        }
+
+        if (downloaded) {
+            if (installRequested) {
+                return;
             }
+            installRequested = true;
+            autoUpdaterInstance.quitAndInstall(false, true);
+            return;
+        }
+
+        if (!available || downloading || !availableInfo) {
+            return;
+        }
+
+        available = false;
+        downloading = true;
+        sendUpdateState({
+            mode: "downloading",
+            percent: 0,
+            version: formatVersion(availableInfo)
+        });
+        void autoUpdaterInstance.downloadUpdate().catch(() => {
+            // electron-updater emits the corresponding error event, which restores the offer.
         });
     });
 
-    autoUpdaterInstance.checkForUpdatesAndNotify();
+    void autoUpdaterInstance.checkForUpdates().catch((error) => {
+        if (!isMissingUpdateMetadataError(error)) {
+            console.error("Failed to check for updates:", error);
+        }
+    });
 }
 
 function normalizePathForR(filePath: string): string {
@@ -151,7 +294,7 @@ app.whenReady().then(() => {
     });
 
     if (production) {
-        initializeAutoUpdater();
+        mainWindow.webContents.once("did-finish-load", initializeAutoUpdater);
     }
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "statconverter",
-  "version": "1.3.04",
+  "version": "1.4.0",
   "description": "Statistical package converter using the DDI standard interface",
   "main": "dist/main.js",
   "scripts": {
@@ -10,11 +10,26 @@
     "prepare:r-portable": "node scripts/prepare-r-portable.js",
     "start": "npm run build && cross-env NODE_ENV=development electron ./dist/main.js",
     "predist": "cross-env NODE_ENV=production node scripts/check-env.js",
-    "dist": "node scripts/dist-dispatch.js",
+    "dist": "cross-env SC_SKIP_CODESIGN=true node scripts/dist-dispatch.js",
+    "predist:sign": "cross-env NODE_ENV=production node scripts/check-env.js",
+    "dist:sign": "node scripts/dist-dispatch.js",
     "dist:publish": "npm run build && electron-builder --publish onTagOrDraft",
     "rename:linux": "bash scripts/rename-binaries-linux.sh",
     "rename:mac": "bash scripts/rename-binaries-mac.sh",
-    "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1"
+    "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1",
+    "refresh:update-metadata": "node scripts/refresh-update-metadata.js",
+    "capture:screenshot": "node scripts/capture-screenshot.js",
+    "verify:mac-signing": "node scripts/verify-macos-signing.js",
+    "verify:update": "node scripts/verify-update-contract.js",
+    "fetch:intel": "node scripts/fetch-intel-artifacts.js",
+    "submit": "node scripts/macos-notarization.js submit",
+    "history": "node scripts/macos-notarization.js history",
+    "staple": "node scripts/macos-notarization.js staple",
+    "publish": "node scripts/publish-artifacts.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RODA/StatConverter.git"
   },
   "author": {
     "name": "Adrian Dusa",
@@ -61,16 +76,25 @@
     },
     "mac": {
       "icon": "icons/StatConverter.icns",
+      "artifactName": "${productName}-${version}-${arch}-${os}.${ext}",
       "category": "public.app-category.productivity",
       "extendInfo": {
         "NSHumanReadableCopyright": "© 2021-2025 Adrian Dusa — Academic Non-Commercial License (see LICENSE file for details)."
       },
-      "target": {
-        "target": "dmg",
-        "arch": [
-          "arm64"
-        ]
-      }
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ]
     },
     "linux": {
       "icon": "icons/StatConverter.png",
@@ -84,12 +108,13 @@
       }
     },
     "publish": {
-      "provider": "github",
-      "owner": "RODA",
-      "repo": "StatConverter"
+      "provider": "generic",
+      "url": "https://github.com/RODA/StatConverter/releases/download/latest",
+      "channel": "latest-x64"
     }
   },
   "devDependencies": {
+    "app-builder-bin": "5.0.0-alpha.12",
     "@types/electron": "^1.4.38",
     "@types/lodash": "^4.17.24",
     "@types/serviceworker": "^0.0.195",
@@ -102,6 +127,7 @@
     "eslint": "^10.2.1",
     "ts-loader": "^9.5.7",
     "ts-node": "^10.9.2",
+    "js-yaml": "^4.1.1",
     "typescript": "^6.0.3",
     "webpack": "^5.106.2",
     "webpack-cli": "^7.0.2"

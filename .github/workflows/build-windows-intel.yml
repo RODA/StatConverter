@@ -59,6 +59,9 @@ jobs:
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
 
+      - name: Refresh Windows update metadata
+        run: npm run refresh:update-metadata -- --platform windows
+
       - name: Publish assets to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -75,3 +78,5 @@ jobs:
           files: |
             build/output/*.exe
             build/output/*.zip
+            build/output/*.exe.blockmap
+            build/output/latest*.yml

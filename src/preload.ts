@@ -12,6 +12,12 @@ import * as interfaces from './library/interfaces';
 
 const appVersion = require('../package.json').version;
 
+type AppUpdateState = {
+    mode: 'available' | 'downloading' | 'downloaded' | 'hidden';
+    percent: number;
+    version: string;
+};
+
 const inputOutput: interfaces.InputOutput = {
     inputType: '',
     fileFrom: '',
@@ -43,6 +49,49 @@ window.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('gotoRODA')?.addEventListener('click', () => {
         ipcRenderer.send('gotoRODA');
+    });
+
+    const updateButton = document.getElementById('app-update-button') as HTMLButtonElement | null;
+    const updateLabel = updateButton?.querySelector('.update-label') as HTMLSpanElement | null;
+    updateButton?.addEventListener('click', () => {
+        const mode = updateButton.dataset.updateMode;
+        if (mode === 'available' || mode === 'downloaded') {
+            ipcRenderer.send('app-update-action');
+        }
+    });
+
+    ipcRenderer.on('app-update-state', (_event, payload: AppUpdateState) => {
+        if (!updateButton || !payload) {
+            return;
+        }
+
+        updateButton.dataset.updateMode = payload.mode;
+
+        if (payload.mode === 'hidden') {
+            updateButton.classList.add('d-none');
+            updateButton.removeAttribute('aria-disabled');
+            return;
+        }
+
+        let tooltip = 'Quit application to update';
+
+        if (payload.mode === 'available') {
+            if (updateLabel) updateLabel.textContent = 'Download';
+            tooltip = 'New version available';
+            updateButton.removeAttribute('aria-disabled');
+        } else if (payload.mode === 'downloading') {
+            const percent = Math.round(payload.percent || 0);
+            if (updateLabel) updateLabel.textContent = 'Download';
+            tooltip = percent > 0 ? `Downloading update ${percent}%` : 'Downloading update';
+            updateButton.setAttribute('aria-disabled', 'true');
+        } else {
+            if (updateLabel) updateLabel.textContent = 'Update';
+            updateButton.removeAttribute('aria-disabled');
+        }
+
+        updateButton.title = tooltip;
+        updateButton.setAttribute('aria-label', tooltip);
+        updateButton.classList.remove('d-none');
     });
 
     ipcRenderer.on('startLoader', () => {

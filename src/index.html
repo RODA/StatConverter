@@ -79,6 +79,64 @@
 				color: #D3D3D3;
 			}
 
+			@keyframes app-update-download {
+				0%   { transform: translateY(-8px); opacity: 0; }
+				30%  { transform: translateY(0); opacity: 1; }
+				70%  { transform: translateY(0); opacity: 1; }
+				100% { transform: translateY(8px); opacity: 0; }
+			}
+
+			.app-update-button {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0;
+				width: 32px;
+				height: 24px;
+				padding: 0;
+				background: #328ee9;
+				color: #ffffff;
+				border: 1px solid #0b5ed7;
+				border-radius: 999px;
+				box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset;
+				cursor: pointer;
+				font-size: 0.8rem;
+				font-weight: 600;
+				line-height: 1;
+				overflow: hidden;
+				transition: width 120ms ease, padding 120ms ease, gap 120ms ease, background-color 120ms ease;
+			}
+
+			.app-update-button:hover {
+				gap: 6px;
+				width: 94px;
+				padding: 0 10px;
+				background: #0b66e4;
+			}
+
+			.app-update-button .update-label {
+				display: none;
+			}
+
+			.app-update-button:hover .update-label {
+				display: inline;
+			}
+
+			.app-update-button[data-update-mode="downloading"] {
+				cursor: progress;
+				background: #5aa2ee;
+			}
+
+			.app-update-button[data-update-mode="downloading"] .update-icon {
+				animation: app-update-download 1.5s infinite linear;
+			}
+
+			.app-update-button .update-icon {
+				width: 16px;
+				height: 16px;
+				pointer-events: none;
+			}
+
 		</style>
     </head>
 
@@ -447,7 +505,16 @@
 				<button class="rounded-0 btn btn-sm btn-secondary active" id="v-pills-convert-tab" data-bs-toggle="pill" data-bs-target="#v-pills-convert" type="button" role="tab" aria-controls="v-pills-convert" aria-selected="true">Convert</button>
 				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-variables-tab" data-bs-toggle="pill" data-bs-target="#v-pills-variables" type="button" role="tab" aria-controls="v-pills-variables" aria-selected="false">Variables</button>
 				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-cases-tab" data-bs-toggle="pill" data-bs-target="#v-pills-cases" type="button" role="tab" aria-controls="v-pills-cases" aria-selected="false">Cases</button>
-				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-settings-tab" style="margin-bottom: auto" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
+				<button class="rounded-0 btn btn-sm btn-secondary" id="v-pills-settings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-settings" type="button" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</button>
+				<button class="app-update-button align-self-center mt-2 d-none" id="app-update-button" type="button" title="New version available" aria-label="New version available">
+					<svg class="update-icon" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M8 2v8" />
+						<path d="M4.5 7.5 8 11l3.5-3.5" />
+						<path d="M2.5 13h11" />
+					</svg>
+					<span class="update-label">Download</span>
+				</button>
+				<div class="flex-grow-1"></div>
 				<div class="text-center flex">
 					<div class="align-self-end pb-3">
 						<a id="gotoRODA" href="#"><img src="./assets/RODA.png" alt="RODA" style="max-width: 50px" /></a>

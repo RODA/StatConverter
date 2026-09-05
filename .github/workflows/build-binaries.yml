@@ -39,6 +39,9 @@ jobs:
       - name: Rename Linux artifacts
         run: npm run rename:linux
 
+      - name: Refresh Linux update metadata
+        run: npm run refresh:update-metadata -- --platform linux
+
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -46,6 +49,8 @@ jobs:
           path: |
             build/output/*.AppImage
             build/output/*.deb
+            build/output/*.AppImage.blockmap
+            build/output/latest*-linux.yml
           if-no-files-found: error
 
   windows-intel:
@@ -99,6 +104,9 @@ jobs:
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
 
+      - name: Refresh Windows update metadata
+        run: npm run refresh:update-metadata -- --platform windows
+
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -106,6 +114,8 @@ jobs:
           path: |
             build/output/*.exe
             build/output/*.zip
+            build/output/*.exe.blockmap
+            build/output/latest*.yml
           if-no-files-found: error
 
   macos-intel:
@@ -162,7 +172,7 @@ jobs:
         run: npm run build
 
       - name: Build Electron app (macOS intel, signed)
-        run: npx electron-builder --mac dmg --x64 --publish never -c.mac.forceCodeSigning=true
+        run: npx electron-builder --mac dmg zip --x64 --publish never -c.mac.forceCodeSigning=true
 
       - name: Verify macOS code signature
         shell: bash
@@ -176,6 +186,9 @@ jobs:
           codesign --verify --deep --strict --verbose=2 "$app_path"
           codesign --display --verbose=2 "$app_path"
 
+      - name: Verify notarization readiness
+        run: npm run verify:mac-signing
+
       - name: Rename macOS artifacts
         run: npm run rename:mac
 
@@ -183,7 +196,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-intel-build
-          path: build/output/*.dmg
+          path: |
+            build/output/*.dmg
+            build/output/*-mac.zip
+            build/output/*-mac.zip.blockmap
+            build/output/*-mac.yml
           if-no-files-found: error
 
   publish-release:
@@ -218,7 +235,9 @@ jobs:
           echo "tag=latest" >> "$GITHUB_OUTPUT"
           echo "name=Latest build" >> "$GITHUB_OUTPUT"
 
-      - name: Publish assets to GitHub Release
+      # Linux and Windows are signed and complete as they leave CI, so they go
+      # straight to the download release.
+      - name: Publish Linux and Windows assets to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}
@@ -234,4 +253,27 @@ jobs:
           files: |
             release-assets/linux-intel/*
             release-assets/windows-intel/*
+
+      # macOS Intel is signed but not yet notarized, so it goes to staging instead.
+      # The release machine pulls it from there with `npm run fetch:intel`, notarizes
+      # both architectures together, and `npm run publish` puts the stapled versions
+      # in the download release. See RELEASING.md.
+      - name: Publish macOS Intel assets to the staging release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: macos-intel-staging
+          target_commitish: ${{ github.sha }}
+          name: macOS Intel staging (not for download)
+          body: |
+            Signed but not notarized. These files are an input to the macOS release
+            sequence in RELEASING.md, not a download. The notarized and stapled build
+            is published in the `latest` release.
+          generate_release_notes: false
+          draft: false
+          prerelease: true
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          append_body: false
+          make_latest: false
+          files: |
             release-assets/macos-intel/*

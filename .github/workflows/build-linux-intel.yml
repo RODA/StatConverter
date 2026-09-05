@@ -38,6 +38,9 @@ jobs:
       - name: Rename Linux artifacts
         run: npm run rename:linux
 
+      - name: Refresh Linux update metadata
+        run: npm run refresh:update-metadata -- --platform linux
+
       - name: Publish assets to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -54,3 +57,5 @@ jobs:
           files: |
             build/output/*.AppImage
             build/output/*.deb
+            build/output/*.AppImage.blockmap
+            build/output/latest*-linux.yml
