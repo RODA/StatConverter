@@ -24,7 +24,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 
-// "Copyright (c) 2021-2025" / "© 2021-2025" / "© 2021", with or without a range.
+// "Copyright (c) 2021-2026" / "© 2021-2026" / "© 2021-2026", with or without a range.
 const NOTICE = /((?:Copyright \(c\)|Copyright \(C\)|©)\s+)(\d{4})(\s*[-–]\s*(\d{4}))?/g;
 
 const BINARY_EXTENSIONS = new Set([
