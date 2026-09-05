@@ -106,6 +106,18 @@ Windows artifacts are signed with Azure Trusted Signing after packaging, so
 `npm run refresh:update-metadata` re-pairs the channel with the signed installer and
 regenerates its blockmap.
 
+## The copyright year
+
+Every copyright notice in the repository ends in a year: the About panel string in
+`package.json`, the `LICENSE`, and the header of each source file. `npm run update:year`
+rewrites the end of those ranges to the current year, taking the file list from
+`git ls-files` so nothing has to be remembered. Run it in January, or whenever the
+release build stops you.
+
+Both `npm run dist` and `npm run dist:sign` run the same script in `--check` mode first
+and refuse to build on a stale year, so a release cannot ship last year's copyright.
+`--year 2027` stamps a specific year instead of today's.
+
 ## Before tagging a release
 
 `npm run verify:update` checks that the update UI, the per-architecture channels, the

@@ -9,9 +9,9 @@
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "prepare:r-portable": "node scripts/prepare-r-portable.js",
     "start": "npm run build && cross-env NODE_ENV=development electron ./dist/main.js",
-    "predist": "cross-env NODE_ENV=production node scripts/check-env.js",
+    "predist": "cross-env NODE_ENV=production node scripts/check-env.js && node scripts/update-copyright-year.js --check",
     "dist": "cross-env SC_SKIP_CODESIGN=true node scripts/dist-dispatch.js",
-    "predist:sign": "cross-env NODE_ENV=production node scripts/check-env.js",
+    "predist:sign": "cross-env NODE_ENV=production node scripts/check-env.js && node scripts/update-copyright-year.js --check",
     "dist:sign": "node scripts/dist-dispatch.js",
     "dist:publish": "npm run build && electron-builder --publish onTagOrDraft",
     "rename:linux": "bash scripts/rename-binaries-linux.sh",
@@ -19,6 +19,7 @@
     "rename:win": "powershell -ExecutionPolicy Bypass -File scripts/rename-binaries-windows.ps1",
     "refresh:update-metadata": "node scripts/refresh-update-metadata.js",
     "capture:screenshot": "node scripts/capture-screenshot.js",
+    "update:year": "node scripts/update-copyright-year.js",
     "verify:mac-signing": "node scripts/verify-macos-signing.js",
     "verify:update": "node scripts/verify-update-contract.js",
     "fetch:intel": "node scripts/fetch-intel-artifacts.js",
@@ -66,7 +67,7 @@
     ],
     "win": {
       "icon": "icons/StatConverter.ico",
-      "legalTrademarks": "Academic Non-Commercial License (see LICENSE file for details).",
+      "legalTrademarks": "Academic Non-Commercial License.",
       "target": {
         "target": "nsis",
         "arch": [
@@ -79,7 +80,7 @@
       "artifactName": "${productName}-${version}-${arch}-${os}.${ext}",
       "category": "public.app-category.productivity",
       "extendInfo": {
-        "NSHumanReadableCopyright": "© 2021-2025 Adrian Dusa — Academic Non-Commercial License (see LICENSE file for details)."
+        "NSHumanReadableCopyright": "© 2021-2026 Adrian Dusa — Academic Non-Commercial License."
       },
       "target": [
         {
@@ -103,7 +104,7 @@
       "maintainer": "Adrian Dusa <dusa.adrian@gmail.com>",
       "desktop": {
         "entry": {
-          "Comment": "Academic Non-Commercial License (see LICENSE file for details)."
+          "Comment": "Academic Non-Commercial License."
         }
       }
     },

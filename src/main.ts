@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2021-2025, Adrian Dusa
+    Copyright (c) 2021-2026, Adrian Dusa
     All rights reserved.
 
     License: Academic Non-Commercial License (see LICENSE file for details).
@@ -23,6 +23,10 @@ const OS_Windows = process.platform == 'win32';
 let mainWindow: BrowserWindow;
 let autoUpdaterInstance: import("electron-updater").AppUpdater | null = null;
 let backendShutdownStarted = false;
+
+// Unpackaged runs would otherwise take the lowercase package name, which shows
+// up in the menu roles as "Quit statconverter".
+app.setName("StatConverter");
 
 type AppUpdateMode = "available" | "downloading" | "downloaded" | "hidden";
 
@@ -276,14 +280,56 @@ function createWindow() {
     // Open the DevTools.
     if (development) {
         mainWindow.webContents.openDevTools();
-    } else {
-        // Remove the default menu
-        Menu.setApplicationMenu(null);
     }
 
 }
 
+function buildApplicationMenu() {
+    // Windows and Linux have no menu bar at all.
+    if (process.platform !== "darwin") {
+        Menu.setApplicationMenu(null);
+        return;
+    }
+
+    // macOS always shows a menu bar, so the default one is replaced with the
+    // smallest menu that still behaves like a Mac application: the application
+    // menu with Quit, and About.
+    //
+    // The clipboard and undo shortcuts are routed through the menu by macOS, so
+    // the roles have to exist for Cmd+C, Cmd+V and friends to keep working in
+    // the text fields. They are hidden; the accelerators still fire, because
+    // acceleratorWorksWhenHidden defaults to true on macOS.
+    const hiddenEditRoles: Electron.MenuItemConstructorOptions[] = ([
+        "undo", "redo", "cut", "copy", "paste", "selectAll"
+    ] as const).map((role) => ({ role, visible: false }));
+
+    // In development the reload and DevTools shortcuts stay available the same
+    // way: registered, never shown.
+    const hiddenDevRoles: Electron.MenuItemConstructorOptions[] = development
+        ? ([ "reload", "forceReload", "toggleDevTools" ] as const)
+            .map((role) => ({ role, visible: false }))
+        : [];
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate([
+        {
+            label: app.name,
+            submenu: [
+                { role: "quit" },
+                ...hiddenEditRoles,
+                ...hiddenDevRoles
+            ]
+        },
+        {
+            label: "About",
+            submenu: [
+                { role: "about", label: "Application" }
+            ]
+        }
+    ]));
+}
+
 app.whenReady().then(() => {
+    buildApplicationMenu();
     createWindow();
     initEmbeddedR().catch((error: Error) => {
         dialog.showMessageBox(mainWindow, {

@@ -43,7 +43,7 @@ function run(cmd, args, opts = {}) {
         entry: Object.assign({}, base.linux?.desktop?.entry || {}, {
           Comment: base.linux?.desktop?.entry?.Comment
             || base.linux?.desktop?.Comment
-            || 'Academic Non-Commercial License (see LICENSE file for details).'
+            || 'Academic Non-Commercial License.'
         })
       })
     })

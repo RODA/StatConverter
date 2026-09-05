@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2021-2025, Adrian Dusa
+    Copyright (c) 2021-2026, Adrian Dusa
     All rights reserved.
 
     License: Academic Non-Commercial License (see LICENSE file for details).
