@@ -22,34 +22,53 @@ const productFileName = () => productName().replace(/\s+/g, '_');
 const appBundleName = () => `${productName()}.app`;
 
 /**
- * The macOS disk images that are actually present, in a stable order. These are the
- * renamed, human-facing downloads the site links to. Names are deliberately
- * version-free: Gatekeeper builds its reputation per file, so a name that stays the
- * same across releases keeps the trust it has already earned, and published links stay
- * valid.
+ * The two architectures a release carries, by the word that names their disk image.
+ * `silicon` is built locally, `intel` comes back from CI through `npm run fetch:intel`.
  */
-const productDmgPaths = ({ required = true } = {}) => {
-    const nameFile = productFileName();
-    const candidates = [
-        path.join(outputDir, `${nameFile}_silicon.dmg`),
-        path.join(outputDir, `${nameFile}_intel.dmg`),
-    ];
+const DMG_LABELS = ['silicon', 'intel'];
 
-    const paths = candidates.filter((candidate) => fs.existsSync(candidate));
+const LABEL_RECOVERY = {
+    silicon: 'build it with `npm run dist:sign`, then run `npm run rename:mac`',
+    intel: 'fetch it with `npm run fetch:intel`',
+};
 
-    if (required && paths.length === 0) {
+/** Where one architecture's renamed disk image belongs, present or not. */
+const productDmgPath = (label) => path.join(outputDir, `${productFileName()}_${label}.dmg`);
+
+/**
+ * The macOS disk images, in a stable order. These are the renamed, human-facing
+ * downloads the site links to. Names are deliberately version-free: Gatekeeper builds
+ * its reputation per file, so a name that stays the same across releases keeps the
+ * trust it has already earned, and published links stay valid.
+ *
+ * Both architectures are required by default. Notarizing, stapling and publishing are
+ * all meant to cover a whole release, and a half-present set does not announce itself:
+ * it notarizes one architecture, then fails much later when the other has no ticket.
+ */
+const productDmgPaths = ({ required = true, labels = DMG_LABELS } = {}) => {
+    const wanted = labels.filter((label) => DMG_LABELS.includes(label));
+    const paths = wanted.map(productDmgPath);
+    const missing = paths.filter((candidate) => !fs.existsSync(candidate));
+
+    if (required && missing.length) {
         // A build that has not been renamed yet is the usual reason, and it looks
-        // identical to no build at all unless the difference is spelled out.
-        const unrenamed = fs.existsSync(outputDir)
+        // identical to an absent build unless the difference is spelled out.
+        const present = fs.existsSync(outputDir)
             ? fs.readdirSync(outputDir).filter((name) => name.endsWith('.dmg'))
             : [];
-        const hint = unrenamed.length
-            ? `\nFound instead: ${unrenamed.join(', ')}. Run \`npm run rename:mac\` first.`
-            : '';
-        throw new Error(`Missing built DMG: looked for ${candidates.join(' and ')}.${hint}`);
+
+        const lines = missing.map((candidate) => {
+            const label = wanted[paths.indexOf(candidate)];
+            return `  ${path.basename(candidate)} — ${LABEL_RECOVERY[label]}`;
+        });
+
+        throw new Error(
+            `Missing disk image(s):\n${lines.join('\n')}\n`
+            + `In build/output: ${present.length ? present.join(', ') : 'no .dmg at all'}`
+        );
     }
 
-    return paths;
+    return paths.filter((candidate) => fs.existsSync(candidate));
 };
 
 /**
@@ -111,6 +130,8 @@ module.exports = {
     productName,
     productFileName,
     appBundleName,
+    DMG_LABELS,
+    productDmgPath,
     productDmgPaths,
     productAppPaths,
     productAppPathForArch,

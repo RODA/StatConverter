@@ -73,7 +73,11 @@ the Intel build produced by GitHub Actions is pulled back down first.
    `latest-x64-mac.yml` from the staging release, and expands the ZIP into
    `build/output/mac` so the Intel app can be stapled too.
 7. `npm run submit` — submits both disk images and waits for a verdict.
-   `npm run history` shows the last couple of submissions.
+   `npm run history` shows the last couple of submissions. To re-submit one
+   architecture without uploading the other again, name it: `npm run submit -- silicon`.
+   Both disk images have to be present by then, or the step stops and says which is
+   missing — notarizing one and discovering the other has no ticket only at the stapling
+   step wastes a round trip.
 8. `npm run staple` — staples both apps and both disk images, then rebuilds each
    updater ZIP from its own stapled app and rewrites the checksum in the matching
    `latest-<arch>-mac.yml`. Without this an update would install an app whose ticket has

@@ -82,8 +82,11 @@ assert.match(fetchIntel, /SC_STAGING_TAG \|\| 'macos-intel-staging'/);
 // renamed file up have to agree on that.
 assert.match(fetchIntel, /`\$\{nameFile\}_intel\.dmg`/);
 const artifactPaths = read('scripts/artifact-paths.js');
-assert.match(artifactPaths, /`\$\{nameFile\}_silicon\.dmg`/);
-assert.match(artifactPaths, /`\$\{nameFile\}_intel\.dmg`/);
+assert.match(artifactPaths, /const DMG_LABELS = \['silicon', 'intel'\]/);
+assert.match(artifactPaths, /`\$\{productFileName\(\)\}_\$\{label\}\.dmg`/);
+// Notarizing, stapling and publishing cover a whole release, so a half-present set is
+// an error rather than something to quietly work with.
+assert.match(artifactPaths, /required = true, labels = DMG_LABELS/);
 const refreshMetadata = read('scripts/refresh-update-metadata.js');
 assert.match(refreshMetadata, /`\$\{name\}_setup_intel\.exe`/);
 assert.match(refreshMetadata, /`\$\{name\}_intel\.AppImage`/);

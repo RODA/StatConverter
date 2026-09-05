@@ -15,6 +15,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const {
+    DMG_LABELS,
     archForChannelMetadata,
     projectRoot,
     productAppPathForArch,
@@ -93,8 +94,8 @@ function historyNewestFirst(history) {
     });
 }
 
-function submit() {
-    const dmgPaths = productDmgPaths();
+function submit(labels) {
+    const dmgPaths = productDmgPaths({ labels });
 
     for (const dmgPath of dmgPaths) {
         console.log(`Submitting ${dmgPath}; waiting for the notary service.`);
@@ -222,6 +223,9 @@ function rebuildUpdaterZip(appPath, channelPath) {
 }
 
 function staple() {
+    // Both disk images are required: stapling rebuilds each architecture's updater ZIP
+    // from its own application, so a half-present set would leave one channel pointing
+    // at an unstapled ZIP.
     const dmgPaths = productDmgPaths();
     const appPaths = productAppPaths();
 
@@ -269,7 +273,17 @@ function main() {
     const action = String(process.argv[2] || '').trim();
 
     if (action === 'submit') {
-        submit();
+        // A whole release is the default. One architecture can be named — `npm run
+        // submit -- silicon` — to re-submit just that one without uploading gigabytes
+        // for a disk image the notary has already accepted.
+        const requested = process.argv.slice(3).map((value) => String(value).replace(/^--/, ''));
+        const unknown = requested.filter((label) => !DMG_LABELS.includes(label));
+
+        if (unknown.length) {
+            fail(`Unknown architecture: ${unknown.join(', ')}. Expected ${DMG_LABELS.join(' or ')}.`);
+        }
+
+        submit(requested.length ? requested : DMG_LABELS);
         return;
     }
 
