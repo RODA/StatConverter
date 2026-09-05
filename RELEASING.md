@@ -91,6 +91,11 @@ Both are fully automated: they are signed and complete as they leave CI, so they
 straight to the `latest` release. Run the **build Windows Intel** and **build Linux
 Intel** workflows, or **build binaries**, which runs all three lanes and then publishes
 Linux and Windows to `latest` and macOS Intel to staging.
+
+Each lane publishes on its own: if one platform fails to build, the platforms that built
+cleanly are still published, and the run is marked failed by the lane that failed. The
+run summary lists which platforms were published and which were not, so a partial
+release is visible without digging through the release assets.
 Windows artifacts are signed with Azure Trusted Signing after packaging, so
 `npm run refresh:update-metadata` re-pairs the channel with the signed installer and
 regenerates its blockmap.

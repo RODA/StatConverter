@@ -209,21 +209,29 @@ jobs:
       - linux-intel
       - windows-intel
       - macos-intel
+    # Each lane publishes on its own. A platform that failed to build is a reason to
+    # withhold that platform, not to withhold the two that built cleanly — so this job
+    # runs whatever happened upstream, and every step below is conditional on the result
+    # of the lane it publishes. The run is still marked failed by the lane that failed.
+    if: ${{ !cancelled() }}
 
     steps:
       - name: Download Linux artifacts
+        if: ${{ needs['linux-intel'].result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: linux-intel-build
           path: release-assets/linux-intel
 
       - name: Download Windows artifacts
+        if: ${{ needs['windows-intel'].result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: windows-intel-build
           path: release-assets/windows-intel
 
       - name: Download macOS artifacts
+        if: ${{ needs['macos-intel'].result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: macos-intel-build
@@ -237,7 +245,8 @@ jobs:
 
       # Linux and Windows are signed and complete as they leave CI, so they go
       # straight to the download release.
-      - name: Publish Linux and Windows assets to GitHub Release
+      - name: Publish Linux assets to GitHub Release
+        if: ${{ needs['linux-intel'].result == 'success' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}
@@ -252,6 +261,22 @@ jobs:
           make_latest: false
           files: |
             release-assets/linux-intel/*
+
+      - name: Publish Windows assets to GitHub Release
+        if: ${{ needs['windows-intel'].result == 'success' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.release.outputs.name }}
+          generate_release_notes: false
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          overwrite_files: true
+          append_body: false
+          make_latest: false
+          files: |
             release-assets/windows-intel/*
 
       # macOS Intel is signed but not yet notarized, so it goes to staging instead.
@@ -259,6 +284,7 @@ jobs:
       # both architectures together, and `npm run publish` puts the stapled versions
       # in the download release. See RELEASING.md.
       - name: Publish macOS Intel assets to the staging release
+        if: ${{ needs['macos-intel'].result == 'success' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: macos-intel-staging
@@ -277,3 +303,33 @@ jobs:
           make_latest: false
           files: |
             release-assets/macos-intel/*
+
+      # Which platforms this run actually published, so a partial release is visible on
+      # the run itself rather than having to be reconstructed from the release assets.
+      - name: Report what was published
+        if: always()
+        env:
+          LINUX: ${{ needs['linux-intel'].result }}
+          WINDOWS: ${{ needs['windows-intel'].result }}
+          MACOS: ${{ needs['macos-intel'].result }}
+        run: |
+          set -euo pipefail
+          {
+            echo "| Platform | Build | Published to |"
+            echo "| --- | --- | --- |"
+            for entry in "Linux:$LINUX:latest" "Windows:$WINDOWS:latest" "macOS Intel:$MACOS:macos-intel-staging"; do
+              name="${entry%%:*}"
+              rest="${entry#*:}"
+              result="${rest%%:*}"
+              target="${rest#*:}"
+              if [ "$result" = "success" ]; then
+                echo "| $name | $result | \`$target\` |"
+              else
+                echo "| $name | $result | nothing |"
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$LINUX" != "success" ] || [ "$WINDOWS" != "success" ] || [ "$MACOS" != "success" ]; then
+            echo "::warning::A partial release: only the platforms marked success above were published."
+          fi

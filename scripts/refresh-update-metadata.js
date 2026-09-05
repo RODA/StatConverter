@@ -47,6 +47,39 @@ function expectedPayload(platform) {
     : `${name}_intel.AppImage`;
 }
 
+/**
+ * The entry that describes the payload being renamed.
+ *
+ * A channel file can list more than one artifact — the Linux build emits an AppImage and
+ * a .deb, and both are recorded. Only the one the updater actually installs is rewritten
+ * here: the others keep the names and checksums electron-builder gave them, which are
+ * still correct because those files are not renamed. The top-level `path` names the
+ * artifact electron-builder chose as the payload, so it identifies the entry; a match on
+ * the file extension covers a channel file that has no usable `path`.
+ */
+function findPayloadEntry(metadata, payloadName, metadataPath) {
+  const files = metadata.files;
+  if (!files.length) {
+    fail(`No update payload listed in ${path.basename(metadataPath)}.`);
+  }
+
+  const named = files.find((file) => file && String(file.url) === String(metadata.path));
+  if (named) return named;
+
+  const extension = path.extname(payloadName).toLowerCase();
+  const byExtension = files.filter(
+    (file) => file && path.extname(String(file.url || '')).toLowerCase() === extension
+  );
+
+  if (byExtension.length === 1) return byExtension[0];
+
+  fail(
+    `Cannot tell which entry in ${path.basename(metadataPath)} is the ${extension} payload; `
+    + `found ${byExtension.length} candidate(s) among: `
+    + files.map((file) => String((file || {}).url)).join(', ')
+  );
+}
+
 function findMetadata(platform) {
   if (!fs.existsSync(outputDir)) {
     fail(`No build output directory at ${outputDir}.`);
@@ -115,18 +148,16 @@ function main() {
     fail(`Invalid update metadata: ${metadataPath}`);
   }
 
-  if (metadata.files.length !== 1) {
-    fail(`Expected one update payload in ${path.basename(metadataPath)}; found ${metadata.files.length}.`);
-  }
+  const entry = findPayloadEntry(metadata, payloadName, metadataPath);
 
   const blockmapPath = regenerateBlockmap(payloadPath);
   const sha512 = sha512Base64(payloadPath);
   const size = fs.statSync(payloadPath).size;
 
-  metadata.files[0].url = payloadName;
-  metadata.files[0].sha512 = sha512;
-  metadata.files[0].size = size;
-  metadata.files[0].blockMapSize = fs.statSync(blockmapPath).size;
+  entry.url = payloadName;
+  entry.sha512 = sha512;
+  entry.size = size;
+  entry.blockMapSize = fs.statSync(blockmapPath).size;
   metadata.path = payloadName;
   metadata.sha512 = sha512;
 

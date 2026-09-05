@@ -153,6 +153,19 @@ for (const workflow of workflows) {
     assert.match(source, /build\/output\/latest\*\.yml/);
     assert.match(source, /build\/output\/\*\.exe\.blockmap/);
   }
+  if (workflow.endsWith('build-binaries.yml')) {
+    // One platform failing to build is a reason to withhold that platform, not the two
+    // that built cleanly, so the publish job runs regardless and gates each upload on
+    // the result of the lane it publishes.
+    assert.match(source, /if: \$\{\{ !cancelled\(\) \}\}/);
+    for (const job of ['linux-intel', 'windows-intel', 'macos-intel']) {
+      assert.match(
+        source,
+        new RegExp(`if: \\$\\{\\{ needs\\['${job}'\\]\\.result == 'success' \\}\\}`),
+        `build-binaries.yml should gate publishing on ${job}`
+      );
+    }
+  }
   if (workflow.includes('macos') || workflow.endsWith('build-binaries.yml')) {
     assert.match(source, /electron-builder --mac dmg zip --x64/);
     assert.match(source, /npm run verify:mac-signing/);
