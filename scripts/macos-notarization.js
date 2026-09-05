@@ -44,10 +44,14 @@ function requireMacOS() {
 }
 
 function runCommand(command, args) {
-    const result = spawnSync(command, args, { cwd: projectRoot, stdio: 'inherit' });
+    // Output is captured rather than inherited: app-builder writes a JSON blob with no
+    // trailing newline, which lands in the middle of the next line of the log.
+    const result = spawnSync(command, args, { cwd: projectRoot, encoding: 'utf8' });
 
     if (result.error) throw result.error;
     if (result.status !== 0) {
+        process.stderr.write(String(result.stdout || ''));
+        process.stderr.write(String(result.stderr || ''));
         fail(`${command} failed with exit code ${String(result.status)}.`);
     }
 }

@@ -84,7 +84,9 @@ the Intel build produced by GitHub Actions is pulled back down first.
    to be fetched from Apple, which fails offline.
 9. `npm run publish` — uploads the disk images and both update channels to the `latest`
    release, which is the first time this build is reachable by users. It refuses to
-   upload a disk image that is not stapled.
+   upload a disk image that is not stapled. `npm run publish -- --dry-run` lists what
+   would be uploaded and checks every link on the download page against the release as
+   it will be afterwards, which is worth a look before the upload itself.
 
 The repository and the two tags can be overridden with `SC_PUBLISH_REPO`,
 `SC_STAGING_TAG` and `SC_PUBLISH_TAG`.
